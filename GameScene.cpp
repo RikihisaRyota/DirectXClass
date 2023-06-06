@@ -22,7 +22,7 @@ void GameScene::Initialize(){
 	worldTransform_1_.UpdateMatrix();
 
 	worldTransform_2_.Initialize();
-	worldTransform_2_.translation_ = { 0.0f,-1.0f,0.0f };
+	worldTransform_2_.translation_ = { 0.0f,-3.0f,0.0f };
 	worldTransform_2_.UpdateMatrix();
 
 	// 生成
