@@ -17,7 +17,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(WinApp* win, int32_t backBufferWidth = WinApp::kWindowWidth,
+	void Initialize(WinApp* winApp, int32_t backBufferWidth = WinApp::kWindowWidth,
 		int32_t backBufferHeight = WinApp::kWindowHeight);
 
 	/// <summary>
@@ -35,7 +35,31 @@ public:
 	/// </summary>
 	void ClearRenderTarget();
 
+	/// <summary>
+	/// デバイスの取得
+	/// </summary>
+	/// <returns>デバイス</returns>
+	ID3D12Device* GetDevice() const { return device_.Get(); }
+
+	/// <summary>
+	/// コマンドリストの取得
+	/// </summary>
+	/// <returns>コマンドリスト</returns>
+	ID3D12GraphicsCommandList* GetCommandList() const { return commandList_.Get(); }
+
+	/// <summary>
+	/// バックバッファの数
+	/// </summary>
+	/// <returns>バックバッファ</returns>
+	size_t GetBackBufferCount()const { return backBuffers_.size(); }
+
+	/// <summary>
+	/// リリース
+	/// </summary>
+	void Release();
+
 private:// メンバ関数
+
 	/// <summary>
 	/// DXGIデバイス初期化
 	/// </summary>

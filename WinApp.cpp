@@ -71,6 +71,14 @@ void WinApp::CreateGameWindow(const wchar_t* title, UINT windowStyle, int32_t cl
 	ShowWindow(hwnd_, SW_NORMAL);
 }
 
+void WinApp::TerminateGameWindow() {
+	// ウィンドウクラスを登録解除
+	UnregisterClass(wc_.lpszClassName, wc_.hInstance);
+
+	// COM 終了
+	CoUninitialize();
+}
+
 bool WinApp::ProcessMessage() {
 	MSG msg{};// メッセージ
 

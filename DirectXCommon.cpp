@@ -63,6 +63,14 @@ void DirectXCommon::PreDraw() {
 
 	// 全画面クリア
 	ClearRenderTarget();
+
+	// ビューポートの設定
+	CD3DX12_VIEWPORT viewport =
+		CD3DX12_VIEWPORT(0.0f, 0.0f, WinApp::kWindowWidth, WinApp::kWindowHeight);
+	commandList_->RSSetViewports(1, &viewport);
+	// シザリング矩形の設定
+	CD3DX12_RECT rect = CD3DX12_RECT(0, 0, WinApp::kWindowWidth, WinApp::kWindowHeight);
+	commandList_->RSSetScissorRects(1, &rect);
 }
 
 void DirectXCommon::PostDraw() {
@@ -200,7 +208,7 @@ void DirectXCommon::InitializeDXGIDevice() {
 		//エラー時に止まる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
 		//警告時に止まる
-		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+		//infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
 		//抑制するメッセージのID
 		D3D12_MESSAGE_ID denyIds[] = {
 			//Windows11でのDXGIデバックレイヤーの相互作用バグによるエラーメッセージ
@@ -269,6 +277,7 @@ void DirectXCommon::CreateSwapChain() {
 		&swapChain1);
 	assert(SUCCEEDED(hr));
 
+
 	// swapChain4を得る
 	swapChain1->QueryInterface(IID_PPV_ARGS(&swapChain_));
 	assert(SUCCEEDED(hr));
@@ -319,4 +328,24 @@ void DirectXCommon::CreateFence() {
 		IID_PPV_ARGS(&fence_)
 	);
 	assert(SUCCEEDED(hr));
+}
+
+void DirectXCommon::Release(){
+	// Direct3D関連
+	// 描画関連
+	fence_.Reset();
+	// レンダーターゲット関連
+	rtvDescriptorHeap_.Reset();
+	for (auto& ite : backBuffers_) {
+		ite.Reset();
+	}
+	// スワップチェーン関連
+	swapChain_.Reset();
+	// コマンド関連
+	commandQueue_.Reset();
+	commandAllocator_.Reset();
+	commandList_.Reset();
+	// DXGI関連
+	device_.Reset();
+	dxgiFactory_.Reset();
 }

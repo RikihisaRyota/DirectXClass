@@ -41,6 +41,11 @@ public:// メンバ関数
 		int32_t clientWidth = kWindowWidth, int32_t clientHeight = kWindowHeight);
 
 	/// <summary>
+	/// ゲームウィンドウの破棄
+	/// </summary>
+	void TerminateGameWindow();
+
+	/// <summary>
 	/// メッセージの処理
 	/// </summary>
 	/// <returns>終了かどうか</returns>
