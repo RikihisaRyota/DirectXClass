@@ -22,6 +22,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	dxCommon = DirectXCommon::GetInstance();
 	dxCommon->Initialize(win);
 
+	// 入力の初期化
+	Input* input = nullptr;
+	input = Input::GetInstans();
+	input->Initialize();
+
 	// テクスチャマネージャの初期化
 	TextureManager::GetInstance()->Initialize(dxCommon->GetDevice());
 	TextureManager::Load("resources/white1x1.png");
@@ -50,6 +55,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		// ImGui受付開始
 		imguiManager->Begin();
+		// 入力関連の毎フレーム処理
+		input->Update();
 		//// ゲームシーンの毎フレーム処理
 		gameScene->Update();
 		// ImGui受付終了

@@ -54,7 +54,7 @@ void WinApp::CreateGameWindow(const wchar_t* title, UINT windowStyle, int32_t cl
 	//クライアント領域を元に実際のサイズにwrcを変更してもらう
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 
-	hwnd_= CreateWindow(
+	hwnd_ = CreateWindow(
 		wc_.lpszClassName,		//利用するクラス名
 		L"CG2",					//タイトルバーの文字(なんでもよい)
 		WS_OVERLAPPEDWINDOW,	//よく見るウィンドウスタイル

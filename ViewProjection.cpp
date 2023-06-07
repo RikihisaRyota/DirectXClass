@@ -54,3 +54,11 @@ void ViewProjection::UpdateMatrix() {
 	constMap_->view = matView_;
 	constMap_->projection = matProjection_;
 }
+
+void ViewProjection::TransferMatrix() {
+	// 透視投影による射影行列の生成
+	matProjection_ = MakePerspectiveFovMatrix(fovAngleY_, aspectRatio_, nearZ_, farZ_);
+	// 定数バッファに書き込み
+	constMap_->view = matView_;
+	constMap_->projection = matProjection_;
+}
