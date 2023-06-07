@@ -28,7 +28,7 @@ void GameScene::Initialize(){
 	worldTransform_1_.UpdateMatrix();
 
 	worldTransform_2_.Initialize();
-	worldTransform_2_.translation_ = { 0.0f,-3.0f,0.0f };
+	worldTransform_2_.translation_ = { 0.0f,-1.0f,0.0f };
 	worldTransform_2_.UpdateMatrix();
 
 	// 生成
@@ -102,8 +102,8 @@ void GameScene::Draw(){
 	/// <summary>
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
-	triangle_1_->Draw(worldTransform_1_,viewProjection_, textureHandle_);
-	triangle_2_->Draw(worldTransform_2_,viewProjection_, textureHandle_2_);
+	triangle_1_->Draw(worldTransform_1_,viewProjection_);
+	triangle_2_->Draw(worldTransform_2_,viewProjection_, textureHandle_);
 
 	//
 	// スプライト描画後処理
