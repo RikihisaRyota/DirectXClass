@@ -57,3 +57,9 @@ struct Vector3 {
 
 	float length(Vector3 v) { return sqrt(v.x * v.x + v.y * v.y + v.z * v.z); }
 };
+// 正規化
+Vector3 Normalize(const Vector3& v);
+// 内積
+float Dot(const Vector3& a, const Vector3& b);
+//外積
+Vector3 Cross(const Vector3& v1, const Vector3& v2);

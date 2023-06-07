@@ -1,8 +1,10 @@
 #pragma once
 #include <cstdlib>
 #include "SafeDelete.h"
+#include "Input.h"
 #include "Basic.h"
 #include "TextureManager.h"
+#include "DebugCamera.h"
 
 class DirectXCommon;
 /// <summary>
@@ -43,6 +45,8 @@ public: // メンバ関数
 
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
+	Input* input_ = nullptr;
+	DebugCamera* debugCamera_ = nullptr;
 	
 	/// <summary>
 	/// ゲーム用

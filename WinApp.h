@@ -57,12 +57,17 @@ public:// メンバ関数
 	/// <returns></returns>
 	HWND GetHwnd() const { return hwnd_; }
 
+	/// <summary>
+	/// ウィンドウズアプリケーションのインスタンス
+	/// </summary>
+	/// <returns></returns>
+	HINSTANCE GethInstance() const { return wc_.hInstance; }
+
 private: // メンバ関数
 	WinApp() = default;
 	~WinApp() = default;
 	WinApp(const WinApp&) = delete;
 	const WinApp& operator=(const WinApp&) = delete;
-
 private:// メンバ変数
 	WNDCLASS wc_;
 	HWND hwnd_ = nullptr;
