@@ -42,7 +42,7 @@ void GameScene::Initialize(){
 	triangle_2_ = Basic::Create();
 
 	// パーティクル
-	/*billParticle_ = new BillParticle();*/
+	billParticle_ = new BillParticle();
 }
 
 void GameScene::Update(){
@@ -105,11 +105,11 @@ void GameScene::Update(){
 	worldTransform_1_.TransferMatrix();
 
 	//
-	/*if (input_->PushKey(DIK_SPACE)) {
+	if (input_->PushKey(DIK_SPACE)) {
  		billParticle_->SetEmitter({ 0.0f, 0.0f, 0.0f });
 		billParticle_->Create();
 	}
-	billParticle_->Update();*/
+	billParticle_->Update();
 	// デバックカメラ
 	debugCamera_->Update(&viewProjection_);
 }
@@ -140,7 +140,7 @@ void GameScene::Draw(){
 	/// </summary>
 
 	sprite_->Draw(sptiteWorldTransform_,viewProjection_, textureHandle_2_);
-	//billParticle_->Draw(viewProjection_);
+	billParticle_->Draw(viewProjection_);
 
 	// スプライト描画後処理
 	Sprite::PostDraw();
@@ -152,6 +152,6 @@ void GameScene::Release(){
 	SafeDelete(triangle_1_);
 	SafeDelete(triangle_2_);
 	SafeDelete(sprite_);
-	/*SafeDelete(billParticle_);*/
+	SafeDelete(billParticle_);
 	SafeDelete(debugCamera_);
 }

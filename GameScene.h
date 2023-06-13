@@ -66,6 +66,6 @@ private: // メンバ変数
 	uint32_t textureHandle_ = 0u;
 	uint32_t textureHandle_2_ = 0u;
 
-	//BillParticle* billParticle_ = nullptr;
+	BillParticle* billParticle_ = nullptr;
 };
 
