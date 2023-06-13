@@ -17,8 +17,7 @@
 
 #pragma comment(lib,"dxcompiler.lib")
 
-class Basic
-{
+class Sprite {
 public: // サブクラス
 	/// <summary>
 	/// 頂点データ構造体
@@ -43,7 +42,7 @@ public: // 静的メンバ関数
 	/// newとInitialize
 	/// </summary>
 	/// <returns>生成</returns>
-	static Basic* Create();
+	static Sprite* Create();
 
 	/// <summary>
 	/// 描画前処理
@@ -60,7 +59,7 @@ public: // 静的メンバ関数
 	/// 解放
 	/// </summary>
 	static void Release();
-	
+
 private: // 静的メンバ変数
 	/// <summary>
 	/// グラフィックパイプラインの生成
@@ -102,21 +101,20 @@ private: // 静的メンバ変数
 	static Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_;
 public: // メンバ関数
 	/// <summary>
-	/// 初期化
-	/// </summary>
-	void Initialize();
-
-	/// <summary>
 	/// 描画
 	/// </summary>
 	void Draw(
 		const WorldTransform& worldTransform, const ViewProjection& viewProjection,
 		uint32_t textureHadle = 0);
-
+private:
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	void Initialize();
 	/// <summary>
 	/// データ生成
 	/// </summary>
-	void CreateBasic();
+	void CreateSprite();
 private: // メンバ変数
 	// 頂点バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertBuff_;

@@ -1,4 +1,4 @@
-#include "Basic.h"
+#include "Sprite.h"
 #include <cassert>
 #include <d3dx12.h>
 #include "ConvertString.h"
@@ -9,16 +9,16 @@ using namespace DirectX;
 using namespace Microsoft::WRL;
 
 // 静的メンバ変数の実体化
-ID3D12Device* Basic::sDevice = nullptr;
-UINT Basic::sDescriptorHandleIncrementSize;
-ComPtr<ID3D12RootSignature> Basic::sRootSignature;
-ComPtr<ID3D12PipelineState> Basic::sPipelineState;
-ComPtr<ID3D12GraphicsCommandList> Basic::sCommandList;
-ComPtr<IDxcUtils> Basic::dxcUtils_;
-ComPtr<IDxcCompiler3> Basic::dxcCompiler_;
-ComPtr<IDxcIncludeHandler> Basic::includeHandler_;
+ID3D12Device* Sprite::sDevice = nullptr;
+UINT Sprite::sDescriptorHandleIncrementSize;
+ComPtr<ID3D12RootSignature> Sprite::sRootSignature;
+ComPtr<ID3D12PipelineState> Sprite::sPipelineState;
+ComPtr<ID3D12GraphicsCommandList> Sprite::sCommandList;
+ComPtr<IDxcUtils> Sprite::dxcUtils_;
+ComPtr<IDxcCompiler3> Sprite::dxcCompiler_;
+ComPtr<IDxcIncludeHandler> Sprite::includeHandler_;
 
-void Basic::StaticInitialize(ID3D12Device* device, int window_width, int window_height, const std::wstring& directoryPath) {
+void Sprite::StaticInitialize(ID3D12Device* device, int window_width, int window_height, const std::wstring& directoryPath) {
 	// nullptrチェック
 	assert(device);
 
@@ -28,7 +28,7 @@ void Basic::StaticInitialize(ID3D12Device* device, int window_width, int window_
 	InitializeGraphicsPipeline();
 }
 
-void Basic::InitializeGraphicsPipeline() {
+void Sprite::InitializeGraphicsPipeline() {
 	HRESULT hr = S_FALSE;
 #pragma region Rootsignature生成
 	// Rootsignature設定
@@ -120,11 +120,11 @@ void Basic::InitializeGraphicsPipeline() {
 	dxcCompilerInitialize();
 #pragma endregion dxcCompilerの初期化
 	//Shaderをコンパイルする
-	ComPtr<IDxcBlob> vertexShaderBlob = CompileShader(L"Basic.VS.hlsl",
+	ComPtr<IDxcBlob> vertexShaderBlob = CompileShader(L"Sprite.VS.hlsl",
 		L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(vertexShaderBlob != nullptr);
 
-	ComPtr<IDxcBlob> pixelShaderBlob = CompileShader(L"Basic.PS.hlsl",
+	ComPtr<IDxcBlob> pixelShaderBlob = CompileShader(L"Sprite.PS.hlsl",
 		L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(pixelShaderBlob != nullptr);
 #pragma endregion ShaderをCompileする
@@ -154,11 +154,13 @@ void Basic::InitializeGraphicsPipeline() {
 		vertexShaderBlob->GetBufferPointer(),
 		vertexShaderBlob->GetBufferSize()
 	};
+
 	// PixelShader
 	graphicPipelineStateDesc.PS = {
 		pixelShaderBlob->GetBufferPointer(),
 		pixelShaderBlob->GetBufferSize()
 	};
+
 	// BlendState
 	graphicPipelineStateDesc.BlendState = blendDesc;
 
@@ -187,7 +189,7 @@ void Basic::InitializeGraphicsPipeline() {
 #pragma endregion PSOの生成
 }
 
-void Basic::dxcCompilerInitialize() {
+void Sprite::dxcCompilerInitialize() {
 	HRESULT hr = S_FALSE;
 	// dxcCompilerを初期化
 	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
@@ -200,8 +202,7 @@ void Basic::dxcCompilerInitialize() {
 	assert(SUCCEEDED(hr));
 }
 
-IDxcBlob* Basic::CompileShader(const std::wstring& filePath, const wchar_t* profile, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler)
-{
+IDxcBlob* Sprite::CompileShader(const std::wstring& filePath, const wchar_t* profile, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler) {
 	//これからシェーダーをコンパイルする旨をログに出す
 	Log(ConvertString(std::format(L"Begin CompilerShader, Path:{},profile:{}\n", filePath, profile)));
 	//hlslファイルを読み込む
@@ -240,9 +241,11 @@ IDxcBlob* Basic::CompileShader(const std::wstring& filePath, const wchar_t* prof
 	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
 	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
 		Log(shaderError->GetStringPointer());
+		shaderError->Release();
 		//警告、エラーダメ
 		assert(false);
 	}
+	shaderError->Release();
 	//コンパイル結果から実行用のバイナリ部分を取得
 	IDxcBlob* shaderBlob = nullptr;
 	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
@@ -256,21 +259,20 @@ IDxcBlob* Basic::CompileShader(const std::wstring& filePath, const wchar_t* prof
 	return shaderBlob;
 }
 
-Basic* Basic::Create()
-{
+Sprite* Sprite::Create() {
 	// Basicのインスタンスを生成
-	Basic* basic = new Basic();
-	assert(basic);
+	Sprite* sprite = new Sprite();
+	assert(sprite);
 
 	// 初期化
-	basic->Initialize();
+	sprite->Initialize();
 
-	return basic;
+	return sprite;
 }
 
-void Basic::PreDraw(ID3D12GraphicsCommandList* cmdList) {
+void Sprite::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
-	assert(Basic::sCommandList == nullptr);
+	assert(Sprite::sCommandList == nullptr);
 
 	// コマンドリストをセット
 	sCommandList = cmdList;
@@ -283,12 +285,12 @@ void Basic::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	sCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Basic::PostDraw() {
+void Sprite::PostDraw() {
 	// コマンドリストの解除
-	Basic::sCommandList = nullptr;
+	Sprite::sCommandList = nullptr;
 }
 
-void Basic::Release() {
+void Sprite::Release() {
 	// dxcCompierを初期化
 	dxcUtils_.Reset();
 	dxcCompiler_.Reset();
@@ -301,17 +303,15 @@ void Basic::Release() {
 	sRootSignature.Reset();
 }
 
-void Basic::Initialize() {
+void Sprite::Initialize() {
 	// nullptrチェック
 	assert(sDevice);
 
 	// 生成
-	CreateBasic();
+	CreateSprite();
 }
 
-void Basic::Draw(
-	const WorldTransform& worldTransform, const ViewProjection& viewProjection,
-	uint32_t textureHadle) {
+void Sprite::Draw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
 	// nullptrチェック
 	assert(sDevice);
 	assert(sCommandList);
@@ -336,67 +336,68 @@ void Basic::Draw(
 	sCommandList->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
 }
 
-void Basic::CreateBasic() {
+void Sprite::CreateSprite() {
 	HRESULT result = S_FALSE;
 
-	vertices_ = {
-		//  x      y      z       nx     ny    nz       u     v
-		// 前
-		{{-1.0f, -1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {0.0f, 1.0f}}, // 左下
-		{{-1.0f, +1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {0.0f, 0.0f}}, // 左上
-		{{+1.0f, -1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {1.0f, 1.0f}}, // 右下
-		{{+1.0f, +1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {1.0f, 0.0f}}, // 右上
-		// 後(前面とZ座標の符号が逆)
-		{{+1.0f, -1.0f, +1.0f}, /*{0.0f, 0.0f, +1.0f},*/ {0.0f, 1.0f}}, // 左下
-		{{+1.0f, +1.0f, +1.0f}, /*{0.0f, 0.0f, +1.0f},*/ {0.0f, 0.0f}}, // 左上
-		{{-1.0f, -1.0f, +1.0f}, /*{0.0f, 0.0f, +1.0f},*/ {1.0f, 1.0f}}, // 右下
-		{{-1.0f, +1.0f, +1.0f}, /*{0.0f, 0.0f, +1.0f},*/ {1.0f, 0.0f}}, // 右上
-		// 左
-		{{-1.0f, -1.0f, +1.0f}, /*{-1.0f, 0.0f, 0.0f},*/ {0.0f, 1.0f}}, // 左下
-		{{-1.0f, +1.0f, +1.0f}, /*{-1.0f, 0.0f, 0.0f},*/ {0.0f, 0.0f}}, // 左上
-		{{-1.0f, -1.0f, -1.0f}, /*{-1.0f, 0.0f, 0.0f},*/ {1.0f, 1.0f}}, // 右下
-		{{-1.0f, +1.0f, -1.0f}, /*{-1.0f, 0.0f, 0.0f},*/ {1.0f, 0.0f}}, // 右上
-		// 右（左面とX座標の符号が逆）
-		{{+1.0f, -1.0f, -1.0f}, /*{+1.0f, 0.0f, 0.0f},*/ {0.0f, 1.0f}}, // 左下
-		{{+1.0f, +1.0f, -1.0f}, /*{+1.0f, 0.0f, 0.0f},*/ {0.0f, 0.0f}}, // 左上
-		{{+1.0f, -1.0f, +1.0f}, /*{+1.0f, 0.0f, 0.0f},*/ {1.0f, 1.0f}}, // 右下
-		{{+1.0f, +1.0f, +1.0f}, /*{+1.0f, 0.0f, 0.0f},*/ {1.0f, 0.0f}}, // 右上
-		// 下
-		{{+1.0f, -1.0f, -1.0f}, /*{0.0f, -1.0f, 0.0f},*/ {0.0f, 1.0f}}, // 左下
-		{{+1.0f, -1.0f, +1.0f}, /*{0.0f, -1.0f, 0.0f},*/ {0.0f, 0.0f}}, // 左上
-		{{-1.0f, -1.0f, -1.0f}, /*{0.0f, -1.0f, 0.0f},*/ {1.0f, 1.0f}}, // 右下
-		{{-1.0f, -1.0f, +1.0f}, /*{0.0f, -1.0f, 0.0f},*/ {1.0f, 0.0f}}, // 右上
-		// 上（下面とY座標の符号が逆）
-		{{-1.0f, +1.0f, -1.0f}, /*{0.0f, +1.0f, 0.0f},*/ {0.0f, 1.0f}}, // 左下
-		{{-1.0f, +1.0f, +1.0f}, /*{0.0f, +1.0f, 0.0f},*/ {0.0f, 0.0f}}, // 左上
-		{{+1.0f, +1.0f, -1.0f}, /*{0.0f, +1.0f, 0.0f},*/ {1.0f, 1.0f}}, // 右下
-		{{+1.0f, +1.0f, +1.0f}, /*{0.0f, +1.0f, 0.0f},*/ {1.0f, 0.0f}}, // 右上
-	};
-
-	// 頂点インデックスの設定
-	indices_ = { 0,  1,  3,  3,  2,  0,
-
-				4,  5,  7,  7,  6,  4,
-
-				8,  9,  11, 11, 10, 8,
-
-				12, 13, 15, 15, 14, 12,
-
-				16, 17, 19, 19, 18, 16,
-
-				20, 21, 23, 23, 22, 20 };
 	//vertices_ = {
-	//	// 左下
-	//	{{-0.5f,-0.5f,0.0f},{-0.5f,-0.5f}},
-	//	// 左上
-	//	{{0.0f,0.5f,0.0f}, {0.0f,0.5f}},
-	//	// 右下
-	//	{{0.5f,-0.5f,0.0f},{0.5f,-0.5f}},
+	//	//  x      y      z       nx     ny    nz       u     v
+	//	// 前
+	//	{{-1.0f, -1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {0.0f, 1.0f}}, // 左下
+	//	{{-1.0f, +1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {0.0f, 0.0f}}, // 左上
+	//	{{+1.0f, -1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {1.0f, 1.0f}}, // 右下
+	//	{{+1.0f, +1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {1.0f, 0.0f}}, // 右上
+	//	// 後(前面とZ座標の符号が逆)
+	//	{{+1.0f, -1.0f, +1.0f}, /*{0.0f, 0.0f, +1.0f},*/ {0.0f, 1.0f}}, // 左下
+	//	{{+1.0f, +1.0f, +1.0f}, /*{0.0f, 0.0f, +1.0f},*/ {0.0f, 0.0f}}, // 左上
+	//	{{-1.0f, -1.0f, +1.0f}, /*{0.0f, 0.0f, +1.0f},*/ {1.0f, 1.0f}}, // 右下
+	//	{{-1.0f, +1.0f, +1.0f}, /*{0.0f, 0.0f, +1.0f},*/ {1.0f, 0.0f}}, // 右上
+	//	// 左
+	//	{{-1.0f, -1.0f, +1.0f}, /*{-1.0f, 0.0f, 0.0f},*/ {0.0f, 1.0f}}, // 左下
+	//	{{-1.0f, +1.0f, +1.0f}, /*{-1.0f, 0.0f, 0.0f},*/ {0.0f, 0.0f}}, // 左上
+	//	{{-1.0f, -1.0f, -1.0f}, /*{-1.0f, 0.0f, 0.0f},*/ {1.0f, 1.0f}}, // 右下
+	//	{{-1.0f, +1.0f, -1.0f}, /*{-1.0f, 0.0f, 0.0f},*/ {1.0f, 0.0f}}, // 右上
+	//	// 右（左面とX座標の符号が逆）
+	//	{{+1.0f, -1.0f, -1.0f}, /*{+1.0f, 0.0f, 0.0f},*/ {0.0f, 1.0f}}, // 左下
+	//	{{+1.0f, +1.0f, -1.0f}, /*{+1.0f, 0.0f, 0.0f},*/ {0.0f, 0.0f}}, // 左上
+	//	{{+1.0f, -1.0f, +1.0f}, /*{+1.0f, 0.0f, 0.0f},*/ {1.0f, 1.0f}}, // 右下
+	//	{{+1.0f, +1.0f, +1.0f}, /*{+1.0f, 0.0f, 0.0f},*/ {1.0f, 0.0f}}, // 右上
+	//	// 下
+	//	{{+1.0f, -1.0f, -1.0f}, /*{0.0f, -1.0f, 0.0f},*/ {0.0f, 1.0f}}, // 左下
+	//	{{+1.0f, -1.0f, +1.0f}, /*{0.0f, -1.0f, 0.0f},*/ {0.0f, 0.0f}}, // 左上
+	//	{{-1.0f, -1.0f, -1.0f}, /*{0.0f, -1.0f, 0.0f},*/ {1.0f, 1.0f}}, // 右下
+	//	{{-1.0f, -1.0f, +1.0f}, /*{0.0f, -1.0f, 0.0f},*/ {1.0f, 0.0f}}, // 右上
+	//	// 上（下面とY座標の符号が逆）
+	//	{{-1.0f, +1.0f, -1.0f}, /*{0.0f, +1.0f, 0.0f},*/ {0.0f, 1.0f}}, // 左下
+	//	{{-1.0f, +1.0f, +1.0f}, /*{0.0f, +1.0f, 0.0f},*/ {0.0f, 0.0f}}, // 左上
+	//	{{+1.0f, +1.0f, -1.0f}, /*{0.0f, +1.0f, 0.0f},*/ {1.0f, 1.0f}}, // 右下
+	//	{{+1.0f, +1.0f, +1.0f}, /*{0.0f, +1.0f, 0.0f},*/ {1.0f, 0.0f}}, // 右上
 	//};
-	//// 頂点インデックスの設定
-	//indices_ = { 0, 1, 2};
 
-	
+	//// 頂点インデックスの設定
+	//indices_ = { 0,  1,  3,  3,  2,  0,
+
+	//			4,  5,  7,  7,  6,  4,
+
+	//			8,  9,  11, 11, 10, 8,
+
+	//			12, 13, 15, 15, 14, 12,
+
+	//			16, 17, 19, 19, 18, 16,
+
+	//			20, 21, 23, 23, 22, 20 };
+	vertices_ = {
+		// 前
+			{{-1.0f, -1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {0.0f, 1.0f}}, // 左下
+			{{-1.0f, +1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {0.0f, 0.0f}}, // 左上
+			{{+1.0f, -1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {1.0f, 1.0f}}, // 右下
+			{{+1.0f, +1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {1.0f, 0.0f}}, // 右上
+	};
+	// 頂点インデックスの設定
+	indices_ = { 0, 1, 3,
+				 3, 2, 0,
+				};
+
+
 
 #pragma region 頂点バッファ
 	// 頂点データのサイズ

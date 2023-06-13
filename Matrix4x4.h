@@ -34,6 +34,9 @@ Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix);
 //4,回転なし座標変換
 Vector3 TransformNormal(const Vector3& vector, const Matrix4x4& matrix);
 
+// 回転行列だけにする
+Matrix4x4 NotTransform(const Matrix4x4& matrix);
+
 //1,X軸回転行列
 Matrix4x4 MakeRotateXMatrix(float radian);
 //2,Y軸回転行列

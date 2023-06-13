@@ -1,0 +1,97 @@
+#include "BillParticle.h"
+#include <cstdlib>
+#include <ctime>
+
+#include "ImGuiManager.h"
+BillParticle::BillParticle() {
+	Initilaize();
+}
+
+BillParticle::~BillParticle() {
+	for (auto& particle : particle_) {
+		if (particle.sprite_ != nullptr) {
+			particle.sprite_->Release();
+		}
+	}
+}
+
+void BillParticle::Initilaize() {
+	// 現在の時刻をシード値として設定
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
+	emitter_ = Vector3(0.0f, 0.0f, 0.0f);
+	for (auto& particle : particle_) {
+		particle.velocity_ = Vector3(0.0f, 0.0f, 0.0f);
+		particle.worldTransform_.Initialize();
+		particle.time_ = 0;
+		particle.IsAlive_ = false;
+		particle.sprite_ = nullptr;
+	}
+}
+
+void BillParticle::Create() {
+	// 何フレーム間隔で生成するか
+	const uint32_t CreateParticleinterval = 5;
+
+	for (auto& particle : particle_) {
+		if (!particle.IsAlive_&& CreateParticleinterval <= createParticleCount) {
+			// 座標
+			particle.worldTransform_.translation_ = emitter_;
+			// 速度と向き
+			Vector3 velocity = Vector3(
+				static_cast<float>(std::rand()) / RAND_MAX * 200.0f - 100.0f,
+				static_cast<float>(std::rand()) / RAND_MAX * 200.0f - 100.0f,
+				static_cast<float>(std::rand()) / RAND_MAX * 200.0f - 100.0f
+			);
+			particle.velocity_ = Normalize(velocity);
+			// 寿命
+			particle.time_ = std::rand() % 15 + 15;
+			// フラグ
+			particle.IsAlive_ = true;
+			// sprite生成
+			if (particle.sprite_ == nullptr) {
+				particle.sprite_ = Sprite::Create();
+			}
+			// 生成カウントリセット
+			createParticleCount = 0;
+			break;
+		}
+	}
+	createParticleCount++;
+}
+
+void BillParticle::Update() {
+	uint32_t count = 0;
+	for (auto& particles : particle_) {
+ 		if (particles.IsAlive_) {
+			particles.time_--;
+			if (particles.time_ <= 0) {
+ 				Destory(count);
+				break;
+			}
+			particles.worldTransform_.translation_ += particles.velocity_;
+			particles.worldTransform_.UpdateMatrix();
+		}
+		count++;
+	}
+	for (auto& particles : particle_) {
+		ImGui::Begin("particle");
+		ImGui::Text("IsAlive : %d", particles.IsAlive_);
+		ImGui::End();
+	}
+
+}
+
+void BillParticle::Draw(const ViewProjection& viewProjection, uint32_t textureHadl) {
+	for (auto& particles : particle_) {
+		if (particles.IsAlive_) {
+			particles.sprite_->Draw(particles.worldTransform_, viewProjection, textureHadl);
+		}
+	}
+}
+
+void BillParticle::Destory(uint32_t index) {
+	particle_[index].worldTransform_.Initialize();
+	particle_[index].velocity_ = Vector3(0.0f, 0.0f, 0.0f);
+	particle_[index].time_ = 0;
+	particle_[index].IsAlive_ = false;
+}

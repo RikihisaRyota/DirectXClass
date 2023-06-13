@@ -246,6 +246,14 @@ Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
 	return result;
 }
 
+Matrix4x4 NotTransform(const Matrix4x4& matrix) {
+	return { 
+		matrix.m[0][0],matrix.m[0][1] ,matrix.m[0][2] ,matrix.m[0][3], 
+		matrix.m[1][0],matrix.m[1][1] ,matrix.m[1][2] ,matrix.m[1][3], 
+		matrix.m[2][0],matrix.m[2][1] ,matrix.m[2][2] ,matrix.m[2][3], 
+		0.0f,0.0f,0.0f,matrix.m[3][3], };
+}
+
 Matrix4x4 MakeRotateXMatrix(float radian) {
 	Matrix4x4 mat;
 	mat.m[0][0] = 1.0f, mat.m[0][1] = 0.0f, mat.m[0][2] = 0.0f, mat.m[0][3] = 0.0f;

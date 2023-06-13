@@ -38,6 +38,9 @@ void DirectXCommon::Initialize(WinApp* winApp, int32_t backBufferWidth, int32_t 
 	// レンダーターゲットの作成
 	CreateRenderTatgets();
 
+	// 深度バッファの生成
+	CreateDepthBuffer();
+
 	// フェンス生成
 	CreateFence();
 }
@@ -58,11 +61,15 @@ void DirectXCommon::PreDraw() {
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart(), bbIndex,
 		device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+	// 深度ステンシルビュー用デスクリプタヒープのハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvH = dsvHeap_->GetCPUDescriptorHandleForHeapStart();
 	// レンダーターゲットをセット
-	commandList_->OMSetRenderTargets(1, &rtvHandle, false, nullptr);
+	commandList_->OMSetRenderTargets(1, &rtvHandle, false, &dsvH);
 
 	// 全画面クリア
 	ClearRenderTarget();
+	// 深度バッファクリア
+	ClearDepthBuffer();
 
 	// ビューポートの設定
 	CD3DX12_VIEWPORT viewport =
@@ -126,6 +133,13 @@ void DirectXCommon::ClearRenderTarget() {
 	// 全画面のクリア
 	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
 	commandList_->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+}
+
+void DirectXCommon::ClearDepthBuffer() {
+	// 深度ステンシルビュー用デスクリプタヒープのハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvH = dsvHeap_->GetCPUDescriptorHandleForHeapStart();
+	// 深度バッファのクリア
+	commandList_->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
 void DirectXCommon::InitializeDXGIDevice() {
@@ -319,6 +333,22 @@ void DirectXCommon::CreateRenderTatgets() {
 	}
 }
 
+void DirectXCommon::CreateDepthBuffer() {
+	// DepthStemcilTextureをウィンドウのサイズで作成
+	depthBuffer_ = CreateDepthStencilTextureResource(WinApp::kWindowWidth, WinApp::kWindowHeight);
+
+	// DSV用のヒープでディスクリプタの数は1。DSVはShader内で触るものではないにで、ShaderVisibleはfalse
+	dsvHeap_ = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+
+	// DSVの設定
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;// Format。基本的にはResourceに合わせる
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D; // 2DTexture
+
+	// DSVHeapの先頭にDSVを作る
+	device_->CreateDepthStencilView(depthBuffer_.Get(), &dsvDesc, dsvHeap_->GetCPUDescriptorHandleForHeapStart());
+}
+
 void DirectXCommon::CreateFence() {
 	HRESULT hr = S_FALSE;
 
@@ -330,10 +360,57 @@ void DirectXCommon::CreateFence() {
 	assert(SUCCEEDED(hr));
 }
 
+ComPtr<ID3D12Resource> DirectXCommon::CreateDepthStencilTextureResource(int32_t width, int32_t height) {
+	D3D12_RESOURCE_DESC resourceDesc{};
+	resourceDesc.Width = width;// Textureの幅
+	resourceDesc.Height = height;// Textureの高さ
+	resourceDesc.MipLevels = 1;// mipmapの数
+	resourceDesc.DepthOrArraySize = 1;// 奥行き or 配列Textureの配列数
+	resourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;// DepthStencilとして利用可能なフォーマット
+	resourceDesc.SampleDesc.Count = 1;// サンプリングカウント。1固定
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;// 2次元
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;// DepthStencilとして使う通知
+
+	// 利用するHeapの設定
+	D3D12_HEAP_PROPERTIES heapProperties{};
+	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;// VRAM上に作る
+
+	// 深度値のクリア設定
+	D3D12_CLEAR_VALUE depthClearValue{};
+	depthClearValue.DepthStencil.Depth = 1.0f;// 1.0f(最大値)でクリア
+	depthClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // フォーマット。Resourceと合わせる
+	ComPtr<ID3D12Resource> resource = nullptr;
+	HRESULT hr = device_->CreateCommittedResource(
+		&heapProperties, // Heapの設定
+		D3D12_HEAP_FLAG_NONE, // Heapの特殊な設定
+		&resourceDesc, // Resourceの設定
+		D3D12_RESOURCE_STATE_DEPTH_WRITE, // 深度値を書き込む状態にしておく
+		&depthClearValue, // Clear最適値
+		IID_PPV_ARGS(&resource));
+
+	assert(SUCCEEDED(hr));
+
+	return resource;
+}
+
+Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DirectXCommon::CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible) {
+	ComPtr<ID3D12DescriptorHeap> descriptorHeap = nullptr;
+	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
+	descriptorHeapDesc.Type = heapType;
+	descriptorHeapDesc.NumDescriptors = numDescriptors;
+	descriptorHeapDesc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	HRESULT hr = device_->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&descriptorHeap));
+	assert(SUCCEEDED(hr));
+	return descriptorHeap;
+}
+
 void DirectXCommon::Release(){
 	// Direct3D関連
 	// 描画関連
 	fence_.Reset();
+	// 深度バッファ関連
+	depthBuffer_.Reset();
+	dsvHeap_.Reset();
 	// レンダーターゲット関連
 	rtvDescriptorHeap_.Reset();
 	for (auto& ite : backBuffers_) {

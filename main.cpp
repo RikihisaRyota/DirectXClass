@@ -31,6 +31,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	TextureManager::GetInstance()->Initialize(dxCommon->GetDevice());
 	TextureManager::Load("resources/white1x1.png");
 	
+	// Spriteの静的初期化
+	Sprite::StaticInitialize(dxCommon->GetDevice(), WinApp::kWindowWidth, WinApp::kWindowHeight);
 
 	// Basicの静的初期化
 	Basic::StaticInitialize(dxCommon->GetDevice(),WinApp::kWindowWidth, WinApp::kWindowHeight);
@@ -79,11 +81,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// テクスチャマネージャーの解放
 	TextureManager::Release();
-
+	
 	// ImGui解放
 	imguiManager->Finalize();
 
-	// 三角形解放
+	// Sprite解放
+	Sprite::Release();
+
+	// Basic解放
 	Basic::Release();
 
 	// DirectXの解放

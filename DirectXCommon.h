@@ -36,6 +36,11 @@ public:
 	void ClearRenderTarget();
 
 	/// <summary>
+	/// 深度バッファのクリア
+	 /// </summary>
+	void ClearDepthBuffer();
+
+	/// <summary>
 	/// デバイスの取得
 	/// </summary>
 	/// <returns>デバイス</returns>
@@ -81,6 +86,11 @@ private:// メンバ関数
 	void CreateRenderTatgets();
 
 	/// <summary>
+	///  深度バッファ生成
+	/// </summary>
+	void CreateDepthBuffer();
+
+	/// <summary>
 	/// フェンス生成
 	/// </summary>
 	void CreateFence();
@@ -91,6 +101,19 @@ private: // メンバ関数
 	DirectXCommon(const DirectXCommon&) = delete;
 	const DirectXCommon& operator=(const DirectXCommon&) = delete;
 
+	/// <summary>
+	/// CreateDepthStencilTexture関数
+	/// </summary>
+	/// <param name="device"></param>
+	/// <param name="width"></param>
+	/// <param name="height"></param>
+	/// <returns></returns>
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(int32_t width, int32_t height);
+
+	/// <summary>
+	/// CreateDescriptorHeap
+	/// </summary>
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
 private:// メンバ変数
 	// ウィンドウズアプリケーション管理
 	WinApp* winApp_;
@@ -110,6 +133,9 @@ private:// メンバ変数
 	// レンダーターゲット関連
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap_;
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
+	// 深度バッファ関連
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;
 	// 描画関連
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
 	UINT64 fenceValue_ = 0;

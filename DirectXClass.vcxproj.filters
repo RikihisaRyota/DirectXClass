@@ -105,6 +105,12 @@
     <ClCompile Include="Vector3.cpp">
       <Filter>ソース ファイル\math</Filter>
     </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="BillParticle.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinApp.h">
@@ -179,6 +185,12 @@
     <ClInclude Include="DebugCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="BillParticle.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -188,8 +200,11 @@
   <ItemGroup>
     <FxCompile Include="Basic.VS.hlsl" />
     <FxCompile Include="Basic.PS.hlsl" />
+    <FxCompile Include="Sprite.VS.hlsl" />
+    <FxCompile Include="Sprite.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.hlsli" />
+    <None Include="Sprite.hlsli" />
   </ItemGroup>
 </Project>

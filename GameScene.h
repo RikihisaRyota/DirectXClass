@@ -3,8 +3,10 @@
 #include "SafeDelete.h"
 #include "Input.h"
 #include "Basic.h"
+#include "Sprite.h"
 #include "TextureManager.h"
 #include "DebugCamera.h"
+#include "BillParticle.h"
 
 class DirectXCommon;
 /// <summary>
@@ -58,7 +60,12 @@ private: // メンバ変数
 	Basic* triangle_1_;
 	Basic* triangle_2_;
 
+	Sprite* sprite_;
+	WorldTransform sptiteWorldTransform_;
+
 	uint32_t textureHandle_ = 0u;
 	uint32_t textureHandle_2_ = 0u;
+
+	//BillParticle* billParticle_ = nullptr;
 };
 
