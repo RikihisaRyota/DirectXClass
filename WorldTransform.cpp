@@ -7,6 +7,7 @@ void WorldTransform::Initialize()
 {
 	CreateConstBuffer();
 	Map();
+	Reset();
 	UpdateMatrix();
 }
 
@@ -58,4 +59,15 @@ void WorldTransform::UpdateMatrix()
 
 	// 定数バッファに転送する
 	TransferMatrix();
+}
+
+void WorldTransform::Reset() {
+	// scale
+	scale_ = { 1.0f,1.0f,1.0f };
+	// rotatition
+	rotation_ = { 0.0f,0.0f,0.0f };
+	// translation
+	translation_ = { 0.0f,0.0f,0.0f };
+	// matWorld
+	matWorld_ = MakeIdentity4x4();
 }

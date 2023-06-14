@@ -3,7 +3,9 @@
 #include <cassert>
 #include <cmath>
 
+#include "ViewProjection.h"
 #include "Vector3.h"
+#include "WorldTransform.h"
 
 Matrix4x4 Matrix4x4::operator*(const Matrix4x4& m2) {
 	Matrix4x4 mat;
@@ -247,10 +249,10 @@ Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
 }
 
 Matrix4x4 NotTransform(const Matrix4x4& matrix) {
-	return { 
-		matrix.m[0][0],matrix.m[0][1] ,matrix.m[0][2] ,matrix.m[0][3], 
-		matrix.m[1][0],matrix.m[1][1] ,matrix.m[1][2] ,matrix.m[1][3], 
-		matrix.m[2][0],matrix.m[2][1] ,matrix.m[2][2] ,matrix.m[2][3], 
+	return {
+		matrix.m[0][0],matrix.m[0][1] ,matrix.m[0][2] ,matrix.m[0][3],
+		matrix.m[1][0],matrix.m[1][1] ,matrix.m[1][2] ,matrix.m[1][3],
+		matrix.m[2][0],matrix.m[2][1] ,matrix.m[2][2] ,matrix.m[2][3],
 		0.0f,0.0f,0.0f,matrix.m[3][3], };
 }
 
@@ -332,15 +334,28 @@ Matrix4x4 MakeViewMatrix(const Vector3& rotation, const Vector3& translation) {
 	return Inverse(cameraMatrix);
 }
 
-Matrix4x4 MakeLookAtLH(const Vector3& target, const Vector3& eye,const Vector3& up) {
+Matrix4x4 MakeLookAtLH(const Vector3& target, const Vector3& eye, const Vector3& up) {
 	Vector3 zaxis = Normalize(target - eye);
 	Vector3 xaxis = Normalize(Cross(up, zaxis));
 	Vector3 yaxis = Cross(zaxis, xaxis);
 	return {
-		xaxis.x,yaxis.x,zaxis.x,0,
-		xaxis.y,yaxis.y,zaxis.y,0,
-		xaxis.z,yaxis.z,zaxis.z,0,
-		-Dot(xaxis, eye),-Dot(yaxis, eye),-Dot(zaxis, eye),1 
+		xaxis.x,yaxis.x,zaxis.x,0.0f,
+		xaxis.y,yaxis.y,zaxis.y,0.0f,
+		xaxis.z,yaxis.z,zaxis.z,0.0f,
+		-Dot(xaxis, eye),-Dot(yaxis, eye),-Dot(zaxis, eye),1.0f
+	};
+}
+
+Matrix4x4 MakeBillboard(const Vector3& target, const Vector3& eye, const Vector3& up) {
+	// ビルボード回転行列
+	Vector3 zaxis = Normalize(target - eye);
+	Vector3 xaxis = Normalize(Cross(up, zaxis));
+	Vector3 yaxis = Cross(zaxis, xaxis);
+	return {
+		xaxis.x,xaxis.y,xaxis.z,0.0f,
+		yaxis.x,yaxis.y,yaxis.z,0.0f,
+		zaxis.x,zaxis.y,zaxis.z,0.0f,
+		0.0f,0.0f,0.0f,1.0f
 	};
 }
 

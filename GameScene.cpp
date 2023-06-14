@@ -39,69 +39,20 @@ void GameScene::Initialize(){
 
 	// 生成
 	triangle_1_ = Basic::Create();
-	triangle_2_ = Basic::Create();
+	base_ = Basic::Create();
 
 	// パーティクル
 	billParticle_ = new BillParticle();
 }
 
 void GameScene::Update(){
-#pragma region カメラ
-	/*ImGui::Begin("camera");
-	ImGui::SliderFloat3(
-		" translation_",
-		&viewProjection_.translation_.x,
-		-50.0f,
-		0.0f);
-	ImGui::SliderFloat3(
-		" rotation_",
-		&viewProjection_.rotation_.x,
-		-2.0f,
-		2.0f);
-	ImGui::End();
-	viewProjection_.UpdateMatrix();*/
-#pragma endregion カメラ
-	//ImGui::Begin("camera");
-	//ImGui::Text(
-	//	" matView_ \n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n",
-	//	viewProjection_.matView_.m[0][0], viewProjection_.matView_.m[0][1],viewProjection_.matView_.m[0][2], viewProjection_.matView_.m[0][3],
-	//	viewProjection_.matView_.m[1][0], viewProjection_.matView_.m[1][1],viewProjection_.matView_.m[1][2], viewProjection_.matView_.m[1][3],
-	//	viewProjection_.matView_.m[2][0], viewProjection_.matView_.m[2][1],viewProjection_.matView_.m[2][2], viewProjection_.matView_.m[2][3],
-	//	viewProjection_.matView_.m[3][0], viewProjection_.matView_.m[3][1],viewProjection_.matView_.m[3][2], viewProjection_.matView_.m[3][3]
-	//);
-	//ImGui::End();
-	//ImGui::Begin("worldTransform_1_");
-	//ImGui::Text(
-	//	" rotation_ : %f,%f,%f",
-	//	worldTransform_1_.rotation_.x,
-	//	worldTransform_1_.rotation_.y,
-	//	worldTransform_1_.rotation_.z
-	//	);
-	//ImGui::Text(
-	//	" matView_ \n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n",
-	//	worldTransform_1_.matWorld_.m[0][0], worldTransform_1_.matWorld_.m[0][1], worldTransform_1_.matWorld_.m[0][2], worldTransform_1_.matWorld_.m[0][3],
-	//	worldTransform_1_.matWorld_.m[1][0], worldTransform_1_.matWorld_.m[1][1], worldTransform_1_.matWorld_.m[1][2], worldTransform_1_.matWorld_.m[1][3],
-	//	worldTransform_1_.matWorld_.m[2][0], worldTransform_1_.matWorld_.m[2][1], worldTransform_1_.matWorld_.m[2][2], worldTransform_1_.matWorld_.m[2][3],
-	//	worldTransform_1_.matWorld_.m[3][0], worldTransform_1_.matWorld_.m[3][1], worldTransform_1_.matWorld_.m[3][2], worldTransform_1_.matWorld_.m[3][3]
-	//);
-	//ImGui::End();
-	
-	//// ビューマトリックスの逆行列作成
-	//Matrix4x4 cameraInverse = Inverse(viewProjection_.matView_);
-	//// 移動情報の打ち消し
-	//cameraInverse.m[3][0] = 0.0f;
-	//cameraInverse.m[3][1] = 0.0f;
-	//cameraInverse.m[3][2] = 0.0f;
-	//Matrix4x4 worldTransformAffin = MakeAffineMatrix(worldTransform_1_.scale_, worldTransform_1_.rotation_, worldTransform_1_.translation_);
-	//worldTransform_1_.matWorld_ = worldTransformAffin * cameraInverse;
-	//worldTransform_1_.TransferMatrix();
+	// デバックカメラ
+	debugCamera_->Update(&viewProjection_);
 
 	// ビルボード回転行列
-	Matrix4x4 Bill = MakeLookAtLH(worldTransform_1_.translation_,viewProjection_.translation_,Vector3(0.0f,1.0f,0.0f));
-	Matrix4x4 InversBill = Inverse(Bill);
-	InversBill = NotTransform(InversBill);
+	Matrix4x4 Bill = MakeBillboard(viewProjection_.translation_, worldTransform_1_.translation_,Vector3(0.0f,1.0f,0.0f));
 	Matrix4x4 worldTransformAffin = MakeAffineMatrix(worldTransform_1_.scale_, worldTransform_1_.rotation_, worldTransform_1_.translation_);
-	worldTransform_1_.matWorld_ = worldTransformAffin * InversBill;
+	worldTransform_1_.matWorld_ = Bill * worldTransformAffin;
 	worldTransform_1_.TransferMatrix();
 
 	//
@@ -109,9 +60,7 @@ void GameScene::Update(){
  		billParticle_->SetEmitter({ 0.0f, 0.0f, 0.0f });
 		billParticle_->Create();
 	}
-	billParticle_->Update();
-	// デバックカメラ
-	debugCamera_->Update(&viewProjection_);
+	billParticle_->Update(viewProjection_);
 }
 
 void GameScene::Draw(){
@@ -125,7 +74,7 @@ void GameScene::Draw(){
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	triangle_1_->Draw(worldTransform_1_,viewProjection_, textureHandle_);
-	triangle_2_->Draw(worldTransform_2_,viewProjection_);
+	base_->Draw(worldTransform_2_,viewProjection_);
 
 	
 	// 3Dオブジェクト描画後処理
@@ -140,7 +89,7 @@ void GameScene::Draw(){
 	/// </summary>
 
 	sprite_->Draw(sptiteWorldTransform_,viewProjection_, textureHandle_2_);
-	billParticle_->Draw(viewProjection_);
+	billParticle_->Draw(viewProjection_, textureHandle_);
 
 	// スプライト描画後処理
 	Sprite::PostDraw();
@@ -150,7 +99,7 @@ void GameScene::Draw(){
 
 void GameScene::Release(){
 	SafeDelete(triangle_1_);
-	SafeDelete(triangle_2_);
+	SafeDelete(base_);
 	SafeDelete(sprite_);
 	SafeDelete(billParticle_);
 	SafeDelete(debugCamera_);

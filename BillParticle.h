@@ -30,7 +30,7 @@ public:
 	/// <summary>
 	/// アップデート
 	/// </summary>
-	void Update();
+	void Update(const ViewProjection& viewProjection);
 
 	/// <summary>
 	/// 描画

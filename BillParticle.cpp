@@ -30,10 +30,10 @@ void BillParticle::Initilaize() {
 
 void BillParticle::Create() {
 	// 何フレーム間隔で生成するか
-	const uint32_t CreateParticleinterval = 5;
+	const uint32_t CreateParticleinterval = 15;
 
 	for (auto& particle : particle_) {
-		if (!particle.IsAlive_&& CreateParticleinterval <= createParticleCount) {
+		if (!particle.IsAlive_ && CreateParticleinterval <= createParticleCount) {
 			// 座標
 			particle.worldTransform_.translation_ = emitter_;
 			// 速度と向き
@@ -42,15 +42,13 @@ void BillParticle::Create() {
 				static_cast<float>(std::rand()) / RAND_MAX * 200.0f - 100.0f,
 				static_cast<float>(std::rand()) / RAND_MAX * 200.0f - 100.0f
 			);
-			particle.velocity_ = Normalize(velocity);
+			particle.velocity_ = Normalize(velocity) * 0.5f;
 			// 寿命
-			particle.time_ = std::rand() % 15 + 15;
+			particle.time_ = /*std::rand() % 15 + 15*/30;
 			// フラグ
 			particle.IsAlive_ = true;
 			// sprite生成
-			if (particle.sprite_ == nullptr) {
-				particle.sprite_ = Sprite::Create();
-			}
+			particle.sprite_ = Sprite::Create();
 			// 生成カウントリセット
 			createParticleCount = 0;
 			break;
@@ -59,23 +57,40 @@ void BillParticle::Create() {
 	createParticleCount++;
 }
 
-void BillParticle::Update() {
+void BillParticle::Update(const ViewProjection& viewProjection) {
 	uint32_t count = 0;
 	for (auto& particles : particle_) {
- 		if (particles.IsAlive_) {
+		if (particles.IsAlive_) {
 			particles.time_--;
 			if (particles.time_ <= 0) {
- 				Destory(count);
+				Destory(count);
 				break;
 			}
 			particles.worldTransform_.translation_ += particles.velocity_;
-			particles.worldTransform_.UpdateMatrix();
+			Matrix4x4 Bill = MakeBillboard(particles.worldTransform_.translation_, viewProjection.translation_, Vector3(0.0f, 1.0f, 0.0f));
+			Matrix4x4 worldTransformAffin = MakeAffineMatrix(particles.worldTransform_.scale_, particles.worldTransform_.rotation_, particles.worldTransform_.translation_);
+			particles.worldTransform_.matWorld_ = Bill * worldTransformAffin;
+			particles.worldTransform_.TransferMatrix();
+			/*if (count % 2 == 0) {
+				Matrix4x4 Bill = MakeBillboard(viewProjection.translation_, particles.worldTransform_.translation_, Vector3(0.0f, 1.0f, 0.0f));
+				Matrix4x4 worldTransformAffin = MakeAffineMatrix(particles.worldTransform_.scale_, particles.worldTransform_.rotation_, particles.worldTransform_.translation_);
+				particles.worldTransform_.matWorld_ = Bill * worldTransformAffin;
+				particles.worldTransform_.TransferMatrix();
+			}
+			else {
+				particles.worldTransform_.UpdateMatrix();
+			}*/
 		}
 		count++;
 	}
 	for (auto& particles : particle_) {
 		ImGui::Begin("particle");
 		ImGui::Text("IsAlive : %d", particles.IsAlive_);
+		ImGui::Text("particles.worldTransform_.matWorld_\n%f,%f,%f,%f,\n%f,%f,%f,%f,\n%f,%f,%f,%f,\n%f,%f,%f,%f,",
+			particles.worldTransform_.matWorld_.m[0][0], particles.worldTransform_.matWorld_.m[0][1], particles.worldTransform_.matWorld_.m[0][2], particles.worldTransform_.matWorld_.m[0][3],
+			particles.worldTransform_.matWorld_.m[1][0], particles.worldTransform_.matWorld_.m[1][1], particles.worldTransform_.matWorld_.m[1][2], particles.worldTransform_.matWorld_.m[1][3],
+			particles.worldTransform_.matWorld_.m[2][0], particles.worldTransform_.matWorld_.m[2][1], particles.worldTransform_.matWorld_.m[2][2], particles.worldTransform_.matWorld_.m[2][3],
+			particles.worldTransform_.matWorld_.m[3][0], particles.worldTransform_.matWorld_.m[3][1], particles.worldTransform_.matWorld_.m[3][2], particles.worldTransform_.matWorld_.m[3][3]);
 		ImGui::End();
 	}
 
@@ -94,4 +109,5 @@ void BillParticle::Destory(uint32_t index) {
 	particle_[index].velocity_ = Vector3(0.0f, 0.0f, 0.0f);
 	particle_[index].time_ = 0;
 	particle_[index].IsAlive_ = false;
+	particle_[index].sprite_->Delete();
 }

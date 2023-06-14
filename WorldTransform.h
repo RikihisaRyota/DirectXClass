@@ -43,4 +43,9 @@ struct WorldTransform {
 	/// 行列を更新する
 	/// </summary>
 	void UpdateMatrix();
+	
+	/// <summary>
+	/// メンバ変数の初期化
+	/// </summary>
+	void Reset();
 };

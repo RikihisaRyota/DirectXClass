@@ -58,7 +58,7 @@ private: // メンバ変数
 	WorldTransform worldTransform_2_;
 
 	Basic* triangle_1_;
-	Basic* triangle_2_;
+	Basic* base_;
 
 	Sprite* sprite_;
 	WorldTransform sptiteWorldTransform_;

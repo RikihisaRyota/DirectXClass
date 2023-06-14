@@ -106,6 +106,8 @@ public: // メンバ関数
 	void Draw(
 		const WorldTransform& worldTransform, const ViewProjection& viewProjection,
 		uint32_t textureHadle = 0);
+	
+	void Delete();
 private:
 	/// <summary>
 	/// 初期化
