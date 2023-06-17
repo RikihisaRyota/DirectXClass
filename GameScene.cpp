@@ -51,7 +51,7 @@ void GameScene::Update(){
 	Matrix4x4 InversBill = Inverse(Bill);
 	InversBill = NotTransform(InversBill);
 	Matrix4x4 worldTransformAffin = MakeAffineMatrix(worldTransform_1_.scale_, worldTransform_1_.rotation_, worldTransform_1_.translation_);
-	worldTransform_1_.matWorld_ = worldTransformAffin * InversBill;
+	worldTransform_1_.matWorld_ = InversBill * worldTransformAffin ;
 	worldTransform_1_.TransferMatrix();
 
 	//
