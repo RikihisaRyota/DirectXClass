@@ -44,7 +44,7 @@ void GameScene::Update(){
 	cameraInverse.m[3][1] = 0.0f;
 	cameraInverse.m[3][2] = 0.0f;
 	Matrix4x4 worldTransformAffin = MakeAffineMatrix(worldTransform_1_.scale_, worldTransform_1_.rotation_, worldTransform_1_.translation_);
-	worldTransform_1_.matWorld_ = worldTransformAffin * cameraInverse;
+	worldTransform_1_.matWorld_ = cameraInverse * worldTransformAffin;
 	worldTransform_1_.TransferMatrix();
 
 	// デバックカメラ
