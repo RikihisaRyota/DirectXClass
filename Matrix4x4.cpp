@@ -333,9 +333,13 @@ Matrix4x4 MakeViewMatrix(const Vector3& rotation, const Vector3& translation) {
 }
 
 Matrix4x4 MakeLookAtLH(const Vector3& target, const Vector3& eye,const Vector3& up) {
+	// Z軸
 	Vector3 zaxis = Normalize(target - eye);
+	// X軸
 	Vector3 xaxis = Normalize(Cross(up, zaxis));
+	// Y軸
 	Vector3 yaxis = Cross(zaxis, xaxis);
+
 	return {
 		xaxis.x,yaxis.x,zaxis.x,0,
 		xaxis.y,yaxis.y,zaxis.y,0,
