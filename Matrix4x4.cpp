@@ -348,8 +348,11 @@ Matrix4x4 MakeLookAtLH(const Vector3& target, const Vector3& eye, const Vector3&
 
 Matrix4x4 MakeBillboard(const Vector3& target, const Vector3& eye, const Vector3& up) {
 	// ビルボード回転行列
+	// X軸
 	Vector3 zaxis = Normalize(target - eye);
+	// Y軸
 	Vector3 xaxis = Normalize(Cross(up, zaxis));
+	// Z軸
 	Vector3 yaxis = Cross(zaxis, xaxis);
 	return {
 		xaxis.x,xaxis.y,xaxis.z,0.0f,

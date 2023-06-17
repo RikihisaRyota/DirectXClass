@@ -54,7 +54,7 @@ private: // メンバ変数
 	/// ゲーム用
 	/// </summary>
 	ViewProjection viewProjection_;
-	WorldTransform worldTransform_1_;
+	WorldTransform worldTransform_;
 	WorldTransform worldTransform_2_;
 
 	Basic* triangle_1_;

@@ -1,5 +1,6 @@
 #include "GameScene.h"
 #include "DirectXCommon.h"
+#include "Matrix4x4.h"
 
 #include "ImGuiManager.h"
 
@@ -23,7 +24,7 @@ void GameScene::Initialize(){
 	// カメラの初期化
 	viewProjection_.Initialize();
 
-	worldTransform_1_.Initialize();
+	worldTransform_.Initialize();
 
 	worldTransform_2_.Initialize();
 	worldTransform_2_.translation_ = { 0.0f,-3.0f,0.0f };
@@ -50,10 +51,10 @@ void GameScene::Update(){
 	debugCamera_->Update(&viewProjection_);
 
 	// ビルボード回転行列
-	Matrix4x4 Bill = MakeBillboard(viewProjection_.translation_, worldTransform_1_.translation_,Vector3(0.0f,1.0f,0.0f));
-	Matrix4x4 worldTransformAffin = MakeAffineMatrix(worldTransform_1_.scale_, worldTransform_1_.rotation_, worldTransform_1_.translation_);
-	worldTransform_1_.matWorld_ = Bill * worldTransformAffin;
-	worldTransform_1_.TransferMatrix();
+	Matrix4x4 Bill = MakeBillboard(viewProjection_.translation_, worldTransform_.translation_, Vector3(0.0f, 1.0f, 0.0f));
+	Matrix4x4 worldTransformAffin = MakeAffineMatrix(worldTransform_.scale_, worldTransform_.rotation_, worldTransform_.translation_);
+	worldTransform_.matWorld_ = Bill * worldTransformAffin;
+	worldTransform_.TransferMatrix();
 
 	//
 	if (input_->PushKey(DIK_SPACE)) {
@@ -73,7 +74,7 @@ void GameScene::Draw(){
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	triangle_1_->Draw(worldTransform_1_,viewProjection_, textureHandle_);
+	triangle_1_->Draw(worldTransform_,viewProjection_, textureHandle_);
 	base_->Draw(worldTransform_2_,viewProjection_);
 
 	
