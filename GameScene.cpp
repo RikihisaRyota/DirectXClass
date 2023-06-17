@@ -27,7 +27,7 @@ void GameScene::Initialize(){
 
 	worldTransform_2_.Initialize();
 	worldTransform_2_.translation_ = { 0.0f,-3.0f,0.0f };
-	worldTransform_2_.scale_ = { 4.0f,0.5f,4.0f };
+	worldTransform_2_.scale_ = { 1.0f,1.0f,1.0f };
 	worldTransform_2_.UpdateMatrix();
 
 	sptiteWorldTransform_.Initialize();
@@ -49,8 +49,8 @@ void GameScene::Initialize(){
 void GameScene::Update(){
 	// ビルボード回転行列
 	Matrix4x4 Bill = MakeLookAtLH(worldTransform_1_.translation_,viewProjection_.translation_,Vector3(0.0f,1.0f,0.0f));
+	Bill = NotTransform(Bill);
 	Matrix4x4 InversBill = Inverse(Bill);
-	InversBill = NotTransform(InversBill);
 	Matrix4x4 worldTransformAffin = MakeAffineMatrix(worldTransform_1_.scale_, worldTransform_1_.rotation_, worldTransform_1_.translation_);
 	worldTransform_1_.matWorld_ = worldTransformAffin * InversBill;
 	worldTransform_1_.TransferMatrix();
@@ -83,7 +83,7 @@ void GameScene::Draw(){
 	/// </summary>
 
 	sprite_->Draw(worldTransform_1_,viewProjection_, textureHandle_);
-	spriteBill_->Draw(sptiteWorldTransform_,viewProjection_, textureHandle_2_);
+	spriteBill_->Draw(worldTransform_2_,viewProjection_, textureHandle_2_);
 	//billParticle_->Draw(viewProjection_);
 
 	// スプライト描画後処理
