@@ -60,6 +60,7 @@ private: // メンバ変数
 	Basic* triangle_1_;
 	Basic* triangle_2_;
 
+	Sprite* spriteBill_;
 	Sprite* sprite_;
 	WorldTransform sptiteWorldTransform_;
 

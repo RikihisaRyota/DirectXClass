@@ -36,6 +36,7 @@ void GameScene::Initialize(){
 
 	// 生成
 	sprite_ = Sprite::Create();
+	spriteBill_ = Sprite::Create();
 
 	// 生成
 	triangle_1_ = Basic::Create();
@@ -67,8 +68,7 @@ void GameScene::Draw(){
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	triangle_1_->Draw(worldTransform_1_,viewProjection_, textureHandle_);
-	triangle_2_->Draw(worldTransform_2_,viewProjection_);
+	//triangle_1_->Draw(worldTransform_1_,viewProjection_, textureHandle_);
 
 	
 	// 3Dオブジェクト描画後処理
@@ -82,7 +82,8 @@ void GameScene::Draw(){
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
 
-	sprite_->Draw(sptiteWorldTransform_,viewProjection_, textureHandle_2_);
+	sprite_->Draw(worldTransform_1_,viewProjection_, textureHandle_);
+	spriteBill_->Draw(sptiteWorldTransform_,viewProjection_, textureHandle_2_);
 	//billParticle_->Draw(viewProjection_);
 
 	// スプライト描画後処理
@@ -95,6 +96,7 @@ void GameScene::Release(){
 	SafeDelete(triangle_1_);
 	SafeDelete(triangle_2_);
 	SafeDelete(sprite_);
+	SafeDelete(spriteBill_);
 	/*SafeDelete(billParticle_);*/
 	SafeDelete(debugCamera_);
 }
