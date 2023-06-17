@@ -53,13 +53,6 @@ void GameScene::Update(){
 	Matrix4x4 worldTransformAffin = MakeAffineMatrix(worldTransform_1_.scale_, worldTransform_1_.rotation_, worldTransform_1_.translation_);
 	worldTransform_1_.matWorld_ = worldTransformAffin * InversBill;
 	worldTransform_1_.TransferMatrix();
-
-	//
-	/*if (input_->PushKey(DIK_SPACE)) {
- 		billParticle_->SetEmitter({ 0.0f, 0.0f, 0.0f });
-		billParticle_->Create();
-	}
-	billParticle_->Update();*/
 	// デバックカメラ
 	debugCamera_->Update(&viewProjection_);
 }
