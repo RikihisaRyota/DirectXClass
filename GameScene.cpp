@@ -75,7 +75,7 @@ void GameScene::Draw(){
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	triangle_1_->Draw(worldTransform_1_,viewProjection_, textureHandle_);
-	triangle_2_->Draw(worldTransform_2_,viewProjection_);
+	triangle_2_->Draw(worldTransform_2_,viewProjection_,textureHandle_2_);
 
 	
 	// 3Dオブジェクト描画後処理
