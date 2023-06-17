@@ -51,9 +51,18 @@ void GameScene::Update(){
 	debugCamera_->Update(&viewProjection_);
 
 	// ビルボード回転行列
-	Matrix4x4 billBoard = MakeBillboard(viewProjection_.translation_, worldTransform_.translation_, Vector3(0.0f, 1.0f, 0.0f));
-	Matrix4x4 worldTransformAffin = MakeAffineMatrix(worldTransform_.scale_, worldTransform_.rotation_, worldTransform_.translation_);
+	Matrix4x4 billBoard = MakeBillboard(
+		viewProjection_.translation_, 
+		worldTransform_.translation_, 
+		Vector3(0.0f, 1.0f, 0.0f));
+	// アフィン変換
+	Matrix4x4 worldTransformAffin = MakeAffineMatrix(
+		worldTransform_.scale_, 
+		worldTransform_.rotation_, 
+		worldTransform_.translation_);
+	// ワールド行列
 	worldTransform_.matWorld_ = billBoard * worldTransformAffin;
+	// 行列更新
 	worldTransform_.TransferMatrix();
 
 	//
