@@ -39,15 +39,23 @@ void GameScene::Initialize(){
 void GameScene::Update(){
 	// デバックカメラ
 	debugCamera_->Update(&viewProjection_);
+
 	// ビューマトリックスの逆行列作成
 	Matrix4x4 cameraInverse = Inverse(viewProjection_.matView_);
 	// 移動情報の打ち消し
 	cameraInverse.m[3][0] = 0.0f;
 	cameraInverse.m[3][1] = 0.0f;
 	cameraInverse.m[3][2] = 0.0f;
-	Matrix4x4 worldTransformAffin = MakeAffineMatrix(worldTransform_.scale_, worldTransform_.rotation_, worldTransform_.translation_);
+	// ワールド座標系
+	Matrix4x4 worldTransformAffin = MakeAffineMatrix(
+		worldTransform_.scale_, 
+		worldTransform_.rotation_, 
+		worldTransform_.translation_);
+	// ワールド行列
 	worldTransform_.matWorld_ = worldTransformAffin * cameraInverse;
+	// 行列を転送
 	worldTransform_.TransferMatrix();
+
 #pragma region カメラ
 	ImGui::Begin("worldTransform_.translation_ ");
 	ImGui::Text(
