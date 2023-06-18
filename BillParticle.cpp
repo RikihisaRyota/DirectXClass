@@ -67,10 +67,11 @@ void BillParticle::Update(const ViewProjection& viewProjection) {
 				break;
 			}
 			particles.worldTransform_.translation_ += particles.velocity_;
-			Matrix4x4 Bill = MakeBillboard(particles.worldTransform_.translation_, viewProjection.translation_, Vector3(0.0f, 1.0f, 0.0f));
+			/*Matrix4x4 Bill = MakeBillboard(particles.worldTransform_.translation_, viewProjection.translation_, Vector3(0.0f, 1.0f, 0.0f));
 			Matrix4x4 worldTransformAffin = MakeAffineMatrix(particles.worldTransform_.scale_, particles.worldTransform_.rotation_, particles.worldTransform_.translation_);
 			particles.worldTransform_.matWorld_ = Bill * worldTransformAffin;
-			particles.worldTransform_.TransferMatrix();
+			particles.worldTransform_.TransferMatrix();*/
+			particles.worldTransform_.UpdateMatrix();
 			/*if (count % 2 == 0) {
 				Matrix4x4 Bill = MakeBillboard(viewProjection.translation_, particles.worldTransform_.translation_, Vector3(0.0f, 1.0f, 0.0f));
 				Matrix4x4 worldTransformAffin = MakeAffineMatrix(particles.worldTransform_.scale_, particles.worldTransform_.rotation_, particles.worldTransform_.translation_);
@@ -83,17 +84,6 @@ void BillParticle::Update(const ViewProjection& viewProjection) {
 		}
 		count++;
 	}
-	for (auto& particles : particle_) {
-		ImGui::Begin("particle");
-		ImGui::Text("IsAlive : %d", particles.IsAlive_);
-		ImGui::Text("particles.worldTransform_.matWorld_\n%f,%f,%f,%f,\n%f,%f,%f,%f,\n%f,%f,%f,%f,\n%f,%f,%f,%f,",
-			particles.worldTransform_.matWorld_.m[0][0], particles.worldTransform_.matWorld_.m[0][1], particles.worldTransform_.matWorld_.m[0][2], particles.worldTransform_.matWorld_.m[0][3],
-			particles.worldTransform_.matWorld_.m[1][0], particles.worldTransform_.matWorld_.m[1][1], particles.worldTransform_.matWorld_.m[1][2], particles.worldTransform_.matWorld_.m[1][3],
-			particles.worldTransform_.matWorld_.m[2][0], particles.worldTransform_.matWorld_.m[2][1], particles.worldTransform_.matWorld_.m[2][2], particles.worldTransform_.matWorld_.m[2][3],
-			particles.worldTransform_.matWorld_.m[3][0], particles.worldTransform_.matWorld_.m[3][1], particles.worldTransform_.matWorld_.m[3][2], particles.worldTransform_.matWorld_.m[3][3]);
-		ImGui::End();
-	}
-
 }
 
 void BillParticle::Draw(const ViewProjection& viewProjection, uint32_t textureHadl) {

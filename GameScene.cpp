@@ -67,7 +67,7 @@ void GameScene::Update(){
 
 	//
 	if (input_->PushKey(DIK_SPACE)) {
- 		billParticle_->SetEmitter({ 0.0f, 0.0f, 0.0f });
+ 		billParticle_->SetEmitter(sptiteWorldTransform_.translation_);
 		billParticle_->Create();
 	}
 	billParticle_->Update(viewProjection_);
@@ -99,7 +99,7 @@ void GameScene::Draw(){
 	/// </summary>
 
 	sprite_->Draw(sptiteWorldTransform_,viewProjection_, textureHandle_2_);
-	billParticle_->Draw(viewProjection_, textureHandle_);
+	billParticle_->Draw(viewProjection_, textureHandle_2_);
 
 	// スプライト描画後処理
 	Sprite::PostDraw();
