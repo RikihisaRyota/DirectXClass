@@ -17,8 +17,7 @@
 
 #pragma comment(lib,"dxcompiler.lib")
 
-class Basic
-{
+class Basic {
 public: // サブクラス
 	/// <summary>
 	/// 頂点データ構造体
@@ -60,7 +59,7 @@ public: // 静的メンバ関数
 	/// 解放
 	/// </summary>
 	static void Release();
-	
+
 private: // 静的メンバ変数
 	/// <summary>
 	/// グラフィックパイプラインの生成
@@ -101,10 +100,7 @@ private: // 静的メンバ変数
 	static Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_;
 	static Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_;
 public: // メンバ関数
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	void Initialize();
+
 
 	/// <summary>
 	/// 描画
@@ -112,6 +108,13 @@ public: // メンバ関数
 	void Draw(
 		const WorldTransform& worldTransform, const ViewProjection& viewProjection,
 		uint32_t textureHadle = 0);
+
+
+private:
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	void Initialize();
 
 	/// <summary>
 	/// データ生成

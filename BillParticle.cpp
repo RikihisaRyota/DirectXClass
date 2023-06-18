@@ -30,21 +30,21 @@ void BillParticle::Initilaize() {
 
 void BillParticle::Create() {
 	// 何フレーム間隔で生成するか
-	const uint32_t CreateParticleinterval = 15;
+	const uint32_t CreateParticleinterval = 10;
 
 	for (auto& particle : particle_) {
 		if (!particle.IsAlive_ && CreateParticleinterval <= createParticleCount) {
 			// 座標
 			particle.worldTransform_.translation_ = emitter_;
 			// 速度と向き
-			Vector3 velocity = Vector3(
-				static_cast<float>(std::rand()) / RAND_MAX * 200.0f - 100.0f,
-				static_cast<float>(std::rand()) / RAND_MAX * 200.0f - 100.0f,
-				static_cast<float>(std::rand()) / RAND_MAX * 200.0f - 100.0f
-			);
-			particle.velocity_ = Normalize(velocity) * 0.5f;
+			float angle = static_cast<float>(std::rand()) / RAND_MAX * (120.0f - 60.0f) + 60.0f;
+			angle = angle * (3.14159265358979323846f / 180.0f);
+			particle.velocity_ = Vector3(std::cos(angle), std::sin(angle), 0.0f) * 0.5f;
+			if (0 > particle.velocity_.y) {
+				particle.velocity_.y *= -1.0f;
+			}
 			// 寿命
-			particle.time_ = /*std::rand() % 15 + 15*/30;
+			particle.time_ = 30;
 			// フラグ
 			particle.IsAlive_ = true;
 			// sprite生成

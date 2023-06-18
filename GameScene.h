@@ -54,17 +54,12 @@ private: // メンバ変数
 	/// ゲーム用
 	/// </summary>
 	ViewProjection viewProjection_;
-	WorldTransform worldTransform_;
-	WorldTransform worldTransform_2_;
-
-	Basic* triangle_1_;
-	Basic* base_;
-
-	Sprite* sprite_;
-	WorldTransform sptiteWorldTransform_;
 
 	uint32_t textureHandle_ = 0u;
 	uint32_t textureHandle_2_ = 0u;
+
+	Basic* base_ = nullptr;
+	WorldTransform baseWorldTransform_;
 
 	BillParticle* billParticle_ = nullptr;
 };
