@@ -19,6 +19,7 @@ void GameScene::Initialize(){
 
 	// テクスチャ
 	textureHandle_ = TextureManager::Load("resources/uvChecker.png");
+	treeTextureHandle_ = TextureManager::Load("resources/tree.png");
 	textureHandle_2_ = TextureManager::Load("resources/mario.png");
 
 	// カメラの初期化
@@ -31,6 +32,13 @@ void GameScene::Initialize(){
 	baseWorldTransform_.translation_ = { 0.0f,-2.0f,0.0f };
 	baseWorldTransform_.UpdateMatrix();
 
+	// 木
+	tree_ = Sprite::Create();
+	treeWorldTransform_.Initialize();
+	treeWorldTransform_.scale_ = { 1.0f,2.0f,1.0f };
+	treeWorldTransform_.translation_ = { 0.0f,0.0f,0.0f };
+	treeWorldTransform_.UpdateMatrix();
+
 	// パーティクル
 	billParticle_ = new BillParticle();
 }
@@ -38,6 +46,15 @@ void GameScene::Initialize(){
 void GameScene::Update(){
 	// デバックカメラ
 	debugCamera_->Update(&viewProjection_);
+
+	Matrix4x4 billBroad = MakeBillboardYAxsizLook(treeWorldTransform_.translation_, viewProjection_.translation_, Vector3(0.0f, 1.0f, 0.0f));
+	Matrix4x4 world = MakeAffineMatrix(
+		treeWorldTransform_.scale_,
+		treeWorldTransform_.rotation_,
+		treeWorldTransform_.translation_
+	);
+	treeWorldTransform_.matWorld_ = billBroad * world;
+	treeWorldTransform_.TransferMatrix();
 
 	if (input_->PushKey(DIK_SPACE)) {
  		billParticle_->SetEmitter(Vector3(0.0f,0.0f,0.0f));
@@ -69,7 +86,7 @@ void GameScene::Draw(){
 	/// <summary>
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
-
+	tree_->Draw(treeWorldTransform_, viewProjection_, treeTextureHandle_);
 	billParticle_->Draw(viewProjection_);
 
 	// スプライト描画後処理
@@ -80,6 +97,7 @@ void GameScene::Draw(){
 
 void GameScene::Release(){
 	SafeDelete(base_);
+	SafeDelete(tree_);
 	SafeDelete(billParticle_); 
 	SafeDelete(debugCamera_);
 }

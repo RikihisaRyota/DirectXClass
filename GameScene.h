@@ -56,10 +56,13 @@ private: // メンバ変数
 	ViewProjection viewProjection_;
 
 	uint32_t textureHandle_ = 0u;
+	uint32_t treeTextureHandle_ = 0u;
 	uint32_t textureHandle_2_ = 0u;
 
 	Basic* base_ = nullptr;
 	WorldTransform baseWorldTransform_;
+	Sprite* tree_ = nullptr;
+	WorldTransform treeWorldTransform_;
 
 	BillParticle* billParticle_ = nullptr;
 };

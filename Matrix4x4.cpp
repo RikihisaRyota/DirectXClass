@@ -362,6 +362,22 @@ Matrix4x4 MakeBillboard(const Vector3& target, const Vector3& eye, const Vector3
 	};
 }
 
+Matrix4x4 MakeBillboardYAxsizLook(const Vector3& target, const Vector3& eye, const Vector3& up) {
+	// ビルボード回転行列
+	// X軸
+	Vector3 zaxis = Normalize(target - eye);
+	// Y軸
+	Vector3 xaxis = Normalize(Cross(up, zaxis));
+	// Z軸
+	Vector3 yaxis = Cross(zaxis, xaxis);
+	return {
+		xaxis.x,xaxis.y,xaxis.z,0.0f,
+		0.0f,1.0f,0.0f,0.0f,
+		zaxis.x,zaxis.y,zaxis.z,0.0f,
+		0.0f,0.0f,0.0f,1.0f
+	};
+}
+
 Vector3 GetXAxis(const Matrix4x4& mat) {
 	return Vector3(mat.m[0][0], mat.m[0][1], mat.m[0][2]);
 }

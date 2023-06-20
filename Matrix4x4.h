@@ -58,9 +58,10 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 Matrix4x4 MakeViewMatrix(const Vector3& rotation, const Vector3& translation);
 // LookAtLH
 Matrix4x4 MakeLookAtLH(const Vector3& target, const Vector3& eye, const Vector3& up);
-
 // Billbord
 Matrix4x4 MakeBillboard(const Vector3& target, const Vector3& eye, const Vector3& up);
+// Y軸固定
+Matrix4x4 MakeBillboardYAxsizLook(const Vector3& target, const Vector3& eye, const Vector3& up);
 
 //1,X軸
 Vector3 GetXAxis(const Matrix4x4& mat);
