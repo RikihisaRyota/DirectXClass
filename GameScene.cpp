@@ -52,7 +52,7 @@ void GameScene::Update(){
 		worldTransform_.rotation_, 
 		worldTransform_.translation_);
 	// ワールド行列
-	worldTransform_.matWorld_ = worldTransformAffin * cameraInverse;
+	worldTransform_.matWorld_ = cameraInverse * worldTransformAffin;
 	// 行列を転送
 	worldTransform_.TransferMatrix();
 
