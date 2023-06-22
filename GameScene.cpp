@@ -37,6 +37,8 @@ void GameScene::Initialize(){
 }
 
 void GameScene::Update(){
+	// デバックカメラ
+	debugCamera_->Update(&viewProjection_);
 	// ビューマトリックスの逆行列作成
 	Matrix4x4 cameraInverse = Inverse(viewProjection_.matView_);
 	// 移動情報の打ち消し
@@ -46,9 +48,6 @@ void GameScene::Update(){
 	Matrix4x4 worldTransformAffin = MakeAffineMatrix(worldTransform_1_.scale_, worldTransform_1_.rotation_, worldTransform_1_.translation_);
 	worldTransform_1_.matWorld_ = cameraInverse * worldTransformAffin;
 	worldTransform_1_.TransferMatrix();
-
-	// デバックカメラ
-	debugCamera_->Update(&viewProjection_);
 }
 
 void GameScene::Draw(){
