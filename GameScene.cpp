@@ -38,7 +38,9 @@ void GameScene::Initialize(){
 	treeWorldTransform_.scale_ = { 1.0f,2.0f,1.0f };
 	treeWorldTransform_.translation_ = { 0.0f,0.0f,0.0f };
 	treeWorldTransform_.UpdateMatrix();
-
+	
+	// 
+	
 	// パーティクル
 	billParticle_ = new BillParticle();
 }

@@ -64,6 +64,12 @@ private: // メンバ変数
 	Sprite* tree_ = nullptr;
 	WorldTransform treeWorldTransform_;
 
+	Sprite* spriteSample_ = nullptr;
+	WorldTransform spriteSampleWorldTransform_;
+
+	Basic* basicSample_ = nullptr;
+	WorldTransform basicSampleWorldTransform_;
+
 	BillParticle* billParticle_ = nullptr;
 };
 
