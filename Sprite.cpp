@@ -103,9 +103,29 @@ void Sprite::InitializeGraphicsPipeline() {
 #pragma region BlendStateの設定
 	//BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};
+	// レンダーターゲットのブレンド設定
+	D3D12_RENDER_TARGET_BLEND_DESC& rtBlendDesc = blendDesc.RenderTarget[0];
 	//全ての色要素を書き込む
-	blendDesc.RenderTarget[0].RenderTargetWriteMask =
-		D3D12_COLOR_WRITE_ENABLE_ALL;
+	rtBlendDesc.RenderTargetWriteMask =	D3D12_COLOR_WRITE_ENABLE_ALL;
+	// ブレンドを有効化
+	rtBlendDesc.BlendEnable = true;
+#pragma region RGB値
+	// 半透明合成
+	// 加算
+	rtBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+	// ソースの値を100%使う
+	rtBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	// デストの値を  0%使う
+	rtBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+#pragma endregion RGB値
+#pragma region アルファ値
+	// 加算
+	rtBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	// ソースの値を100%使う
+	rtBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+	// デストの値を  0%使う
+	rtBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+#pragma endregion アルファ値
 #pragma endregion BlendStateの設定
 #pragma region RasiterzerStateの設定
 	//RasiterzerStateの設定
