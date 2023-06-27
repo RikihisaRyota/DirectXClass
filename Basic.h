@@ -100,16 +100,10 @@ private: // 静的メンバ変数
 	static Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_;
 	static Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_;
 public: // メンバ関数
-
-
 	/// <summary>
 	/// 描画
 	/// </summary>
-	void Draw(
-		const WorldTransform& worldTransform, const ViewProjection& viewProjection,
-		uint32_t textureHadle = 0);
-
-
+	void Draw(const WorldTransform& worldTransform, const ViewProjection& viewProjection,uint32_t textureHadle = 0);
 private:
 	/// <summary>
 	/// 初期化

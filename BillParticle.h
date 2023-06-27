@@ -28,9 +28,11 @@ public:
 	void Create();
 
 	/// <summary>
-	/// アップデート
+	/// 更新
 	/// </summary>
-	void Update(const ViewProjection& viewProjection);
+	/// <param name="viewProjection"></param>
+	/// <param name="flag">false:NotBillBoard</param>
+	void Update(const ViewProjection& viewProjection, bool flag);
 
 	/// <summary>
 	/// 描画

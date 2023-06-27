@@ -57,7 +57,7 @@ void BillParticle::Create() {
 	createParticleCount++;
 }
 
-void BillParticle::Update(const ViewProjection& viewProjection) {
+void BillParticle::Update(const ViewProjection& viewProjection,bool flag) {
 	uint32_t count = 0;
 	for (auto& particles : particle_) {
 		if (particles.IsAlive_) {
@@ -67,20 +67,15 @@ void BillParticle::Update(const ViewProjection& viewProjection) {
 				break;
 			}
 			particles.worldTransform_.translation_ += particles.velocity_;
-			/*Matrix4x4 Bill = MakeBillboard(particles.worldTransform_.translation_, viewProjection.translation_, Vector3(0.0f, 1.0f, 0.0f));
-			Matrix4x4 worldTransformAffin = MakeAffineMatrix(particles.worldTransform_.scale_, particles.worldTransform_.rotation_, particles.worldTransform_.translation_);
-			particles.worldTransform_.matWorld_ = Bill * worldTransformAffin;
-			particles.worldTransform_.TransferMatrix();*/
-			particles.worldTransform_.UpdateMatrix();
-			/*if (count % 2 == 0) {
-				Matrix4x4 Bill = MakeBillboard(viewProjection.translation_, particles.worldTransform_.translation_, Vector3(0.0f, 1.0f, 0.0f));
+			if (flag) {
+				Matrix4x4 Bill = MakeBillboard(particles.worldTransform_.translation_, viewProjection.translation_, Vector3(0.0f, 1.0f, 0.0f));
 				Matrix4x4 worldTransformAffin = MakeAffineMatrix(particles.worldTransform_.scale_, particles.worldTransform_.rotation_, particles.worldTransform_.translation_);
 				particles.worldTransform_.matWorld_ = Bill * worldTransformAffin;
 				particles.worldTransform_.TransferMatrix();
 			}
 			else {
 				particles.worldTransform_.UpdateMatrix();
-			}*/
+			}
 		}
 		count++;
 	}
