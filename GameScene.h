@@ -1,19 +1,18 @@
 #pragma once
 #include <cstdlib>
-#include "SafeDelete.h"
-#include "Input.h"
+#include <memory>
+
 #include "Basic.h"
-#include "Sprite.h"
-#include "TextureManager.h"
 #include "DebugCamera.h"
-#include "BillParticle.h"
+#include "Input.h"
+#include "SafeDelete.h"
+#include "Sprite.h"
 
 class DirectXCommon;
 /// <summary>
 /// ゲームシーン
 /// </summary>
-class GameScene
-{
+class GameScene {
 public: // メンバ関数
 	/// <summary>
 	/// コンストクラタ
@@ -49,23 +48,10 @@ private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
 	DebugCamera* debugCamera_ = nullptr;
-	
+
 	/// <summary>
 	/// ゲーム用
 	/// </summary>
 	ViewProjection viewProjection_;
-	WorldTransform worldTransform_;
-	WorldTransform worldTransform_2_;
-
-	Basic* triangle_1_;
-	Basic* base_;
-
-	Sprite* sprite_;
-	WorldTransform sptiteWorldTransform_;
-
-	uint32_t textureHandle_ = 0u;
-	uint32_t textureHandle_2_ = 0u;
-
-	BillParticle* billParticle_ = nullptr;
 };
 

@@ -268,6 +268,10 @@ Basic* Basic::Create()
 	return basic;
 }
 
+Basic* Basic::CreateFromOBJ(const std::string& modelname, bool smoothing) {
+	return nullptr;
+}
+
 void Basic::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
 	assert(Basic::sCommandList == nullptr);

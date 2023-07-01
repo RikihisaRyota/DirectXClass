@@ -46,6 +46,14 @@ public: // 静的メンバ関数
 	static Basic* Create();
 
 	/// <summary>
+	/// OBJファイルからメッシュ生成
+	/// </summary>
+	/// <param name="modelname">モデル名</param>
+	/// <param name="modelname">エッジ平滑化フラグ</param>
+	/// <returns>生成されたモデル</returns>
+	static Basic* CreateFromOBJ(const std::string& modelname, bool smoothing = false);
+
+	/// <summary>
 	/// 描画前処理
 	/// </summary>
 	/// <param name="cmdList">描画コマンドリスト</param>

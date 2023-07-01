@@ -50,17 +50,6 @@ void Input::Initialize() {
 	result =
 		devMouse_->SetCooperativeLevel(WinApp::GetInstance()->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(result));
-
-	//// デバイスの設定
-	//DIPROPDWORD diprop;
-	//diprop.diph.dwSize = sizeof(diprop);
-	//diprop.diph.dwHeaderSize = sizeof(diprop.diph);
-	//diprop.diph.dwObj = 0;
-	//diprop.diph.dwHow = DIPH_DEVICE;
-	//diprop.dwData = DIPROPAXISMODE_REL;	// 相対値モードで設定（絶対値はDIPROPAXISMODE_ABS）
-
-	//result = devMouse_->SetProperty(DIPROP_AXISMODE, &diprop.diph);
-	//assert(SUCCEEDED(result));
 #pragma endregion マウス設定
 }
 
@@ -78,9 +67,6 @@ void Input::Update() {
 
 	// マウスの入力
 	devMouse_->GetDeviceState(sizeof(DIMOUSESTATE), &mouse_);
-	ImGui::Begin("mouse");
-	ImGui::Text("mouse_.lZ:%d\nmouse_.lX:%d\nmouse_.lY:%d", mouse_.lZ, mouse_.lX, mouse_.lY);
-	ImGui::End();
 }
 
 bool Input::PushKey(BYTE keyNumber) const {
