@@ -1,3 +1,5 @@
+//#include "Pera.hlsli"
+
 Texture2D<float4> tex : register(t0); // 通常テクスチャ
 SamplerState smp : register(s0); // サンプラー
 
