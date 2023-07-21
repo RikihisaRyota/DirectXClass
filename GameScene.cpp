@@ -52,6 +52,10 @@ void GameScene::Initialize() {
 	pera_=std::make_unique<Pera>();
 	pera_->Initialize();
 
+	// peratest
+	peraCube_.reset(Cube::Create(true));
+	peraCubeWorldTransform_.Initialize();
+
 	// Sprite_
 	for (size_t i = 0; i < kCount; i++) {
 		sprite_[i].reset(Sprite::Create());
@@ -169,6 +173,7 @@ void GameScene::Draw() {
 	//obj_->Draw(objWorldTransform_, viewProjection_);
 	//cube_->Draw(cubeWorldTransform_, viewProjection_, textureHandle_);
 	//sphere_->Draw(sphereWorldTransform_, viewProjection_, textureHandle_);
+	peraCube_->Draw(peraCubeWorldTransform_,viewProjection_);
 	pera_->Draw();
 
 	light_->Draw(lightWorldTransform_, viewProjection_);

@@ -150,9 +150,6 @@
     <ClCompile Include="Sprite.cpp">
       <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
-    <ClCompile Include="ToonBasic.cpp">
-      <Filter>ソース ファイル\Figure</Filter>
-    </ClCompile>
     <ClCompile Include="Pera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>

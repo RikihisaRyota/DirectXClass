@@ -117,14 +117,12 @@ void DirectXCommon::PostDraw() {
 	commandList_->ResourceBarrier(2, barriers);
 	
 	commandList_->CopyResource(backBuffers_[bbIndex].Get(), peraResource_.Get());
+
 	barriers[0] = CD3DX12_RESOURCE_BARRIER::Transition(
 		backBuffers_[bbIndex].Get(),
 		D3D12_RESOURCE_STATE_COPY_DEST,
 		D3D12_RESOURCE_STATE_PRESENT);
 	commandList_->ResourceBarrier(1, barriers);
-
-
-
 
 	// 命令のクローズ
 	hr = commandList_->Close();

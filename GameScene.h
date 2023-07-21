@@ -81,6 +81,10 @@ private: // メンバ変数
 	WorldTransform sphereWorldTransform_;
 	// Pera
 	std::unique_ptr<Pera> pera_;
+
+	// peratest
+	std::unique_ptr<Cube> peraCube_;
+	WorldTransform peraCubeWorldTransform_;
 	// sprite
 	static const int32_t kCount = 2;
 	std::array<std::unique_ptr<Sprite>,kCount> sprite_;
