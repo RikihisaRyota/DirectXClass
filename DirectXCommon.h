@@ -133,6 +133,10 @@ private:// メンバ変数
 	// レンダーターゲット関連
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap_;
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
+	// マルチパスレンダリング用
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> peraRTVDescriptorHeap_;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> peraSRVDescriptorHeap_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> peraResource_;
 	// 深度バッファ関連
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;

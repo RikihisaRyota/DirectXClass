@@ -8,9 +8,15 @@
 #include "DirectXTex.h"
 
 
+class DirectXCommon;
 class TextureManager
 {
 public: // 静的メンバ関数
+	enum class TextureHandle {
+		WHITE1x1,
+		TOON,
+		COUNT,
+	};
 
 	/// <summary>
 	/// テクスチャ
@@ -43,6 +49,11 @@ public: // 静的メンバ関数
 	/// 解放
 	/// </summary>
 	static void Release();
+
+	/// <summary>
+	/// 描画前
+	/// </summary>
+	static void PreDraw();
 
 public: // 静的メンバ変数
 	// デスクリプターの数
@@ -97,7 +108,7 @@ public: // メンバ関数
 	/// システム初期化
 	/// </summary>
 	/// <param name="device">デバイス</param>
-	void Initialize(ID3D12Device* device);
+	void Initialize(DirectXCommon* device);
 
 	/// <summary>
 	/// 解放
@@ -124,11 +135,11 @@ public: // メンバ関数
 
 private: // メンバ変数
 	// デバイス
-	ID3D12Device* device_;
+	static DirectXCommon* device_;
 	// デスクリプタサイズ
 	UINT descriptorHandleIncrementSize = 0u;
 	// デスクリプタヒープ
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
+	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
 	// テクスチャコンテナ
 	std::array<Texture, kNumDescriptors> textures_;
 	std::array<bool, kNumDescriptors> useTable_;

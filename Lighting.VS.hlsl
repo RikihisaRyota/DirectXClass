@@ -1,4 +1,4 @@
-#include "Sprite.hlsli"
+#include "VertexShaderOutput.hlsli"
 
 struct WorldTransform
 {
@@ -19,15 +19,16 @@ ConstantBuffer<ViewProjection> gViewProjection : register(b1);
 struct VertexShaderInput
 {
     float4 position : POSITION0;
-    float2 texcoord : TEXCOORD0;
     float3 normal : NORMAL0;
+    float2 texcoord : TEXCOORD0;
 };
 
 VertexShaderOutput main(VertexShaderInput input)
 {
     VertexShaderOutput output; // ピクセルシェーダーに渡す値
-    output.position = mul(mul(input.position, gWorldTransform.world), mul(gViewProjection.view, gViewProjection.projection));
-    output.texcoord = input.texcoord;
+    output.position = input.position;
+    output.position = mul(mul(output.position, gWorldTransform.world), mul(gViewProjection.view, gViewProjection.projection));
     output.normal = normalize(mul(input.normal, (float3x3) gWorldTransform.world));
+    output.texcoord = input.texcoord;
     return output;
 }

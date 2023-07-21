@@ -44,19 +44,27 @@ void Sprite::InitializeGraphicsPipeline() {
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;// Offsetを自動計算
 
 	// rootParameterの生成
-	D3D12_ROOT_PARAMETER rootParameters[3] = {};
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
-	rootParameters[0].Descriptor.ShaderRegister = 0; //!< レジスタ番号0とバインド
+	D3D12_ROOT_PARAMETER rootParameters[COUNT] = {};
+	rootParameters[WORLDTRANSFORM].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
+	rootParameters[WORLDTRANSFORM].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
+	rootParameters[WORLDTRANSFORM].Descriptor.ShaderRegister = WORLDTRANSFORM; //!< レジスタ番号0とバインド
 
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
-	rootParameters[1].Descriptor.ShaderRegister = 1; //!< レジスタ番号1とバインド
+	rootParameters[VIEWPROJECTION].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
+	rootParameters[VIEWPROJECTION].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
+	rootParameters[VIEWPROJECTION].Descriptor.ShaderRegister = VIEWPROJECTION; //!< レジスタ番号1とバインド
 
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;// DescriptorTableを使う
-	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
-	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;// Tableの中身の配列を指定
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);// tableで利用する数
+	rootParameters[TEXTURE].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;// DescriptorTableを使う
+	rootParameters[TEXTURE].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
+	rootParameters[TEXTURE].DescriptorTable.pDescriptorRanges = descriptorRange;// Tableの中身の配列を指定
+	rootParameters[TEXTURE].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);// tableで利用する数
+
+	rootParameters[MATERIAL].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
+	rootParameters[MATERIAL].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
+	rootParameters[MATERIAL].Descriptor.ShaderRegister = MATERIAL; //!< レジスタ番号3とバインド
+
+	rootParameters[LIGHTING].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
+	rootParameters[LIGHTING].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
+	rootParameters[LIGHTING].Descriptor.ShaderRegister = LIGHTING; //!< レジスタ番号4とバインド
 
 	descriptionRootSignature.pParameters = rootParameters; //!< ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters); //!< 配列の長さ
@@ -91,11 +99,15 @@ void Sprite::InitializeGraphicsPipeline() {
 	//InputLayout
 	D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
 	{// xyz座標(1行で書いたほうが見やすい)
-	 "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,
+	 "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,
 	 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
 	},
 	{// uv座標(1行で書いたほうが見やすい)
 	 "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,
+	 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
+	},
+	{// 法線
+	"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,
 	 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
 	},
 	};
@@ -293,10 +305,8 @@ Sprite* Sprite::Create() {
 void Sprite::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
 	assert(Sprite::sCommandList == nullptr);
-
 	// コマンドリストをセット
 	sCommandList = cmdList;
-
 	// パイプラインステートの設定
 	sCommandList->SetPipelineState(sPipelineState.Get());
 	// ルートシグネチャの設定
@@ -344,13 +354,19 @@ void Sprite::Draw(const WorldTransform& worldTransform, const ViewProjection& vi
 	sCommandList->IASetIndexBuffer(&ibView_);
 
 	// CBVをセット（ワールド行列）
- 	sCommandList->SetGraphicsRootConstantBufferView(0, worldTransform.constBuff_->GetGPUVirtualAddress());
+ 	sCommandList->SetGraphicsRootConstantBufferView(WORLDTRANSFORM, worldTransform.constBuff_->GetGPUVirtualAddress());
 
 	// CBVをセット（ビュープロジェクション行列）
-	sCommandList->SetGraphicsRootConstantBufferView(1, viewProjection.constBuff_->GetGPUVirtualAddress());
+	sCommandList->SetGraphicsRootConstantBufferView(VIEWPROJECTION, viewProjection.constBuff_->GetGPUVirtualAddress());
+
+	// CBVをセット（Material）
+	sCommandList->SetGraphicsRootConstantBufferView(MATERIAL, materialBuff_->GetGPUVirtualAddress());
+
+	// DirectionalLight用のCBufferの場所を設定
+	sCommandList->SetGraphicsRootConstantBufferView(LIGHTING, directionalLightBuff_->GetGPUVirtualAddress());
 
 	// SRVをセット
-	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(sCommandList.Get(), 2, textureHadle);
+	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(sCommandList.Get(), TEXTURE, textureHadle);
 
 	// 描画コマンド
 	sCommandList->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
@@ -371,19 +387,16 @@ void Sprite::CreateSprite() {
 	HRESULT result = S_FALSE;
 
 	vertices_ = {
-		// 前
-			{{-1.0f, -1.0f, 0.0f},{0.0f, 1.0f}}, // 左下 0
-			{{-1.0f, +1.0f, 0.0f},{0.0f, 0.0f}}, // 左上 1
-			{{+1.0f, +1.0f, 0.0f},{1.0f, 0.0f}}, // 右上 2
-			{{+1.0f, -1.0f, 0.0f},{1.0f, 1.0f}}, // 右下 3
+			//	x      y     z      w      u     v      nx    ny    nz
+			{{-1.0f, -1.0f, 0.0f, +1.0f},{0.0f, 1.0f},{0.0f, 0.0f,-1.0f}}, // 左下 0
+			{{-1.0f, +1.0f, 0.0f, +1.0f},{0.0f, 0.0f},{0.0f, 0.0f,-1.0f}}, // 左上 1
+			{{+1.0f, +1.0f, 0.0f, +1.0f},{1.0f, 0.0f},{0.0f, 0.0f,-1.0f}}, // 右上 2
+			{{+1.0f, -1.0f, 0.0f, +1.0f},{1.0f, 1.0f},{0.0f, 0.0f,-1.0f}}, // 右下 3
 	};
 	// 頂点インデックスの設定
 	indices_ = { 0, 1, 2,
 				 0, 2, 3,
 				};
-
-
-
 #pragma region 頂点バッファ
 	// 頂点データのサイズ
 	UINT sizeVB = static_cast<UINT>(sizeof(VertexPos) * vertices_.size());
@@ -449,4 +462,46 @@ void Sprite::CreateSprite() {
 	ibView_.Format = DXGI_FORMAT_R16_UINT;
 	ibView_.SizeInBytes = sizeIB;
 #pragma endregion インデックスバッファビュー
+#pragma region マテリアルバッファ
+	{
+		// ヒーププロパティ
+		CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		// リソース設定
+		CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(Material));
+
+		// インデックスバッファ生成
+		result = sDevice->CreateCommittedResource(
+			&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+			IID_PPV_ARGS(&materialBuff_));
+		assert(SUCCEEDED(result));
+	}
+
+	// マテリアルへのデータ転送
+	result = materialBuff_->Map(0, nullptr, reinterpret_cast<void**>(&material_));
+	material_->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	// Lightingを有効化
+	material_->enableLightint = true;
+#pragma endregion
+#pragma region ライティングバッファ
+	{
+		// ヒーププロパティ
+		CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		// リソース設定
+		CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(DirectionalLight));
+
+		// インデックスバッファ生成
+		result = sDevice->CreateCommittedResource(
+			&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+			IID_PPV_ARGS(&directionalLightBuff_));
+		assert(SUCCEEDED(result));
+	}
+
+	// マテリアルへのデータ転送
+	result = directionalLightBuff_->Map(0, nullptr, reinterpret_cast<void**>(&directionalLight_));
+	// 初期値代入
+	directionalLight_->color = { 1.0f,1.0f,1.0f,1.0f };
+	directionalLight_->direction = { 0.0f,-1.0f,0.0f };
+	directionalLight_->intensiy = 1.0f;
+#pragma endregion
+
 }

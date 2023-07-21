@@ -28,14 +28,36 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	input->Initialize();
 
 	// テクスチャマネージャの初期化
-	TextureManager::GetInstance()->Initialize(dxCommon->GetDevice());
+	TextureManager::GetInstance()->Initialize(dxCommon);
 	TextureManager::Load("resources/white1x1.png");
-	
+	TextureManager::Load("resources/toon.png");
+
+	// BasicGraphicsPiplineの静的初期化
+	BasicGraphicsPipline::SetDevice(dxCommon->GetDevice());
+
+	// ToonGraphicsPiplineの静的初期化
+	ToonGraphicsPipline::SetDevice(dxCommon->GetDevice());
+
+	// PeraGraphicsPiplineの静的初期化
+	PeraGraphicsPipeline::SetDevice(dxCommon->GetDevice());
+
 	// Spriteの静的初期化
 	Sprite::StaticInitialize(dxCommon->GetDevice(), WinApp::kWindowWidth, WinApp::kWindowHeight);
 
 	// Basicの静的初期化
 	Basic::StaticInitialize(dxCommon->GetDevice(),WinApp::kWindowWidth, WinApp::kWindowHeight);
+
+	// OBJの静的初期化
+	OBJ::SetDevice(dxCommon->GetDevice());
+
+	// Cubeのデバイスセット
+	Cube::SetDevice(dxCommon->GetDevice());
+	
+	// Sphereのデバイスセット
+	Sphere::SetDevice(dxCommon->GetDevice());
+
+	// peraのデバイスセット
+	Pera::SetDevice(dxCommon->GetDevice());
 
 	// ImGuiの初期化
 	ImGuiManager* imguiManager = ImGuiManager::GetInstance();
@@ -63,11 +85,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		gameScene->Update();
 		// ImGui受付終了
 		imguiManager->End();
-
 		// 描画開始
 		dxCommon->PreDraw();
-
-		//// ゲームシーンの描画
+		// テクスチャマネージャーの描画準備
+		TextureManager::GetInstance()->PreDraw();
+		// ゲームシーンの描画
 		gameScene->Draw();
 		// ImGui描画
 		imguiManager->Draw();
@@ -79,17 +101,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	gameScene->Release();
 	SafeDelete(gameScene);
 
-	// テクスチャマネージャーの解放
-	TextureManager::Release();
-	
 	// ImGui解放
 	imguiManager->Finalize();
+
+	// Basic解放
+	Basic::Release();
 
 	// Sprite解放
 	Sprite::Release();
 
-	// Basic解放
-	Basic::Release();
+	// テクスチャマネージャーの解放
+	TextureManager::Release();
 
 	// DirectXの解放
 	dxCommon->Release();

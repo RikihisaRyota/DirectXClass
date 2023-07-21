@@ -40,6 +40,30 @@
     <Filter Include="ソース ファイル\scene">
       <UniqueIdentifier>{a6e1cd55-5481-4792-b29d-7ec4f475fe9b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\graphicsPipeline">
+      <UniqueIdentifier>{0ae6f59c-2c7e-4a17-8144-61b346b0d4ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\graphicsPipeline">
+      <UniqueIdentifier>{3dedd729-df82-43e4-b358-1230a92d2613}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\constantBuffer">
+      <UniqueIdentifier>{2586de3b-a9b3-48af-8673-5fa59185e7cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="リソース ファイル\Toon">
+      <UniqueIdentifier>{d7f9d85f-4f91-458b-b1df-0f1d57c199f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="リソース ファイル\Lighting">
+      <UniqueIdentifier>{8b4a08db-054e-419b-8642-812fee091e28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Figure">
+      <UniqueIdentifier>{8876adc9-e507-405f-aa45-ef1f92bbae77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Figure">
+      <UniqueIdentifier>{c33b482c-df70-46f3-914a-4d5dd022c4fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="リソース ファイル\Pera">
+      <UniqueIdentifier>{8eba6a6b-c3cb-4997-9ca2-4d92754f6542}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -75,9 +99,6 @@
     <ClCompile Include="externals\imgui\imgui_widgets.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Basic.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="WorldTransform.cpp">
       <Filter>ソース ファイル\3d</Filter>
     </ClCompile>
@@ -105,11 +126,38 @@
     <ClCompile Include="Vector3.cpp">
       <Filter>ソース ファイル\math</Filter>
     </ClCompile>
-    <ClCompile Include="Sprite.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="BillParticle.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicGraphicsPipline.cpp">
+      <Filter>ソース ファイル\graphicsPipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="ToonGraphicsPipline.cpp">
+      <Filter>ソース ファイル\graphicsPipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Cube.cpp">
+      <Filter>ソース ファイル\Figure</Filter>
+    </ClCompile>
+    <ClCompile Include="Basic.cpp">
+      <Filter>ソース ファイル\Figure</Filter>
+    </ClCompile>
+    <ClCompile Include="OBJ.cpp">
+      <Filter>ソース ファイル\Figure</Filter>
+    </ClCompile>
+    <ClCompile Include="Sphere.cpp">
+      <Filter>ソース ファイル\Figure</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>ソース ファイル\Figure</Filter>
+    </ClCompile>
+    <ClCompile Include="ToonBasic.cpp">
+      <Filter>ソース ファイル\Figure</Filter>
+    </ClCompile>
+    <ClCompile Include="Pera.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="PeraGraphicsPipeline.cpp">
+      <Filter>ソース ファイル\graphicsPipeline</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -145,9 +193,6 @@
     </ClInclude>
     <ClInclude Include="externals\imgui\imstb_truetype.h">
       <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="Basic.h">
-      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Matrix4x4.h">
       <Filter>ヘッダー ファイル\math</Filter>
@@ -185,11 +230,44 @@
     <ClInclude Include="DebugCamera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Sprite.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="BillParticle.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicGraphicsPipline.h">
+      <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexPos.h">
+      <Filter>ヘッダー ファイル\constantBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>ヘッダー ファイル\constantBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectionalLight.h">
+      <Filter>ヘッダー ファイル\constantBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="ToonGraphicsPipline.h">
+      <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube.h">
+      <Filter>ヘッダー ファイル\Figure</Filter>
+    </ClInclude>
+    <ClInclude Include="OBJ.h">
+      <Filter>ヘッダー ファイル\Figure</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphere.h">
+      <Filter>ヘッダー ファイル\Figure</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>ヘッダー ファイル\Figure</Filter>
+    </ClInclude>
+    <ClInclude Include="Basic.h">
+      <Filter>ヘッダー ファイル\Figure</Filter>
+    </ClInclude>
+    <ClInclude Include="Pera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="PeraGraphicsPipeline.h">
+      <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -202,9 +280,34 @@
     <FxCompile Include="Basic.PS.hlsl" />
     <FxCompile Include="Sprite.VS.hlsl" />
     <FxCompile Include="Sprite.PS.hlsl" />
+    <FxCompile Include="OBJ.PS.hlsl" />
+    <FxCompile Include="OBJ.VS.hlsl" />
+    <FxCompile Include="Toon.VS.hlsl">
+      <Filter>リソース ファイル\Toon</Filter>
+    </FxCompile>
+    <FxCompile Include="Toon.PS.hlsl">
+      <Filter>リソース ファイル\Toon</Filter>
+    </FxCompile>
+    <FxCompile Include="Lighting.PS.hlsl">
+      <Filter>リソース ファイル\Lighting</Filter>
+    </FxCompile>
+    <FxCompile Include="Lighting.VS.hlsl">
+      <Filter>リソース ファイル\Lighting</Filter>
+    </FxCompile>
+    <FxCompile Include="Pera.VS.hlsl">
+      <Filter>リソース ファイル\Pera</Filter>
+    </FxCompile>
+    <FxCompile Include="Pera.PS.hlsl">
+      <Filter>リソース ファイル\Pera</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.hlsli" />
     <None Include="Sprite.hlsli" />
+    <None Include="OBJ.hlsli" />
+    <None Include="VertexShaderOutput.hlsli" />
+    <None Include="Pera.hlsli">
+      <Filter>リソース ファイル\Pera</Filter>
+    </None>
   </ItemGroup>
 </Project>

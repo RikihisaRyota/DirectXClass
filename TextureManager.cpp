@@ -1,8 +1,15 @@
 #include "TextureManager.h"
-#include "ConvertString.h"
+
 #include <cassert>
 
+#include "ConvertString.h"
+#include "DirectXCommon.h"
+
 using namespace Microsoft::WRL;
+
+// 静的メンバ変数の実体化
+DirectXCommon* TextureManager::device_ = nullptr;
+ComPtr<ID3D12DescriptorHeap> TextureManager::srvDescriptorHeap_;
 
 TextureManager* TextureManager::GetInstance() {
 	static TextureManager instance;
@@ -15,6 +22,13 @@ uint32_t TextureManager::Load(const std::string& fileName) {
 
 void TextureManager::Release() {
 	return TextureManager::GetInstance()->UnLoadInternal();
+}
+
+void TextureManager::PreDraw() {
+	// セットするために呼び出すのは効率が悪い
+	ID3D12DescriptorHeap* ppHeaps[] = { srvDescriptorHeap_.Get() };
+	
+	device_->GetCommandList()->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 }
 
 void TextureManager::UnLoadInternal() {
@@ -102,7 +116,7 @@ ComPtr<ID3D12Resource> TextureManager::CreateTextureResourec(const DirectX::TexM
 	heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;// プロセッサの近くに配置
 	// Resourceの生成
 	ComPtr<ID3D12Resource> resource = nullptr;
-	HRESULT hr = device_->CreateCommittedResource(
+	HRESULT hr = device_->GetDevice()->CreateCommittedResource(
 		&heapProperties,// Heapの設定
 		D3D12_HEAP_FLAG_NONE,// Heapの特殊な設定。特になし
 		&resourceDesc,// Resourceの設定
@@ -146,33 +160,29 @@ void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metada
 	textures_[kNumDescriptorsCount].gpuDescHandleSRV = GetGPUDescriptorHandle(srvDescriptorHeap_.Get(), descriptorHandleIncrementSize, kNumDescriptorsCount);
 
 	// SRVの生成
-	device_->CreateShaderResourceView(textureResourec, &srvDesc, textures_[kNumDescriptorsCount].cpuDescHandleSRV);
+	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[kNumDescriptorsCount].cpuDescHandleSRV);
 }
 
-void TextureManager::SetGraphicsRootDescriptorTable(
-	ID3D12GraphicsCommandList* commandList, UINT rootParamIndex, uint32_t textureHandle) {
-	ID3D12DescriptorHeap* ppHeaps[] = { srvDescriptorHeap_.Get() };
-	commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-
+void TextureManager::SetGraphicsRootDescriptorTable(ID3D12GraphicsCommandList* commandList, UINT rootParamIndex, uint32_t textureHandle) {
 	// シェーダリソースビューをセット
 	commandList->SetGraphicsRootDescriptorTable(rootParamIndex, textures_[textureHandle].gpuDescHandleSRV);
 }
 
-void TextureManager::Initialize(ID3D12Device* device) {
+void TextureManager::Initialize(DirectXCommon* device) {
 	HRESULT result = S_FALSE;
 
 	device_ = device;
 
 	// デスクリプタサイズを取得
 	descriptorHandleIncrementSize =
-		device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		device_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	// デスクリプタヒープを生成
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE; // シェーダから見えるように
 	descHeapDesc.NumDescriptors = kNumDescriptors; // シェーダーリソースビュー1つ
-	result = device_->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&srvDescriptorHeap_)); // 生成
+	result = device_->GetDevice()->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&srvDescriptorHeap_)); // 生成
 	assert(SUCCEEDED(result));
 
 	// 全テクスチャを初期化

@@ -23,10 +23,34 @@ public: // サブクラス
 	/// 頂点データ構造体
 	/// </summary>
 	struct VertexPos {
-		Vector3 pos; // xyz座標
+		Vector4 pos; // xyz座標
 		Vector2 texcoord; // uv座標
+		Vector3 normal; // 法線
 	};
-
+	/// <summary>
+	/// マテリアル
+	/// </summary>
+	struct Material {
+		Vector4 color; // 色
+		int32_t enableLightint;
+	};
+	/// <summary>
+	/// ライト
+	/// </summary>
+	struct DirectionalLight {
+		Vector4 color; //!< ライトの色
+		Vector3 direction; //!< ライトの色
+		float intensiy; //!< 輝度
+	};
+private:
+	enum ROOT_PARAMETER_TYP {
+		WORLDTRANSFORM,
+		VIEWPROJECTION,
+		TEXTURE,
+		MATERIAL,
+		LIGHTING,
+		COUNT,
+	};
 public: // 静的メンバ関数
 	/// <summary>
 	/// 静的初期化
@@ -108,6 +132,17 @@ public: // メンバ関数
 		uint32_t textureHadle = 0);
 	
 	void Delete();
+public: 
+	void SetMaterial(const Vector4& color) { material_->color = color; }
+	void SetLighting(const Vector4& color, const Vector3& direction, float intensiy) {
+		directionalLight_->color = color,
+		directionalLight_->direction = direction, 
+		directionalLight_->intensiy = intensiy;
+	}
+
+	Vector4 GetLightColor() {return directionalLight_->color;}
+	Vector3 GetLightDirection() {return directionalLight_->direction;}
+	float GetLightIntensiy() {return directionalLight_->intensiy;}
 private:
 	/// <summary>
 	/// 初期化
@@ -116,6 +151,7 @@ private:
 	/// <summary>
 	/// データ生成
 	/// </summary>
+	// 頂点データ配列
 	void CreateSprite();
 private: // メンバ変数
 	// 頂点バッファ
@@ -124,7 +160,11 @@ private: // メンバ変数
 	Microsoft::WRL::ComPtr<ID3D12Resource> constBuff_;
 	// インデックスバッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> idxBuff_;
-	// 頂点データ配列
+	// マテリアルリソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialBuff_;
+	// ライティングリソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightBuff_;
+	// 頂点データ
 	std::vector<VertexPos> vertices_;
 	// 頂点インデックスデータ
 	std::vector<uint16_t> indices_;
@@ -132,5 +172,8 @@ private: // メンバ変数
 	D3D12_VERTEX_BUFFER_VIEW vbView_{};
 	// インデックスバッファビュー
 	D3D12_INDEX_BUFFER_VIEW ibView_{};
+	// マテリアル
+	Material* material_;
+	// ライティング
+	DirectionalLight* directionalLight_;
 };
-

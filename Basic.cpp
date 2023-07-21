@@ -1,9 +1,11 @@
 #include "Basic.h"
 #include <cassert>
 #include <d3dx12.h>
-#include "ConvertString.h"
-#include "TextureManager.h"
+#include <fstream>
+#include <sstream>
 #include <Windows.h>
+
+#include "ConvertString.h"
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
@@ -17,18 +19,16 @@ ComPtr<ID3D12GraphicsCommandList> Basic::sCommandList;
 ComPtr<IDxcUtils> Basic::dxcUtils_;
 ComPtr<IDxcCompiler3> Basic::dxcCompiler_;
 ComPtr<IDxcIncludeHandler> Basic::includeHandler_;
+bool Basic::cullingFlag_;
 
-void Basic::StaticInitialize(ID3D12Device* device, int window_width, int window_height, const std::wstring& directoryPath) {
+void Basic::StaticInitialize(ID3D12Device* device, int window_width, int window_height) {
 	// nullptrチェック
 	assert(device);
 
 	sDevice = device;
-
-	// パイプライン初期化
-	InitializeGraphicsPipeline();
 }
 
-void Basic::InitializeGraphicsPipeline() {
+void Basic::InitializeGraphicsPipeline(bool flag) {
 	HRESULT hr = S_FALSE;
 #pragma region Rootsignature生成
 	// Rootsignature設定
@@ -37,26 +37,48 @@ void Basic::InitializeGraphicsPipeline() {
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	// DescriptorRangeの設定
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	descriptorRange[0].BaseShaderRegister = 0;// 0から始める
+	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
+	descriptorRange[0].BaseShaderRegister = 0;// t0を使用
 	descriptorRange[0].NumDescriptors = 1;// 数は1つ
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;// SRVを使う
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;// Offsetを自動計算
 
+	descriptorRange[1].BaseShaderRegister = 1;// t1を使用(二枚目テクスチャ用)
+	descriptorRange[1].NumDescriptors = 1;// 数は1つ
+	descriptorRange[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;// SRVを使う
+	descriptorRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;// Offsetを自動計算
+
 	// rootParameterの生成
-	D3D12_ROOT_PARAMETER rootParameters[3] = {};
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
-	rootParameters[0].Descriptor.ShaderRegister = 0; //!< レジスタ番号0とバインド
+	D3D12_ROOT_PARAMETER rootParameters[COUNT] = {};
+	rootParameters[WORLDTRANSFORM].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
+	rootParameters[WORLDTRANSFORM].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
+	rootParameters[WORLDTRANSFORM].Descriptor.ShaderRegister = WORLDTRANSFORM; //!< レジスタ番号0とバインド
 
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
-	rootParameters[1].Descriptor.ShaderRegister = 1; //!< レジスタ番号1とバインド
+	rootParameters[VIEWPROJECTION].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
+	rootParameters[VIEWPROJECTION].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
+	rootParameters[VIEWPROJECTION].Descriptor.ShaderRegister = VIEWPROJECTION; //!< レジスタ番号1とバインド
 
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;// DescriptorTableを使う
-	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
-	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;// Tableの中身の配列を指定
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);// tableで利用する数
+	rootParameters[TEXTURE].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;// DescriptorTableを使う
+	rootParameters[TEXTURE].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
+	rootParameters[TEXTURE].DescriptorTable.pDescriptorRanges = &descriptorRange[0]; // 最初のデスクリプタレンジを指定
+	rootParameters[TEXTURE].DescriptorTable.NumDescriptorRanges = 1; // 1つのデスクリプタレンジを利用
+
+	rootParameters[TOONTEXTURE].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;// DescriptorTableを使う
+	rootParameters[TOONTEXTURE].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
+	rootParameters[TOONTEXTURE].DescriptorTable.pDescriptorRanges = &descriptorRange[1]; // 2枚目のデスクリプタレンジを指定
+	rootParameters[TOONTEXTURE].DescriptorTable.NumDescriptorRanges = 1; // 1つのデスクリプタレンジを利用
+
+	rootParameters[CULLINGFLUG].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
+	rootParameters[CULLINGFLUG].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
+	rootParameters[CULLINGFLUG].Descriptor.ShaderRegister = CULLINGFLUG; //!< レジスタ番号4とバインド
+
+	rootParameters[MATERIAL].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
+	rootParameters[MATERIAL].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
+	rootParameters[MATERIAL].Descriptor.ShaderRegister = MATERIAL; //!< レジスタ番号5とバインド
+
+	rootParameters[LIGHTING].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
+	rootParameters[LIGHTING].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
+	rootParameters[LIGHTING].Descriptor.ShaderRegister = LIGHTING; //!< レジスタ番号6とバインド
 
 	descriptionRootSignature.pParameters = rootParameters; //!< ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters); //!< 配列の長さ
@@ -91,7 +113,11 @@ void Basic::InitializeGraphicsPipeline() {
 	//InputLayout
 	D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
 	{// xyz座標(1行で書いたほうが見やすい)
-	 "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,
+	 "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,
+	 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
+	},
+	{// 法線
+	"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,
 	 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
 	},
 	{// uv座標(1行で書いたほうが見やすい)
@@ -104,14 +130,20 @@ void Basic::InitializeGraphicsPipeline() {
 	//BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};
 	//全ての色要素を書き込む
-	blendDesc.RenderTarget[0].RenderTargetWriteMask =
-		D3D12_COLOR_WRITE_ENABLE_ALL;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 #pragma endregion BlendStateの設定
 #pragma region RasiterzerStateの設定
 	//RasiterzerStateの設定
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
-	//裏面（時計回り）を表示しない
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	if (flag) {
+		//裏面（時計回り）を表示しない
+		rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	}
+	else {
+		//表面（時計回り）を表示しない
+		rasterizerDesc.CullMode = D3D12_CULL_MODE_FRONT;
+	}
+	cullingFlag_ = flag;
 	//三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 #pragma endregion RasiterzerStateの設定
@@ -182,7 +214,7 @@ void Basic::InitializeGraphicsPipeline() {
 	graphicPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
 	// グラフィックスパイプラインの生成
-	hr = sDevice->CreateGraphicsPipelineState(&graphicPipelineStateDesc, IID_PPV_ARGS(&sPipelineState));
+	hr = sDevice->CreateGraphicsPipelineState(&graphicPipelineStateDesc, IID_PPV_ARGS(&pipelineState_));
 	assert(SUCCEEDED(hr));
 #pragma endregion PSOの生成
 }
@@ -200,8 +232,7 @@ void Basic::dxcCompilerInitialize() {
 	assert(SUCCEEDED(hr));
 }
 
-IDxcBlob* Basic::CompileShader(const std::wstring& filePath, const wchar_t* profile, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler)
-{
+IDxcBlob* Basic::CompileShader(const std::wstring& filePath, const wchar_t* profile, IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler) {
 	//これからシェーダーをコンパイルする旨をログに出す
 	Log(ConvertString(std::format(L"Begin CompilerShader, Path:{},profile:{}\n", filePath, profile)));
 	//hlslファイルを読み込む
@@ -256,11 +287,13 @@ IDxcBlob* Basic::CompileShader(const std::wstring& filePath, const wchar_t* prof
 	return shaderBlob;
 }
 
-Basic* Basic::Create()
-{
+Basic* Basic::Create(bool flag) {
 	// Basicのインスタンスを生成
 	Basic* basic = new Basic();
 	assert(basic);
+
+	// パイプライン初期化
+	basic->InitializeGraphicsPipeline(flag);
 
 	// 初期化
 	basic->Initialize();
@@ -268,23 +301,17 @@ Basic* Basic::Create()
 	return basic;
 }
 
-Basic* Basic::CreateFromOBJ(const std::string& modelname, bool smoothing) {
-	return nullptr;
-}
-
 void Basic::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
 	assert(Basic::sCommandList == nullptr);
-
 	// コマンドリストをセット
 	sCommandList = cmdList;
-
-	// パイプラインステートの設定
-	sCommandList->SetPipelineState(sPipelineState.Get());
-	// ルートシグネチャの設定
-	sCommandList->SetGraphicsRootSignature(sRootSignature.Get());
-	// プリミティブ形状を設定
-	sCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//// パイプラインステートの設定
+	//sCommandList->SetPipelineState(sPipelineState.Get());
+	//// ルートシグネチャの設定
+	//sCommandList->SetGraphicsRootSignature(sRootSignature.Get());
+	//// プリミティブ形状を設定
+	//sCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void Basic::PostDraw() {
@@ -320,6 +347,12 @@ void Basic::Draw(
 	assert(sDevice);
 	assert(sCommandList);
 	assert(worldTransform.constBuff_.Get());
+	// ルートシグネチャの設定
+	sCommandList->SetGraphicsRootSignature(sRootSignature.Get());
+
+	sCommandList->SetPipelineState(pipelineState_.Get());
+	// プリミティブ形状を設定
+	sCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// 頂点バッファの設定
 	sCommandList->IASetVertexBuffers(0, 1, &vbView_);
@@ -328,13 +361,24 @@ void Basic::Draw(
 	sCommandList->IASetIndexBuffer(&ibView_);
 
 	// CBVをセット（ワールド行列）
-	sCommandList->SetGraphicsRootConstantBufferView(0, worldTransform.constBuff_->GetGPUVirtualAddress());
+	sCommandList->SetGraphicsRootConstantBufferView(WORLDTRANSFORM, worldTransform.constBuff_->GetGPUVirtualAddress());
 
 	// CBVをセット（ビュープロジェクション行列）
-	sCommandList->SetGraphicsRootConstantBufferView(1, viewProjection.constBuff_->GetGPUVirtualAddress());
+	sCommandList->SetGraphicsRootConstantBufferView(VIEWPROJECTION, viewProjection.constBuff_->GetGPUVirtualAddress());
+
+	// CBVをセット（カリングフラグ）
+	sCommandList->SetGraphicsRootConstantBufferView(CULLINGFLUG, cullingBuff_->GetGPUVirtualAddress());
+
+	// CBVをセット（Material）
+	sCommandList->SetGraphicsRootConstantBufferView(MATERIAL, materialBuff_->GetGPUVirtualAddress());
+
+	// DirectionalLight用のCBufferの場所を設定
+	sCommandList->SetGraphicsRootConstantBufferView(LIGHTING, directionalLightBuff_->GetGPUVirtualAddress());
 
 	// SRVをセット
-	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(sCommandList.Get(), 2, textureHadle);
+	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(sCommandList.Get(), TEXTURE, textureHadle);
+	// toonShader用の画像をセット
+	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(sCommandList.Get(), TOONTEXTURE, static_cast<int>(TextureManager::TextureHandle::TOON));
 
 	// 描画コマンド
 	sCommandList->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
@@ -344,37 +388,37 @@ void Basic::CreateBasic() {
 	HRESULT result = S_FALSE;
 
 	vertices_ = {
-		//  x      y      z       nx     ny    nz       u     v
+		//  x      y      z     w       nx    ny     nz      u     v
 		// 前
-		{{-1.0f, -1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {0.0f, 1.0f}}, // 左下
-		{{-1.0f, +1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {0.0f, 0.0f}}, // 左上
-		{{+1.0f, -1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {1.0f, 1.0f}}, // 右下
-		{{+1.0f, +1.0f, -1.0f}, /*{0.0f, 0.0f, -1.0f},*/ {1.0f, 0.0f}}, // 右上
-		// 後(前面とZ座標の符号が逆)
-		{{+1.0f, -1.0f, +1.0f}, /*{0.0f, 0.0f, +1.0f},*/ {0.0f, 1.0f}}, // 左下
-		{{+1.0f, +1.0f, +1.0f}, /*{0.0f, 0.0f, +1.0f},*/ {0.0f, 0.0f}}, // 左上
-		{{-1.0f, -1.0f, +1.0f}, /*{0.0f, 0.0f, +1.0f},*/ {1.0f, 1.0f}}, // 右下
-		{{-1.0f, +1.0f, +1.0f}, /*{0.0f, 0.0f, +1.0f},*/ {1.0f, 0.0f}}, // 右上
+		{{-1.0f, -1.0f, -1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}}, // 左下
+		{{-1.0f, +1.0f, -1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}}, // 左上
+		{{+1.0f, -1.0f, -1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}}, // 右下
+		{{+1.0f, +1.0f, -1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}}, // 右上
+		 // 後(前面とZ座標の符号が逆)
+		{{+1.0f, -1.0f, +1.0f, 1.0f}, {0.0f, 0.0f, +1.0f}, {0.0f, 1.0f}}, // 左下
+		{{+1.0f, +1.0f, +1.0f, 1.0f}, {0.0f, 0.0f, +1.0f}, {0.0f, 0.0f}}, // 左上
+		{{-1.0f, -1.0f, +1.0f, 1.0f}, {0.0f, 0.0f, +1.0f}, {1.0f, 1.0f}}, // 右下
+		{{-1.0f, +1.0f, +1.0f, 1.0f}, {0.0f, 0.0f, +1.0f}, {1.0f, 0.0f}}, // 右上
 		// 左
-		{{-1.0f, -1.0f, +1.0f}, /*{-1.0f, 0.0f, 0.0f},*/ {0.0f, 1.0f}}, // 左下
-		{{-1.0f, +1.0f, +1.0f}, /*{-1.0f, 0.0f, 0.0f},*/ {0.0f, 0.0f}}, // 左上
-		{{-1.0f, -1.0f, -1.0f}, /*{-1.0f, 0.0f, 0.0f},*/ {1.0f, 1.0f}}, // 右下
-		{{-1.0f, +1.0f, -1.0f}, /*{-1.0f, 0.0f, 0.0f},*/ {1.0f, 0.0f}}, // 右上
+		{{-1.0f, -1.0f, +1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // 左下
+		{{-1.0f, +1.0f, +1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 左上
+		{{-1.0f, -1.0f, -1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}}, // 右下
+		{{-1.0f, +1.0f, -1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // 右上
 		// 右（左面とX座標の符号が逆）
-		{{+1.0f, -1.0f, -1.0f}, /*{+1.0f, 0.0f, 0.0f},*/ {0.0f, 1.0f}}, // 左下
-		{{+1.0f, +1.0f, -1.0f}, /*{+1.0f, 0.0f, 0.0f},*/ {0.0f, 0.0f}}, // 左上
-		{{+1.0f, -1.0f, +1.0f}, /*{+1.0f, 0.0f, 0.0f},*/ {1.0f, 1.0f}}, // 右下
-		{{+1.0f, +1.0f, +1.0f}, /*{+1.0f, 0.0f, 0.0f},*/ {1.0f, 0.0f}}, // 右上
+		{{+1.0f, -1.0f, -1.0f, 1.0f}, {+1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // 左下
+		{{+1.0f, +1.0f, -1.0f, 1.0f}, {+1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 左上
+		{{+1.0f, -1.0f, +1.0f, 1.0f}, {+1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}}, // 右下
+		{{+1.0f, +1.0f, +1.0f, 1.0f}, {+1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // 右上
 		// 下
-		{{+1.0f, -1.0f, -1.0f}, /*{0.0f, -1.0f, 0.0f},*/ {0.0f, 1.0f}}, // 左下
-		{{+1.0f, -1.0f, +1.0f}, /*{0.0f, -1.0f, 0.0f},*/ {0.0f, 0.0f}}, // 左上
-		{{-1.0f, -1.0f, -1.0f}, /*{0.0f, -1.0f, 0.0f},*/ {1.0f, 1.0f}}, // 右下
-		{{-1.0f, -1.0f, +1.0f}, /*{0.0f, -1.0f, 0.0f},*/ {1.0f, 0.0f}}, // 右上
+		{{+1.0f, -1.0f, -1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f}}, // 左下
+		{{+1.0f, -1.0f, +1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}}, // 左上
+		{{-1.0f, -1.0f, -1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}, {1.0f, 1.0f}}, // 右下
+		{{-1.0f, -1.0f, +1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}}, // 右上
 		// 上（下面とY座標の符号が逆）
-		{{-1.0f, +1.0f, -1.0f}, /*{0.0f, +1.0f, 0.0f},*/ {0.0f, 1.0f}}, // 左下
-		{{-1.0f, +1.0f, +1.0f}, /*{0.0f, +1.0f, 0.0f},*/ {0.0f, 0.0f}}, // 左上
-		{{+1.0f, +1.0f, -1.0f}, /*{0.0f, +1.0f, 0.0f},*/ {1.0f, 1.0f}}, // 右下
-		{{+1.0f, +1.0f, +1.0f}, /*{0.0f, +1.0f, 0.0f},*/ {1.0f, 0.0f}}, // 右上
+		{{-1.0f, +1.0f, -1.0f, 1.0f}, {0.0f, +1.0f, 0.0f}, {0.0f, 1.0f}}, // 左下
+		{{-1.0f, +1.0f, +1.0f, 1.0f}, {0.0f, +1.0f, 0.0f}, {0.0f, 0.0f}}, // 左上
+		{{+1.0f, +1.0f, -1.0f, 1.0f}, {0.0f, +1.0f, 0.0f}, {1.0f, 1.0f}}, // 右下
+		{{+1.0f, +1.0f, +1.0f, 1.0f}, {0.0f, +1.0f, 0.0f}, {1.0f, 0.0f}}, // 右上
 	};
 
 	// 頂点インデックスの設定
@@ -389,19 +433,6 @@ void Basic::CreateBasic() {
 				16, 17, 19, 19, 18, 16,
 
 				20, 21, 23, 23, 22, 20 };
-	//vertices_ = {
-	//	// 左下
-	//	{{-0.5f,-0.5f,0.0f},{-0.5f,-0.5f}},
-	//	// 左上
-	//	{{0.0f,0.5f,0.0f}, {0.0f,0.5f}},
-	//	// 右下
-	//	{{0.5f,-0.5f,0.0f},{0.5f,-0.5f}},
-	//};
-	//// 頂点インデックスの設定
-	//indices_ = { 0, 1, 2};
-
-	
-
 #pragma region 頂点バッファ
 	// 頂点データのサイズ
 	UINT sizeVB = static_cast<UINT>(sizeof(VertexPos) * vertices_.size());
@@ -467,4 +498,64 @@ void Basic::CreateBasic() {
 	ibView_.Format = DXGI_FORMAT_R16_UINT;
 	ibView_.SizeInBytes = sizeIB;
 #pragma endregion インデックスバッファビュー
+#pragma region マテリアルバッファ
+	{
+		// ヒーププロパティ
+		CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		// リソース設定
+		CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(Material));
+
+		// バッファ生成
+		result = sDevice->CreateCommittedResource(
+			&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+			IID_PPV_ARGS(&materialBuff_));
+		assert(SUCCEEDED(result));
+	}
+
+	// マテリアルへのデータ転送
+	result = materialBuff_->Map(0, nullptr, reinterpret_cast<void**>(&material_));
+	material_->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	// Lightingを有効化
+	material_->enableLightint = true;
+#pragma endregion
+#pragma region ライティングバッファ
+	{
+		// ヒーププロパティ
+		CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		// リソース設定
+		CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(DirectionalLight));
+
+		// バッファ生成
+		result = sDevice->CreateCommittedResource(
+			&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+			IID_PPV_ARGS(&directionalLightBuff_));
+		assert(SUCCEEDED(result));
+	}
+
+	// ライティングバッファへのデータ転送
+	result = directionalLightBuff_->Map(0, nullptr, reinterpret_cast<void**>(&directionalLight_));
+	// 初期値代入
+	directionalLight_->color = { 1.0f,1.0f,1.0f,1.0f };
+	directionalLight_->direction = { 0.5f,-0.7f,1.0f };
+	directionalLight_->intensiy = 1.0f;
+#pragma endregion
+#pragma region カリング
+	{
+		// ヒーププロパティ
+		CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		// リソース設定
+		CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(Culling));
+
+		// バッファ生成
+		result = sDevice->CreateCommittedResource(
+			&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+			IID_PPV_ARGS(&cullingBuff_));
+		assert(SUCCEEDED(result));
+	}
+
+	// カリングへのデータ転送
+	result = cullingBuff_->Map(0, nullptr, reinterpret_cast<void**>(&culling_));
+	culling_->flag = cullingFlag_;
+#pragma endregion
+
 }
