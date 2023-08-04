@@ -15,6 +15,7 @@ public: // 静的メンバ関数
 	enum class TextureHandle {
 		WHITE1x1,
 		TOON,
+		PERA,
 		COUNT,
 	};
 
@@ -94,7 +95,7 @@ public: // メンバ関数
 	/// </summary>
 	/// <param name="metadata">metadata</param>
 	void CreateShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* texture);
-
+	void CreateShaderResourceView(ID3D12Resource* textureResourec);
 	/// <summary>
 	/// デスクリプタテーブルをセット
 	/// </summary>
@@ -103,6 +104,14 @@ public: // メンバ関数
 	/// <param name="textureHandle">テクスチャハンドル</param>
 	void SetGraphicsRootDescriptorTable(
 		ID3D12GraphicsCommandList* commandList, UINT rootParamIndex, uint32_t textureHandle);
+	
+	/// <summary>
+	/// デスクリプタテーブルをセット
+	/// </summary>
+	/// <param name="commandList">コマンドリスト</param>
+	/// <param name="rootParamIndex">ルートパラメータ番号</param>
+	/// <param name="SRV">ID3D12DescriptorHeap</param>
+	void SetGraphicsRootDescriptorTable(ID3D12GraphicsCommandList* commandList, UINT rootParamIndex, ID3D12DescriptorHeap* SRV);
 
 	/// <summary>
 	/// システム初期化

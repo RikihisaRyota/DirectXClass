@@ -27,7 +27,7 @@ void TextureManager::Release() {
 void TextureManager::PreDraw() {
 	// セットするために呼び出すのは効率が悪い
 	ID3D12DescriptorHeap* ppHeaps[] = { srvDescriptorHeap_.Get() };
-	
+
 	device_->GetCommandList()->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 }
 
@@ -43,10 +43,9 @@ void TextureManager::UnLoadInternal() {
 	}
 }
 
-uint32_t TextureManager::LoadInternal(const std::string& filePath)
-{
+uint32_t TextureManager::LoadInternal(const std::string& filePath) {
 	// どこが空いているか探す
-	for (uint32_t i = 0; i < kNumDescriptors; i++) {
+	for (uint32_t i = static_cast<int>(TextureHandle::COUNT); i < kNumDescriptors; i++) {
 		if (!useTable_[i]) {
 			kNumDescriptorsCount = i;
 
@@ -77,8 +76,7 @@ uint32_t TextureManager::LoadInternal(const std::string& filePath)
 	return kNumDescriptorsCount;
 }
 
-DirectX::ScratchImage TextureManager::LoadTexture(const std::string& filePath)
-{
+DirectX::ScratchImage TextureManager::LoadTexture(const std::string& filePath) {
 	// テクスチャを読み込んでプログラムで扱えるようにする
 	DirectX::ScratchImage image{};
 	std::wstring filePathW = ConvertString(filePath);
@@ -163,9 +161,28 @@ void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metada
 	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[kNumDescriptorsCount].cpuDescHandleSRV);
 }
 
+void TextureManager::CreateShaderResourceView(ID3D12Resource* textureResourec) {
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	srvDesc.Texture1D.MipLevels = 1;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	// SRVを作成するDescriptorHeapの場所を決める
+	textures_[static_cast<int>(TextureHandle::PERA)].cpuDescHandleSRV = GetCPUDescriptorHandle(srvDescriptorHeap_.Get(), descriptorHandleIncrementSize, static_cast<int>(TextureHandle::PERA));
+	textures_[static_cast<int>(TextureHandle::PERA)].gpuDescHandleSRV = GetGPUDescriptorHandle(srvDescriptorHeap_.Get(), descriptorHandleIncrementSize, static_cast<int>(TextureHandle::PERA));
+
+	// SRVの生成
+	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[static_cast<int>(TextureHandle::PERA)].cpuDescHandleSRV);
+}
+
 void TextureManager::SetGraphicsRootDescriptorTable(ID3D12GraphicsCommandList* commandList, UINT rootParamIndex, uint32_t textureHandle) {
 	// シェーダリソースビューをセット
 	commandList->SetGraphicsRootDescriptorTable(rootParamIndex, textures_[textureHandle].gpuDescHandleSRV);
+}
+
+void TextureManager::SetGraphicsRootDescriptorTable(ID3D12GraphicsCommandList* commandList, UINT rootParamIndex, ID3D12DescriptorHeap* SRV) {
+	// シェーダリソースビューをセット
+	commandList->SetGraphicsRootDescriptorTable(rootParamIndex, SRV->GetGPUDescriptorHandleForHeapStart());
 }
 
 void TextureManager::Initialize(DirectXCommon* device) {
@@ -193,6 +210,36 @@ void TextureManager::Initialize(DirectXCommon* device) {
 		textures_[i].name.clear();
 		useTable_[i] = 0;
 	}
+	// 初期テクスチャ
+	const int InitialTexture = 2;
+	std::string filePath[InitialTexture]{};
+	filePath[0] = ("resources/white1x1.png");
+	filePath[1] = ("resources/toon.png");
+	for (uint32_t i = 0; i < InitialTexture; i++) {
+		kNumDescriptorsCount = i;
+
+		useTable_[i] = true;
+
+		// TextureデータをCPUにロード
+		DirectX::ScratchImage mipImage = LoadTexture(filePath[i]);
+
+		textures_[kNumDescriptorsCount].name = filePath[i];
+
+		const DirectX::TexMetadata& metadata = mipImage.GetMetadata();
+
+		// TextureResourceの設定
+		textures_[kNumDescriptorsCount].resource = CreateTextureResourec(metadata);
+
+		// TextureResourceをTextureデータに転送
+		UploadTextureData(textures_[kNumDescriptorsCount].resource.Get(), mipImage);
+
+		// SRVの作成
+		CreateShaderResourceView(metadata, textures_[kNumDescriptorsCount].resource.Get());
+
+		// 解放
+		mipImage.Release();
+	}
+
 }
 
 

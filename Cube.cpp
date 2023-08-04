@@ -7,8 +7,6 @@ using namespace Microsoft::WRL;
 // 静的メンバ変数の実体化
 ID3D12Device* Cube::sDevice = nullptr;
 Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> Cube::cmdList_;
-bool Cube::IsLighting_;
-bool Cube::IsToon_;
 
 void Cube::SetDevice(ID3D12Device* device) {
 	// nullptrチェック
@@ -28,7 +26,7 @@ void Cube::PostDraw() {
 	cmdList_ = nullptr;
 }
 
-Cube* Cube::Create(bool IsLighting, bool IsToon ) {
+Cube* Cube::Create(uint32_t IsLighting, bool IsToon ) {
 	// Cubeのインスタンスを生成
 	Cube* cube = new Cube();
 	assert(cube);
@@ -39,9 +37,9 @@ Cube* Cube::Create(bool IsLighting, bool IsToon ) {
 	cube->basicGraphicsPipline_->InitializeGraphicsPipeline();
 	cube->toonGraphicsPipline_->InitializeGraphicsPipeline();
 	// ライティングするか
-	IsLighting_ = IsLighting;
+	cube->IsLighting_ = IsLighting;
 	// トゥーンシェーディングするか
-	IsToon_ = IsToon;
+	cube->IsToon_ = IsToon;
 	// 初期化
 	cube->Initialize();
 	return cube;
@@ -54,11 +52,59 @@ void Cube::Draw(const WorldTransform& worldTransform, const ViewProjection& view
 	BasicDraw(worldTransform, viewProjection, textureHadle);
 }
 
-void Cube::SetDirectionalLight(const DirectionalLight& DirectionalLight) {
+void Cube::NotPeraDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
+	if (IsToon_) {
+		ToonDraw(worldTransform, viewProjection, textureHadle);
+	}
+	// ルートシグネチャの設定
+	cmdList_->SetGraphicsRootSignature(basicGraphicsPipline_->GetRootSignature());
+
+	// パイプラインステートの設定
+	cmdList_->SetPipelineState(basicGraphicsPipline_->GetPipelineStatee());
+
+	// プリミティブ形状を設定
+	cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// 頂点バッファの設定
+	cmdList_->IASetVertexBuffers(0, 1, &vbView_);
+
+	// インデックスバッファの設定
+	cmdList_->IASetIndexBuffer(&ibView_);
+
+	// CBVをセット（ワールド行列）
+	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::WORLDTRANSFORM), worldTransform.constBuff_->GetGPUVirtualAddress());
+
+	// CBVをセット（ビュープロジェクション行列）
+	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::VIEWPROJECTION), viewProjection.constBuff_->GetGPUVirtualAddress());
+
+	// CBVをセット（Material）
+	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::MATERIAL), materialBuff_->GetGPUVirtualAddress());
+
+	// DirectionalLight用のCBufferの場所を設定
+	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::LIGHTING), directionalLightBuff_->GetGPUVirtualAddress());
+
+	// SRVをセット
+	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(cmdList_.Get(), static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::TEXTURE), textureHadle);
+
+	// 描画コマンド
+	cmdList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
+}
+
+void Cube::SetToon(uint32_t IsToon) {
+	IsToon_ = IsToon;
+}
+
+void Cube::SetDirectionalLight(const cDirectionalLight& DirectionalLight) {
 	directionalLight_->color_ = DirectionalLight.color_;
-	//directionalLight_->eye_Position_ = DirectionalLight.eye_Position_;
 	directionalLight_->direction_ = Normalize(DirectionalLight.direction_);
 	directionalLight_->intensiy_ = DirectionalLight.intensiy_;
+	directionalLight_->sharpness_ = DirectionalLight.sharpness_;
+}
+
+void Cube::SetMaterial(const cMaterial& material) {
+	material_->color_ = material.color_;
+	material_->enableLightint_ = material.enableLightint_;
+	material_->uvTransform_ = material.uvTransform_;
 }
 
 void Cube::Initialize() {
@@ -115,11 +161,11 @@ void Cube::Initialize() {
 	};
 #pragma region 頂点バッファ
 	// 頂点データのサイズ
-	UINT sizeVB = static_cast<UINT>(sizeof(VertexPos) * vertices_.size());
+	UINT sizeVB = static_cast<UINT>(sizeof(cVertexPos) * vertices_.size());
 	vertBuff_ = CreateBuffer(sizeVB);
 	// 頂点バッファへのデータ転送
 	{
-		VertexPos* vertMap = nullptr;
+		cVertexPos* vertMap = nullptr;
 		result = vertBuff_->Map(0, nullptr, reinterpret_cast<void**>(&vertMap));
 		if (SUCCEEDED(result)) {
 			std::copy(vertices_.begin(), vertices_.end(), vertMap);
@@ -149,15 +195,16 @@ void Cube::Initialize() {
 	ibView_.SizeInBytes = sizeIB; // 修正: インデックスバッファのバイトサイズを代入
 #pragma endregion インデックスバッファ
 #pragma region マテリアルバッファ
-	materialBuff_ = CreateBuffer(sizeof(Material));
+	materialBuff_ = CreateBuffer(sizeof(cMaterial));
 	// マテリアルへのデータ転送
 	result = materialBuff_->Map(0, nullptr, reinterpret_cast<void**>(&material_));
 	material_->color_ = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	// Lightingを有効化
 	material_->enableLightint_ = IsLighting_;
+	material_->uvTransform_ = MakeAffineMatrix(Vector3(1.0f, 1.0f, 1.0f), Vector3(0.0f, 0.0f, 0.0f), Vector3(0.0f, 0.0f, 0.0f));
 #pragma endregion
 #pragma region ライティングバッファ
-	directionalLightBuff_ = CreateBuffer(sizeof(DirectionalLight));
+	directionalLightBuff_ = CreateBuffer(sizeof(cDirectionalLight));
 	// ライティングバッファへのデータ転送
 	result = directionalLightBuff_->Map(0, nullptr, reinterpret_cast<void**>(&directionalLight_));
 	// 初期値代入
@@ -198,7 +245,7 @@ void Cube::BasicDraw(const WorldTransform& worldTransform, const ViewProjection&
 	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::LIGHTING), directionalLightBuff_->GetGPUVirtualAddress());
 
 	// SRVをセット
-	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(cmdList_.Get(), static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::TEXTURE), textureHadle);
+	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(cmdList_.Get(), static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::TEXTURE), static_cast<int>(TextureManager::TextureHandle::PERA));
 
 	// 描画コマンド
 	cmdList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);

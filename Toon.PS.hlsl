@@ -57,11 +57,15 @@ PixelShaderOutput main(VertexShaderOutput input)
 
         // 最終出力色にトゥーンシェーディングを適用
         output.color = float4(objectColor.rgb * toonShading, objectColor.a);
+        ////////////////////////////////////////////////////////////////////
+        output.color = float4(0.5f, 0.5f, 0.5f, 1.0f);
     }
     else
     {
         // ライティングを無効にしてオブジェクトの色を出力
         output.color = objectColor;
+        ////////////////////////////////////////////////////////////////////
+        output.color = float4(0.5f, 0.5f, 0.5f, 1.0f);
     }
 
     return output;

@@ -4,11 +4,11 @@
 #include <vector>
 
 #include "BasicGraphicsPipline.h"
-#include "DirectionalLight.h"
-#include "Material.h"
+#include "cDirectionalLight.h"
+#include "cMaterial.h"
 #include "ToonGraphicsPipline.h"
 #include "WorldTransform.h"
-#include "VertexPos.h"
+#include "cVertexPos.h"
 #include "ViewProjection.h"
 
 class OBJ {
@@ -16,14 +16,22 @@ public:
 	static void SetDevice(ID3D12Device* device);
 	static void PreDraw(ID3D12GraphicsCommandList* cmdList);
 	static void PostDraw();
-	static OBJ* Create(const std::string& modelname,bool IsLighting = true, bool IsToon = false);
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="modelname"></param>
+	/// <param name="IsLighting">0:litingなし,1:litingあり,2:Lambert</param>
+	/// <param name="IsToon"></param>
+	/// <returns></returns>
+	static OBJ* Create(const std::string& modelname, uint32_t  IsLighting = 1, bool IsToon = false);
 	void Draw(
 		const WorldTransform& worldTransform,
 		const ViewProjection& viewProjection,
 		uint32_t textureHadle = 0u);
 
-
-	void SetDirectionalLight(const DirectionalLight& DirectionalLight);
+	void SetToon(uint32_t IsToon);
+	void SetDirectionalLight(const cDirectionalLight& DirectionalLight);
+	void SetMaterial(const cMaterial& material);
 private:
 	void Initialize(const std::string& modelname);
 	void BasicDraw(
@@ -35,7 +43,7 @@ private:
 		const ViewProjection& viewProjection,
 		uint32_t textureHadle);
 	// OBJファイルの読み込み
-	std::vector<VertexPos> LoadObjFile(const std::string& filename);
+	std::vector<cVertexPos> LoadObjFile(const std::string& filename);
 	// mtlファイルの読み込み
 	std::string LoadMaterialTemplateFile(const std::string& filepath, const std::string& filename);
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(UINT size);
@@ -55,25 +63,25 @@ private:
 	// 頂点バッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vbView_{};
 	// 頂点データ配列
-	std::vector<VertexPos> vertices_;
+	std::vector<cVertexPos> vertices_;
 #pragma endregion
 #pragma region マテリアル
 	// マテリアルリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialBuff_;
 	// マテリアル
-	Material* material_ = nullptr;
+	cMaterial* material_ = nullptr;
 #pragma endregion
 #pragma region ライティング
 	// ライティングリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightBuff_;
 	// ライティング
-	DirectionalLight* directionalLight_;
+	cDirectionalLight* directionalLight_;
 #pragma endregion
 #pragma endregion
 	// ライティングするか
-	static bool IsLighting_;
+	uint32_t IsLighting_;
 	// トゥーンシェーディングするか
-	static bool IsToon_;
+	bool IsToon_;
 	// mtlファイルから受け取ったテクスチャハンドル
 	uint32_t textureHandle_;
 };

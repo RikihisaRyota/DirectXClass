@@ -1,4 +1,4 @@
-#include "VertexShaderOutput.hlsli"
+#include "Lighting.hlsli"
 
 struct WorldTransform
 {
@@ -30,5 +30,7 @@ VertexShaderOutput main(VertexShaderInput input)
     output.position = mul(mul(output.position, gWorldTransform.world), mul(gViewProjection.view, gViewProjection.projection));
     output.normal = normalize(mul(input.normal, (float3x3) gWorldTransform.world));
     output.texcoord = input.texcoord;
+    output.ray = input.position;
+    output.ray = mul(output.ray,gWorldTransform.world);
     return output;
 }

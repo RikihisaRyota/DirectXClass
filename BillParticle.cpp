@@ -10,7 +10,6 @@ BillParticle::BillParticle() {
 BillParticle::~BillParticle() {
 	for (auto& particle : particle_) {
 		if (particle.sprite_ != nullptr) {
-			particle.sprite_->Release();
 		}
 	}
 }
@@ -99,5 +98,4 @@ void BillParticle::Destory(uint32_t index) {
 	particle_[index].velocity_ = Vector3(0.0f, 0.0f, 0.0f);
 	particle_[index].time_ = 0;
 	particle_[index].IsAlive_ = false;
-	particle_[index].sprite_->Delete();
 }

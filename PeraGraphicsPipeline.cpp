@@ -134,7 +134,7 @@ void PeraGraphicsPipeline::CreatePSO() {
 
 	// 書き込むRTVの情報
 	graphicPipelineStateDesc.NumRenderTargets = 1;
-	graphicPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	graphicPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 
 	// 利用するとポロジ（形状）のタイプ、三角形
 	graphicPipelineStateDesc.PrimitiveTopologyType =

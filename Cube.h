@@ -4,11 +4,11 @@
 #include <vector>
 
 #include "BasicGraphicsPipline.h"
-#include "DirectionalLight.h"
-#include "Material.h"
+#include "cDirectionalLight.h"
+#include "cMaterial.h"
 #include "ToonGraphicsPipline.h"
 #include "WorldTransform.h"
-#include "VertexPos.h"
+#include "cVertexPos.h"
 #include "ViewProjection.h"
 
 class Cube {
@@ -16,14 +16,18 @@ public:
 	static void SetDevice(ID3D12Device* device);
 	static void PreDraw(ID3D12GraphicsCommandList* cmdList);
 	static void PostDraw();
-	static Cube* Create(bool IsLighting = true,bool IsToon = false);
+	static Cube* Create(uint32_t IsLighting = 1,bool IsToon = false);
 	void Draw(
 		const WorldTransform& worldTransform, 
 		const ViewProjection& viewProjection,
 		uint32_t textureHadle = 0u);
-
-
-	void SetDirectionalLight(const DirectionalLight& DirectionalLight);
+	void NotPeraDraw(
+		const WorldTransform& worldTransform,
+		const ViewProjection& viewProjection,
+		uint32_t textureHadle = 0u);
+	void SetToon(uint32_t IsToon);
+	void SetDirectionalLight(const cDirectionalLight& DirectionalLight);
+	void SetMaterial(const cMaterial& material);
 private:
 	void Initialize();
 	void BasicDraw(
@@ -51,7 +55,7 @@ private:
 	// 頂点バッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vbView_{};
 	// 頂点データ配列
-	std::vector<VertexPos> vertices_;
+	std::vector<cVertexPos> vertices_;
 #pragma endregion
 #pragma region インデックスバッファ
 	// インデックスバッファ
@@ -65,17 +69,17 @@ private:
 	// マテリアルリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialBuff_;
 	// マテリアル
-	Material* material_ = nullptr;
+	cMaterial* material_ = nullptr;
 #pragma endregion
 #pragma region DirectionalLight
 	// 平行光源リソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightBuff_;
 	// 平行光源
-	DirectionalLight* directionalLight_;
+	cDirectionalLight* directionalLight_;
 #pragma endregion
 #pragma endregion
 	// ライティングするか
-	static bool IsLighting_;
+	uint32_t IsLighting_;
 	// トゥーンシェーディングするか
-	static bool IsToon_;
+	bool IsToon_;
 };

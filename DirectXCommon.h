@@ -33,7 +33,8 @@ public:
 	/// <summary>
 	/// レンダーターゲットのクリア
 	/// </summary>
-	void ClearRenderTarget();
+	void ClearRenderTarget(
+	);
 
 	/// <summary>
 	/// 深度バッファのクリア
@@ -57,6 +58,20 @@ public:
 	/// </summary>
 	/// <returns>バックバッファ</returns>
 	size_t GetBackBufferCount()const { return backBuffers_.size(); }
+
+	ID3D12Resource* GetBackBuff()const { return backBuffers_[0].Get(); }
+
+	/// <summary>
+	/// RTV
+	/// </summary>
+	/// <returns></returns>
+	ID3D12DescriptorHeap* GetRTVDescriptorHeap() { return rtvDescriptorHeap_.Get(); }
+
+	/// <summary>
+	/// DSV
+	/// </summary>
+	/// <returns></returns>
+	D3D12_CPU_DESCRIPTOR_HANDLE GetDSVHandle() { return dpsHandle_; }
 
 	/// <summary>
 	/// リリース
@@ -133,13 +148,11 @@ private:// メンバ変数
 	// レンダーターゲット関連
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap_;
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
-	// マルチパスレンダリング用
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> peraRTVDescriptorHeap_;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> peraSRVDescriptorHeap_;
-	Microsoft::WRL::ComPtr<ID3D12Resource> peraResource_;
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle_;
 	// 深度バッファ関連
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;
+	D3D12_CPU_DESCRIPTOR_HANDLE dpsHandle_;
 	// 描画関連
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
 	UINT64 fenceValue_ = 0;

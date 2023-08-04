@@ -43,22 +43,31 @@ void ViewProjection::UpdateMatrix() {
 	matView_ = MakeViewMatrix(rotation_,translation_);
 
 	// 平行投影による射影行列の生成
-	// constMap_->mat = MakeOrthographicMatrix(
-	//	0, window_width,
-	//	window_height, 0,
-	//	0, 1);
+	//matProjection_ = MakeOrthographicMatrix(
+	//	0.0f, 0.0f,
+	//	static_cast<float> (WinApp::kWindowWidth),
+	//	static_cast<float> (WinApp::kWindowHeight),
+	//	nearZ_, farZ_);
 	// 透視投影による射影行列の生成
 	matProjection_ = MakePerspectiveFovMatrix(fovAngleY_, aspectRatio_, nearZ_, farZ_);
 
 	// 定数バッファに書き込み
 	constMap_->view = matView_;
 	constMap_->projection = matProjection_;
+	constMap_->cameraPos = translation_;
 }
 
 void ViewProjection::TransferMatrix() {
+	// 平行投影による射影行列の生成
+	//matProjection_ = MakeOrthographicMatrix(
+	//	0.0f, 0.0f,
+	//	WinApp::kWindowWidth,
+	//	WinApp::kWindowHeight,
+	//	nearZ_, farZ_);
 	// 透視投影による射影行列の生成
 	matProjection_ = MakePerspectiveFovMatrix(fovAngleY_, aspectRatio_, nearZ_, farZ_);
 	// 定数バッファに書き込み
 	constMap_->view = matView_;
 	constMap_->projection = matProjection_;
+	constMap_->cameraPos = translation_;
 }

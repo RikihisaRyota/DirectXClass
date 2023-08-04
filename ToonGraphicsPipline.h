@@ -4,7 +4,7 @@
 #include <wrl.h>
 #include <dxcapi.h>
 
-#include "VertexPos.h"
+#include "cVertexPos.h"
 
 #pragma comment(lib,"dxcompiler.lib")
 class ToonGraphicsPipline {

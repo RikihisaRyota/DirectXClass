@@ -2,12 +2,16 @@
 #include <cstdlib>
 #include <memory>
 
+#include "Audio.h"
 #include "Basic.h"
 #include "Cube.h"
 #include "DebugCamera.h"
 #include "Input.h"
+#include "Model.h"
 #include "OBJ.h"
+
 #include "Pera.h"
+
 #include "SafeDelete.h"
 #include "Sprite.h"
 #include "Sphere.h"
@@ -43,6 +47,8 @@ public: // メンバ関数
 	/// </summary>
 	void Draw();
 
+	void Draw2();
+
 	/// <summary>
 	/// 解放
 	/// </summary>
@@ -53,44 +59,92 @@ private: // メンバ変数
 	Input* input_ = nullptr;
 	DebugCamera* debugCamera_ = nullptr;
 	// ライト
-	DirectionalLight* directionalLight_ = nullptr;
-	std::unique_ptr<Sphere> light_;
-	WorldTransform lightWorldTransform_;
-
-	std::unique_ptr<Sphere> origin_;
-	WorldTransform originWorldTransform_;
-
-	std::array<bool, 2> IsCamera_;
+	cDirectionalLight* directionalLight_ = nullptr;
 
 	uint32_t textureHandle_ = 0u;
+
+	uint32_t peraTextureHandle_=0u;
+
+	struct UVtranslation {
+		Vector3 scale_;
+		Vector3 rotate_;
+		Vector3 translate_;
+	};
+
+	std::unique_ptr<Cube> test_;
+	WorldTransform testWorldTransform_;
 	/// <summary>
 	/// ゲーム用
 	/// </summary>
 	ViewProjection viewProjection_;
-	// 土台
-	std::unique_ptr<Basic> base_;
-	WorldTransform baseWorldTransform_;
 	// obj
-	std::unique_ptr<OBJ> obj_;
-	WorldTransform objWorldTransform_;
+	std::vector<std::unique_ptr<OBJ>> obj_;
+	std::vector<std::unique_ptr<WorldTransform>> objWorldTransform_;
+	std::vector<uint32_t> objUseTexture_;
+	std::vector<uint32_t> objUseToon_;
+	std::vector< std::unique_ptr<cMaterial>> objMaterial_;
+	std::vector< std::unique_ptr<UVtranslation>> objUVtranslation_;
+	// teapot
+	std::vector<std::unique_ptr<OBJ>> teapot_;
+	std::vector<std::unique_ptr<WorldTransform>> teapotWorldTransform_;
+	std::vector<uint32_t> teapotUseTexture_;
+	std::vector<uint32_t> teapotUseToon_;
+	std::vector< std::unique_ptr<cMaterial>> teapotMaterial_;
+	std::vector< std::unique_ptr<UVtranslation>> teapotUVtranslation_;
+	// bunny
+	std::vector<std::unique_ptr<OBJ>> bunny_;
+	std::vector<std::unique_ptr<WorldTransform>> bunnyWorldTransform_;
+	std::vector<uint32_t> bunnyUseTexture_;
+	std::vector<uint32_t> bunnyUseToon_;
+	std::vector< std::unique_ptr<cMaterial>> bunnyMaterial_;
+	std::vector< std::unique_ptr<UVtranslation>> bunnyUVtranslation_;
+	// multiMesh
+	std::vector<std::unique_ptr<OBJ>> multiMesh_;
+	std::vector<std::unique_ptr<WorldTransform>> multiMeshWorldTransform_;
+	std::vector<uint32_t> multiMeshUseTexture_;
+	std::vector<uint32_t> multiMeshUseToon_;
+	std::vector< std::unique_ptr<cMaterial>>multiMeshMaterial_;
+	std::vector< std::unique_ptr<UVtranslation>> multiMeshUVtranslation_;
 	// cube
-	std::unique_ptr<Cube> cube_;
-	WorldTransform cubeWorldTransform_;
+	std::vector<std::unique_ptr<Cube>> cube_;
+	std::vector<std::unique_ptr<WorldTransform>> cubeWorldTransform_;
+	std::vector<uint32_t> cubeUseTexture_;
+	std::vector<uint32_t> cubeUseToon_;
+	std::vector< std::unique_ptr<cMaterial>> cubeMaterial_;
+	std::vector< std::unique_ptr<UVtranslation>> cubeUVtranslation_;
 	// sphere
-	std::unique_ptr<Sphere> sphere_;
-	WorldTransform sphereWorldTransform_;
-	// Pera
-	std::unique_ptr<Pera> pera_;
-
-	// peratest
-	std::unique_ptr<Cube> peraCube_;
-	WorldTransform peraCubeWorldTransform_;
+	std::vector<std::unique_ptr<Sphere>> sphere_;
+	std::vector<std::unique_ptr<WorldTransform>> sphereWorldTransform_;
+	std::vector<uint32_t> sphereUseTexture_;
+	std::vector<uint32_t> sphereUseToon_;
+	std::vector< std::unique_ptr<cMaterial>> sphereMaterial_;
+	std::vector< std::unique_ptr<UVtranslation>> sphereUVtranslation_;
 	// sprite
-	static const int32_t kCount = 2;
-	std::array<std::unique_ptr<Sprite>,kCount> sprite_;
-	std::array<WorldTransform,kCount> spriteWorldTransform_;
-	std::array<Vector4,kCount> sprite_Color_;
-	std::array<bool,kCount>isTexture_;
-	std::array<uint32_t ,kCount> spriteTextureHandle_;
-};
+	std::vector<std::unique_ptr<Sprite>> sprite_;
+	std::vector<std::unique_ptr<WorldTransform>> spriteWorldTransform_;
+	std::vector<uint32_t> spriteUseTexture_;
+	std::vector<uint32_t> spriteUseToon_;
+	std::vector<std::unique_ptr<cMaterial>> spriteMaterial_;
+	std::vector<std::unique_ptr<UVtranslation>> spriteUVtranslation_;
 
+	// multiMaterial
+	std::vector<std::unique_ptr<Model>> multiMaterial_;
+	std::vector<std::unique_ptr<WorldTransform>> multiMaterialWorldTransform_;
+	std::vector<uint32_t> multiMaterialUseTexture_;
+	std::vector<uint32_t> multiMaterialUseToon_;
+	std::vector<std::vector<std::unique_ptr<cMaterial>>> multiMaterialMaterial_;
+	std::vector<std::vector<std::unique_ptr<UVtranslation>>> multiMaterialUVtranslation_;
+
+	// suzanne
+	std::vector<std::unique_ptr<Model>> suzanne_;
+	std::vector<std::unique_ptr<WorldTransform>> suzanneWorldTransform_;
+	std::vector<uint32_t> suzanneUseTexture_;
+	std::vector<uint32_t> suzanneUseToon_;
+	std::vector<std::vector<std::unique_ptr<cMaterial>>> suzanneMaterial_;
+	std::vector<std::vector<std::unique_ptr<UVtranslation>>> suzanneUVtranslation_;
+
+	// 音声再生
+	Audio* audio;
+
+	Audio::SoundData soundHandle_;
+};

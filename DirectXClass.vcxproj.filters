@@ -150,11 +150,23 @@
     <ClCompile Include="Sprite.cpp">
       <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
+    <ClCompile Include="PeraGraphicsPipeline.cpp">
+      <Filter>ソース ファイル\graphicsPipeline</Filter>
+    </ClCompile>
     <ClCompile Include="Pera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="PeraGraphicsPipeline.cpp">
-      <Filter>ソース ファイル\graphicsPipeline</Filter>
+    <ClCompile Include="Model.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -233,13 +245,13 @@
     <ClInclude Include="BasicGraphicsPipline.h">
       <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
     </ClInclude>
-    <ClInclude Include="VertexPos.h">
+    <ClInclude Include="cVertexPos.h">
       <Filter>ヘッダー ファイル\constantBuffer</Filter>
     </ClInclude>
-    <ClInclude Include="Material.h">
+    <ClInclude Include="cMaterial.h">
       <Filter>ヘッダー ファイル\constantBuffer</Filter>
     </ClInclude>
-    <ClInclude Include="DirectionalLight.h">
+    <ClInclude Include="cDirectionalLight.h">
       <Filter>ヘッダー ファイル\constantBuffer</Filter>
     </ClInclude>
     <ClInclude Include="ToonGraphicsPipline.h">
@@ -260,11 +272,23 @@
     <ClInclude Include="Basic.h">
       <Filter>ヘッダー ファイル\Figure</Filter>
     </ClInclude>
+    <ClInclude Include="PeraGraphicsPipeline.h">
+      <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
+    </ClInclude>
     <ClInclude Include="Pera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="PeraGraphicsPipeline.h">
-      <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
+    <ClInclude Include="Model.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -305,6 +329,9 @@
     <None Include="VertexShaderOutput.hlsli" />
     <None Include="Pera.hlsli">
       <Filter>リソース ファイル\Pera</Filter>
+    </None>
+    <None Include="Lighting.hlsli">
+      <Filter>リソース ファイル\Lighting</Filter>
     </None>
   </ItemGroup>
 </Project>

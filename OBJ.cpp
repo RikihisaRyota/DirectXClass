@@ -15,8 +15,6 @@ using namespace Microsoft::WRL;
 // 静的メンバ変数の実体化
 ID3D12Device* OBJ::sDevice = nullptr;
 Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> OBJ::cmdList_;
-bool OBJ::IsLighting_;
-bool OBJ::IsToon_;
 
 void OBJ::SetDevice(ID3D12Device* device) {
 	// nullptrチェック
@@ -25,7 +23,7 @@ void OBJ::SetDevice(ID3D12Device* device) {
 	sDevice = device;
 }
 
-OBJ* OBJ::Create(const std::string& modelname, bool IsLighting, bool IsToon) {
+OBJ* OBJ::Create(const std::string& modelname, uint32_t IsLighting, bool IsToon) {
 	// OBJのインスタンスを生成
 	OBJ* obj = new OBJ();
 	assert(obj);
@@ -36,9 +34,9 @@ OBJ* OBJ::Create(const std::string& modelname, bool IsLighting, bool IsToon) {
 	obj->basicGraphicsPipline_->InitializeGraphicsPipeline();
 	obj->toonGraphicsPipline_->InitializeGraphicsPipeline();
 	// ライティングするか
-	IsLighting_ = IsLighting;
+	obj->IsLighting_ = IsLighting;
 	// トゥーンシェーディングするか
-	IsToon_ = IsToon;
+	obj->IsToon_ = IsToon;
 	// 初期化
 	obj->Initialize(modelname);
 	return obj;
@@ -57,18 +55,31 @@ void OBJ::PostDraw() {
 	cmdList_ = nullptr;
 }
 
-void OBJ::Draw(const WorldTransform& worldTransform, const ViewProjection& viewProjection,uint32_t textureHadle) {
+void OBJ::Draw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
 	if (IsToon_) {
 		ToonDraw(worldTransform, viewProjection, textureHandle_);
 	}
-	BasicDraw(worldTransform, viewProjection, textureHandle_);
+	uint32_t tex = textureHadle;
+	if (tex == 10) {
+		tex = 0;
+	}
+	else {
+		tex = textureHandle_;
+	}
+	BasicDraw(worldTransform, viewProjection, tex);
 }
 
-void OBJ::SetDirectionalLight(const DirectionalLight& DirectionalLight) {
+void OBJ::SetDirectionalLight(const cDirectionalLight& DirectionalLight) {
 	directionalLight_->color_ = DirectionalLight.color_;
-	//directionalLight_->eye_Position_ = DirectionalLight.eye_Position_;
 	directionalLight_->direction_ = Normalize(DirectionalLight.direction_);
 	directionalLight_->intensiy_ = DirectionalLight.intensiy_;
+	directionalLight_->sharpness_ = DirectionalLight.sharpness_;
+}
+
+void OBJ::SetMaterial(const cMaterial& material) {
+	material_->color_ = material.color_;
+	material_->enableLightint_ = material.enableLightint_;
+	material_->uvTransform_ = material.uvTransform_;
 }
 
 void OBJ::Initialize(const std::string& modelname) {
@@ -78,11 +89,11 @@ void OBJ::Initialize(const std::string& modelname) {
 
 #pragma region 頂点バッファ
 	// 頂点データのサイズ
-	UINT sizeVB = static_cast<UINT>(sizeof(VertexPos) * vertices_.size());
+	UINT sizeVB = static_cast<UINT>(sizeof(cVertexPos) * vertices_.size());
 	vertBuff_ = CreateBuffer(sizeVB);
 	// 頂点バッファへのデータ転送
 	{
-		VertexPos* vertMap = nullptr;
+		cVertexPos* vertMap = nullptr;
 		result = vertBuff_->Map(0, nullptr, reinterpret_cast<void**>(&vertMap));
 		if (SUCCEEDED(result)) {
 			std::copy(vertices_.begin(), vertices_.end(), vertMap);
@@ -92,18 +103,19 @@ void OBJ::Initialize(const std::string& modelname) {
 	// 頂点バッファビューの作成
 	vbView_.BufferLocation = vertBuff_->GetGPUVirtualAddress();
 	vbView_.SizeInBytes = sizeVB;
-	vbView_.StrideInBytes = sizeof(VertexPos);
+	vbView_.StrideInBytes = sizeof(cVertexPos);
 #pragma endregion 頂点バッファ
 #pragma region マテリアルバッファ
-	materialBuff_ = CreateBuffer(sizeof(Material));
+	materialBuff_ = CreateBuffer(sizeof(cMaterial));
 	// マテリアルへのデータ転送
 	result = materialBuff_->Map(0, nullptr, reinterpret_cast<void**>(&material_));
 	material_->color_ = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	// Lightingを有効化
 	material_->enableLightint_ = IsLighting_;
+	material_->uvTransform_ = MakeAffineMatrix(Vector3(1.0f, 1.0f, 1.0f), Vector3(0.0f, 0.0f, 0.0f), Vector3(0.0f, 0.0f, 0.0f));
 #pragma endregion
 #pragma region ライティングバッファ
-	directionalLightBuff_ = CreateBuffer(sizeof(DirectionalLight));
+	directionalLightBuff_ = CreateBuffer(sizeof(cDirectionalLight));
 	// ライティングバッファへのデータ転送
 	result = directionalLightBuff_->Map(0, nullptr, reinterpret_cast<void**>(&directionalLight_));
 	// 初期値代入
@@ -182,15 +194,19 @@ void OBJ::ToonDraw(const WorldTransform& worldTransform, const ViewProjection& v
 	cmdList_->DrawInstanced(static_cast<UINT>(vertices_.size()), 1, 0, 0);
 }
 
+void OBJ::SetToon(uint32_t IsToon) {
+	IsToon_ = IsToon;
+}
 
-std::vector<VertexPos> OBJ::LoadObjFile(const std::string& filename) {
-	std::vector<VertexPos> vertexPos; //!< 構築するModelData
+
+std::vector<cVertexPos> OBJ::LoadObjFile(const std::string& filename) {
+	std::vector<cVertexPos> vertexPos; //!< 構築するModelData
 	std::vector<Vector4> positions; //!< 位置
 	std::vector<Vector3> normals; //!< 法線
 	std::vector<Vector2> texcoords; //!< テクスチャ座標
 	std::string line; //!< ファイルから読み込んだ1行を格納するもの
 
-	std::ifstream file("resources/" + filename +"/" + filename + ".obj"); //!< ファイルを開く
+	std::ifstream file("resources/" + filename + "/" + filename + ".obj"); //!< ファイルを開く
 	assert(file.is_open()); //!< とりあえず開けなかったら止める
 
 	while (std::getline(file, line)) {
@@ -204,21 +220,22 @@ std::vector<VertexPos> OBJ::LoadObjFile(const std::string& filename) {
 			s >> position.x >> position.y >> position.z;
 			position.z *= -1.0f;
 			position.w = 1.0f;
-			positions.push_back(position);
+			positions.emplace_back(position);
 		}
 		else if (indentifier == "vt") {
 			Vector2 texcood;
 			s >> texcood.x >> texcood.y;
-			texcoords.push_back(texcood);
+			texcood.y = 1.0f - texcood.y;
+			texcoords.emplace_back(texcood);
 		}
 		else if (indentifier == "vn") {
 			Vector3 normal;
 			s >> normal.x >> normal.y >> normal.z;
 			normal.z *= -1.0f;
-			normals.push_back(normal);
+			normals.emplace_back(normal);
 		}
 		else if (indentifier == "f") {
-			VertexPos triangle[3];
+			cVertexPos triangle[3];
 			// 面は三角形限定。その他は未対応
 			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
 				std::string vertexDefinion;
@@ -243,7 +260,13 @@ std::vector<VertexPos> OBJ::LoadObjFile(const std::string& filename) {
 			vertexPos.push_back(triangle[1]);
 			vertexPos.push_back(triangle[0]);
 		}
-		
+		else if (indentifier == "mtllib") {
+			//materialTemplateLibraryファイルの名前を取得する
+			std::string materialFilename;
+			s >> materialFilename;
+			//基本的にobjファイルと同一階層にmtlは存在させるので,ディレクトリ名とファイル名を渡す
+			textureHandle_ = TextureManager::Load(LoadMaterialTemplateFile(filename, materialFilename));
+		}
 	}
 	return vertexPos;
 }
@@ -265,7 +288,7 @@ std::string OBJ::LoadMaterialTemplateFile(const std::string& filepath, const std
 			std::string textureFilename;
 			s >> textureFilename;
 			// 連結してファイルパスにする
-			materialData = "resources/" + filepath +"/" + textureFilename;
+			materialData = "resources/" + filepath + "/" + textureFilename;
 		}
 	}
 	// 4. MateriarDataを返す

@@ -7,8 +7,6 @@ using namespace Microsoft::WRL;
 // 静的メンバ変数の実体化
 ID3D12Device* Sphere::sDevice = nullptr;
 Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> Sphere::cmdList_;
-bool Sphere::IsLighting_;
-bool Sphere::IsToon_;
 
 void Sphere::SetDevice(ID3D12Device* device) {
 	// nullptrチェック
@@ -28,7 +26,7 @@ void Sphere::PostDraw() {
 	cmdList_ = nullptr;
 }
 
-Sphere* Sphere::Create(bool IsLighting, bool IsToon) {
+Sphere* Sphere::Create(uint32_t IsLighting, bool IsToon) {
 	// Sphereのインスタンスを生成
 	Sphere* sphere = new Sphere();
 	assert(sphere);
@@ -38,9 +36,9 @@ Sphere* Sphere::Create(bool IsLighting, bool IsToon) {
 	sphere->basicGraphicsPipline_->InitializeGraphicsPipeline();
 	sphere->toonGraphicsPipline_->InitializeGraphicsPipeline();
 	// ライティングするか
-	IsLighting_ = IsLighting;
+	sphere->IsLighting_ = IsLighting;
 	// トゥーンシェーディングするか
-	IsToon_ = IsToon;
+	sphere->IsToon_ = IsToon;
 	// 初期化
 	sphere->Initialize();
 	return sphere;
@@ -53,12 +51,21 @@ void Sphere::Draw(const WorldTransform& worldTransform, const ViewProjection& vi
 	BasicDraw(worldTransform, viewProjection, textureHadle);
 }
 
-void Sphere::SetDirectionalLight(const DirectionalLight& DirectionalLight) {
+void Sphere::SetToon(uint32_t IsToon) {
+	IsToon_ = IsToon;
+}
+
+void Sphere::SetDirectionalLight(const cDirectionalLight& DirectionalLight) {
 	directionalLight_->color_ = DirectionalLight.color_;
-	//directionalLight_->eye_Position_ = DirectionalLight.eye_Position_;
 	directionalLight_->direction_ = Normalize(DirectionalLight.direction_);
 	directionalLight_->intensiy_ = DirectionalLight.intensiy_;
 	directionalLight_->sharpness_ = DirectionalLight.sharpness_;
+}
+
+void Sphere::SetMaterial(const cMaterial& material) {
+	material_->color_ = material.color_;
+	material_->enableLightint_ = material.enableLightint_;
+	material_->uvTransform_ = material.uvTransform_;
 }
 
 void Sphere::Initialize() {
@@ -78,7 +85,7 @@ void Sphere::Initialize() {
 			// 現在の経度
 			float lon = lonIndex * kLonEvery;
 
-			VertexPos vertex;
+			cVertexPos vertex;
 			// 頂点データを入力する。基準点a
 			// a
 			vertex.pos_.x = std::cos(lat) * std::cos(lon);
@@ -151,16 +158,16 @@ void Sphere::Initialize() {
 			vertex.normal_.y = vertex.pos_.y;
 			vertex.normal_.z = vertex.pos_.z;
 			vertices_.push_back(vertex);
-			
+
 		}
 	}
 #pragma region 頂点バッファ
 	// 頂点データのサイズ
-	UINT sizeVB = static_cast<UINT>(sizeof(VertexPos) * kSubdivision * kSubdivision * 6);
+	UINT sizeVB = static_cast<UINT>(sizeof(cVertexPos) * kSubdivision * kSubdivision * 6);
 	vertBuff_ = CreateBuffer(sizeVB);
 	// 頂点バッファへのデータ転送
 	{
-		VertexPos* vertMap = nullptr;
+		cVertexPos* vertMap = nullptr;
 		result = vertBuff_->Map(0, nullptr, reinterpret_cast<void**>(&vertMap));
 		if (SUCCEEDED(result)) {
 			std::copy(vertices_.begin(), vertices_.end(), vertMap);
@@ -173,15 +180,16 @@ void Sphere::Initialize() {
 	vbView_.StrideInBytes = sizeof(vertices_[0]);
 #pragma endregion 頂点バッファ
 #pragma region マテリアルバッファ
-	materialBuff_ = CreateBuffer(sizeof(Material));
+	materialBuff_ = CreateBuffer(sizeof(cMaterial));
 	// マテリアルへのデータ転送
 	result = materialBuff_->Map(0, nullptr, reinterpret_cast<void**>(&material_));
 	material_->color_ = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	// Lightingを有効化
 	material_->enableLightint_ = IsLighting_;
+	material_->uvTransform_ = MakeAffineMatrix(Vector3(1.0f, 1.0f, 1.0f), Vector3(0.0f, 0.0f, 0.0f), Vector3(0.0f, 0.0f, 0.0f));
 #pragma endregion
 #pragma region ライティングバッファ
-	directionalLightBuff_ = CreateBuffer(sizeof(DirectionalLight));
+	directionalLightBuff_ = CreateBuffer(sizeof(cDirectionalLight));
 	// ライティングバッファへのデータ転送
 	result = directionalLightBuff_->Map(0, nullptr, reinterpret_cast<void**>(&directionalLight_));
 	// 初期値代入
