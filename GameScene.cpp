@@ -19,8 +19,6 @@ void GameScene::Initialize() {
 
 	// 入力
 	input_ = Input::GetInstans();
-	test_.reset(Cube::Create(0));
-	testWorldTransform_.Initialize();
 
 	// ライト
 	directionalLight_ = new cDirectionalLight();
@@ -31,11 +29,12 @@ void GameScene::Initialize() {
 
 	// カメラの初期化
 	viewProjection_.Initialize();
+	Line::GetInstance()->SetViewProjection(&viewProjection_);
 
 	// 音声再生
 	audio = new Audio;
 	audio->Initialize();
-	soundHandle_ = audio->SoundLoadWave("resources/se_saa01.wav");
+	soundHandle_ = audio->SoundLoadWave("resources/mokugyo.wav");
 }
 
 void GameScene::Update() {
@@ -43,6 +42,11 @@ void GameScene::Update() {
 	//audio->SoundPlayWave(soundHandle_);
 	// デバックカメラ
 	debugCamera_->Update(&viewProjection_);
+	
+	ImGui::Begin("Line");
+	ImGui::SliderFloat3("start", &start.x, -5.0f, 5.0f);
+	ImGui::SliderFloat3("end", &end.x, -5.0f, 5.0f);
+	ImGui::End();
 #pragma region ライト
 	{
 		ImGui::Begin("Lighting");
@@ -1039,8 +1043,10 @@ void GameScene::Draw() {
 	OBJ::PreDraw(commandList);
 	Basic::PreDraw(commandList);
 	Model::PreDraw(commandList);
+	Line::PreDraw(commandList);
 
-	//test_->Draw(testWorldTransform_,viewProjection_);
+	Line::GetInstance()->Line::Draw(start,end);
+	Line::GetInstance()->Line::Draw(Vector3(1.0f,0.0f,2.0f), Vector3(0.0f, -1.0f, 1.0f));
 
 
 
@@ -1130,6 +1136,7 @@ void GameScene::Draw() {
 	}
 
 	// 3Dオブジェクト描画後処理
+	Line::PostDraw();
 	Model::PostDraw();
 	Basic::PostDraw();
 	Sphere::PostDraw();
@@ -1160,16 +1167,6 @@ void GameScene::Draw() {
 	Sprite::PostDraw();
 
 #pragma endregion
-}
-
-void GameScene::Draw2() {
-	// コマンドリストの取得
-	ID3D12GraphicsCommandList* commandList = dxCommon_->GetCommandList();
-
-	// 3Dオブジェクト描画前処理
-	Cube::PreDraw(commandList);
-	test_->NotPeraDraw(testWorldTransform_, viewProjection_);
-	Cube::PostDraw();
 }
 
 void GameScene::Release() {

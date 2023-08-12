@@ -64,6 +64,9 @@
     <Filter Include="リソース ファイル\Pera">
       <UniqueIdentifier>{8eba6a6b-c3cb-4997-9ca2-4d92754f6542}</UniqueIdentifier>
     </Filter>
+    <Filter Include="リソース ファイル\Line">
+      <UniqueIdentifier>{93d34cd8-70fe-41ec-8bbe-2eedf3313df3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -167,6 +170,12 @@
     </ClCompile>
     <ClCompile Include="Audio.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="LineGraphicsPipline.cpp">
+      <Filter>ソース ファイル\graphicsPipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Line.cpp">
+      <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -290,6 +299,12 @@
     <ClInclude Include="Audio.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="LineGraphicsPipline.h">
+      <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Line.h">
+      <Filter>ヘッダー ファイル\Figure</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -321,6 +336,12 @@
     <FxCompile Include="Pera.PS.hlsl">
       <Filter>リソース ファイル\Pera</Filter>
     </FxCompile>
+    <FxCompile Include="Line.PS.hlsl">
+      <Filter>リソース ファイル\Line</Filter>
+    </FxCompile>
+    <FxCompile Include="Line.VS.hlsl">
+      <Filter>リソース ファイル\Line</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.hlsli" />
@@ -332,6 +353,9 @@
     </None>
     <None Include="Lighting.hlsli">
       <Filter>リソース ファイル\Lighting</Filter>
+    </None>
+    <None Include="Line.hlsli">
+      <Filter>リソース ファイル\Line</Filter>
     </None>
   </ItemGroup>
 </Project>

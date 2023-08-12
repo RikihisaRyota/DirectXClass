@@ -21,7 +21,7 @@ uint32_t TextureManager::Load(const std::string& fileName) {
 }
 
 void TextureManager::Release() {
-	return TextureManager::GetInstance()->UnLoadInternal();
+	TextureManager::GetInstance()->UnLoadInternal();
 }
 
 void TextureManager::PreDraw() {

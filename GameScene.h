@@ -7,6 +7,7 @@
 #include "Cube.h"
 #include "DebugCamera.h"
 #include "Input.h"
+#include "Line.h"
 #include "Model.h"
 #include "OBJ.h"
 
@@ -47,8 +48,6 @@ public: // メンバ関数
 	/// </summary>
 	void Draw();
 
-	void Draw2();
-
 	/// <summary>
 	/// 解放
 	/// </summary>
@@ -70,9 +69,10 @@ private: // メンバ変数
 		Vector3 rotate_;
 		Vector3 translate_;
 	};
+	std::unique_ptr<Line> line_;
+	Vector3 start{1.0f,0.0f,0.0f};
+	Vector3 end{ -1.0f,0.0f,0.0f };
 
-	std::unique_ptr<Cube> test_;
-	WorldTransform testWorldTransform_;
 	/// <summary>
 	/// ゲーム用
 	/// </summary>

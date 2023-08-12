@@ -36,6 +36,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// ToonGraphicsPiplineの静的初期化
 	ToonGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
+	// LineGraphicsPiplineの静的初期化
+	LineGraphicsPipline::SetDevice(dxCommon->GetDevice());
+
 	// Spriteの静的初期化
 	Sprite::SetDevice(dxCommon->GetDevice());
 
@@ -59,6 +62,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// Model
 	Model::SetDevice(dxCommon->GetDevice());
+
+	// Line
+	Line::SetDevice(dxCommon->GetDevice());
+	Line::GetInstance()->Initialize();
 
 	// ImGuiの初期化
 	ImGuiManager* imguiManager = ImGuiManager::GetInstance();
@@ -90,12 +97,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		imguiManager->End();
 		// テクスチャマネージャーの描画準備
 		TextureManager::GetInstance()->PreDraw();
-		// SRV->RTV
-		pera->PreDraw();
-		// ゲームシーンの描画
-		gameScene->Draw2();
-		// RTV->SRV
-		pera->PostDraw();
+		//// SRV->RTV
+		//pera->PreDraw();
+		//// ゲームシーンの描画
+		//gameScene->Draw2();
+		//// RTV->SRV
+		//pera->PostDraw();
 		// 描画開始
 		dxCommon->PreDraw();
 		// ゲームシーンの描画
@@ -113,6 +120,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// ImGui解放
 	imguiManager->Finalize();
+
+	// Line解放
+	Line::Release();
 
 	// Basic解放
 	Basic::Release();
