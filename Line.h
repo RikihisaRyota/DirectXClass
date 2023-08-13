@@ -24,19 +24,21 @@ public:
 	static void PreDraw(ID3D12GraphicsCommandList* cmdList);
 	static void PostDraw();
 	static void Release();
+	static void Draw();
 	void Reset();
 	void SetViewProjection(const ViewProjection* viewProjection) {
 		viewProjection_ = viewProjection;
 	}
-	void Draw(
-		const Vector3& v1,
-		const Vector3& v2,
-		const Vector4& color=Vector4(1.0f,1.0f,1.0f,1.0f));
-private:
-	void BasicDraw(
+	void SetDraw(
 		const Vector3& v1,
 		const Vector3& v2,
 		const Vector4& color = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+private:
+	void CreateVertexBuffer();
+	void SetMappingVertex();
+	void CreateIndexBuffer();
+	void SetMappingIndex();
+	void BasicDraw();
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(UINT size);
 private:
 #pragma region DirectX関連
@@ -52,7 +54,7 @@ private:
 	// 頂点バッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vbView_{};
 	// 頂点データ配列
-	std::vector<Vertex> vertices_;
+	static std::vector<Vertex> vertices_;
 #pragma endregion
 #pragma region インデックスバッファ
 	// インデックスバッファ
@@ -60,8 +62,12 @@ private:
 	// インデックスバッファビュー
 	D3D12_INDEX_BUFFER_VIEW ibView_{};
 	// 頂点インデックスデータ
-	std::vector<uint16_t> indices_;
+	static std::vector<uint16_t> indices_;
 #pragma endregion
 	// 参照するビュープロジェクション
 	const ViewProjection* viewProjection_ = nullptr;
+
+	static const UINT kMaxLineCount = 4096;
+
+	static UINT darwCount;
 };

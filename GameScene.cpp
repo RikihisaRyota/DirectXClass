@@ -1045,9 +1045,7 @@ void GameScene::Draw() {
 	Model::PreDraw(commandList);
 	Line::PreDraw(commandList);
 
-	Line::GetInstance()->Line::Draw(start,end);
-	Line::GetInstance()->Line::Draw(Vector3(1.0f,0.0f,2.0f), Vector3(0.0f, -1.0f, 1.0f));
-
+	
 
 
 	/// <summary>
@@ -1134,7 +1132,7 @@ void GameScene::Draw() {
 			}
 		}
 	}
-
+	Line::GetInstance()->Line::Draw();
 	// 3Dオブジェクト描画後処理
 	Line::PostDraw();
 	Model::PostDraw();

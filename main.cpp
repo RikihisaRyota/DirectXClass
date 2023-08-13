@@ -105,6 +105,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		//pera->PostDraw();
 		// 描画開始
 		dxCommon->PreDraw();
+		// LineのPreDraw
+		
 		// ゲームシーンの描画
 		gameScene->Draw();
 		// ImGui描画
