@@ -254,3 +254,9 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetGPUDescriptorHandle(ID3D12Descrip
 	handleGPU.ptr += (descriptorSize * index);
 	return handleGPU;
 }
+
+const D3D12_RESOURCE_DESC TextureManager::GetResoureDesc(uint32_t textureHandle) {
+	assert(textureHandle < textures_.size());
+	Texture& texture = textures_.at(textureHandle);
+	return texture.resource->GetDesc();
+}

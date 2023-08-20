@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "Audio.h"
-#include "Basic.h"
 #include "Cube.h"
 #include "DebugCamera.h"
 #include "Input.h"
@@ -14,8 +13,9 @@
 #include "Pera.h"
 
 #include "SafeDelete.h"
-#include "Sprite.h"
+#include "Plane.h"
 #include "Sphere.h"
+#include "Sprite.h"
 
 class DirectXCommon;
 /// <summary>
@@ -69,9 +69,7 @@ private: // メンバ変数
 		Vector3 rotate_;
 		Vector3 translate_;
 	};
-	std::unique_ptr<Line> line_;
-	Vector3 start{1.0f,0.0f,0.0f};
-	Vector3 end{ -1.0f,0.0f,0.0f };
+	std::unique_ptr<Sprite> sprite_;
 
 	/// <summary>
 	/// ゲーム用
@@ -119,13 +117,13 @@ private: // メンバ変数
 	std::vector<uint32_t> sphereUseToon_;
 	std::vector< std::unique_ptr<cMaterial>> sphereMaterial_;
 	std::vector< std::unique_ptr<UVtranslation>> sphereUVtranslation_;
-	// sprite
-	std::vector<std::unique_ptr<Sprite>> sprite_;
-	std::vector<std::unique_ptr<WorldTransform>> spriteWorldTransform_;
-	std::vector<uint32_t> spriteUseTexture_;
-	std::vector<uint32_t> spriteUseToon_;
-	std::vector<std::unique_ptr<cMaterial>> spriteMaterial_;
-	std::vector<std::unique_ptr<UVtranslation>> spriteUVtranslation_;
+	// plane
+	std::vector<std::unique_ptr<Plane>> plane_;
+	std::vector<std::unique_ptr<WorldTransform>> planeWorldTransform_;
+	std::vector<uint32_t> planeUseTexture_;
+	std::vector<uint32_t> planeUseToon_;
+	std::vector<std::unique_ptr<cMaterial>> planeMaterial_;
+	std::vector<std::unique_ptr<UVtranslation>> planeUVtranslation_;
 
 	// multiMaterial
 	std::vector<std::unique_ptr<Model>> multiMaterial_;

@@ -30,6 +30,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// テクスチャマネージャの初期化
 	TextureManager::GetInstance()->Initialize(dxCommon);
 
+	// スプライト静的初期化
+	Sprite::SetDevice(dxCommon->GetDevice());
+
 	// BasicGraphicsPiplineの静的初期化
 	BasicGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
@@ -39,11 +42,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// LineGraphicsPiplineの静的初期化
 	LineGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
-	// Spriteの静的初期化
-	Sprite::SetDevice(dxCommon->GetDevice());
+	// SpriteGraphicsPiplineの静的初期化
+	SpriteGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
-	// Basicの静的初期化
-	Basic::StaticInitialize(dxCommon->GetDevice(), WinApp::kWindowWidth, WinApp::kWindowHeight);
+	// Spriteの静的初期化
+	Plane::SetDevice(dxCommon->GetDevice());
 
 	// OBJの静的初期化
 	OBJ::SetDevice(dxCommon->GetDevice());
@@ -125,9 +128,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// Line解放
 	Line::Release();
-
-	// Basic解放
-	Basic::Release();
 
 	// テクスチャマネージャーの解放
 	TextureManager::Release();

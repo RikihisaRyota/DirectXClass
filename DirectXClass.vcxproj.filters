@@ -141,16 +141,13 @@
     <ClCompile Include="Cube.cpp">
       <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
-    <ClCompile Include="Basic.cpp">
-      <Filter>ソース ファイル\Figure</Filter>
-    </ClCompile>
     <ClCompile Include="OBJ.cpp">
       <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
     <ClCompile Include="Sphere.cpp">
       <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
-    <ClCompile Include="Sprite.cpp">
+    <ClCompile Include="Plane.cpp">
       <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
     <ClCompile Include="PeraGraphicsPipeline.cpp">
@@ -176,6 +173,12 @@
     </ClCompile>
     <ClCompile Include="Line.cpp">
       <Filter>ソース ファイル\Figure</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>ソース ファイル\Figure</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteGraphicsPipline.cpp">
+      <Filter>ソース ファイル\graphicsPipeline</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -251,9 +254,6 @@
     <ClInclude Include="BillParticle.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="BasicGraphicsPipline.h">
-      <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
-    </ClInclude>
     <ClInclude Include="cVertexPos.h">
       <Filter>ヘッダー ファイル\constantBuffer</Filter>
     </ClInclude>
@@ -275,10 +275,7 @@
     <ClInclude Include="Sphere.h">
       <Filter>ヘッダー ファイル\Figure</Filter>
     </ClInclude>
-    <ClInclude Include="Sprite.h">
-      <Filter>ヘッダー ファイル\Figure</Filter>
-    </ClInclude>
-    <ClInclude Include="Basic.h">
+    <ClInclude Include="Plane.h">
       <Filter>ヘッダー ファイル\Figure</Filter>
     </ClInclude>
     <ClInclude Include="PeraGraphicsPipeline.h">
@@ -304,6 +301,15 @@
     </ClInclude>
     <ClInclude Include="Line.h">
       <Filter>ヘッダー ファイル\Figure</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>ヘッダー ファイル\Figure</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteGraphicsPipline.h">
+      <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicGraphicsPipline.h">
+      <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

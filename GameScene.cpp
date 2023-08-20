@@ -31,6 +31,8 @@ void GameScene::Initialize() {
 	viewProjection_.Initialize();
 	Line::GetInstance()->SetViewProjection(&viewProjection_);
 
+	sprite_.reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
+
 	// 音声再生
 	audio = new Audio;
 	audio->Initialize();
@@ -42,11 +44,22 @@ void GameScene::Update() {
 	//audio->SoundPlayWave(soundHandle_);
 	// デバックカメラ
 	debugCamera_->Update(&viewProjection_);
+
+
+	ImGui::Begin("Sprite:");
 	
-	ImGui::Begin("Line");
-	ImGui::SliderFloat3("start", &start.x, -5.0f, 5.0f);
-	ImGui::SliderFloat3("end", &end.x, -5.0f, 5.0f);
+		//ImVec4 color = ImVec4(directionalLight_->color_.x, directionalLight_->color_.y, directionalLight_->color_.z, 0.0f); // 初期値は赤色
+		//ImGui::ColorEdit3("Color", (float*)&color, ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_AlphaBar);
+		//directionalLight_->color_.x = color.x, directionalLight_->color_.y = color.y, directionalLight_->color_.z = color.z;
+		Vector2 size = sprite_->GetSize();
+		ImGui::SliderFloat2("size", &size.x, 512.0f, -512.0f);
+		sprite_->SetSize(size);
+		Vector2 position = sprite_->GetPosition();
+		ImGui::SliderFloat2("position", &position.x, 0.0f, 1280.0f);
+		sprite_->SetPosition(position);
+	
 	ImGui::End();
+
 #pragma region ライト
 	{
 		ImGui::Begin("Lighting");
@@ -77,7 +90,7 @@ void GameScene::Update() {
 	for (auto& i : sphere_) {
 		i->SetDirectionalLight(*directionalLight_);
 	}
-	for (auto& i : sprite_) {
+	for (auto& i : plane_) {
 		i->SetDirectionalLight(*directionalLight_);
 	}
 	for (auto& mmaterial : multiMaterial_) {
@@ -95,7 +108,7 @@ void GameScene::Update() {
 	ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_MenuBar);
 #pragma region コンボ
 	// ドロップダウンメニューの表示
-	static const char* items[] = { "cube", "sphere", "obj", "sprite","teapot","bunny","multiMesh","multiMaterial","suzanne" };
+	static const char* items[] = { "cube", "sphere", "obj", "plane","teapot","bunny","multiMesh","multiMaterial","suzanne" };
 	static int currentItem = 0;
 	if (ImGui::BeginCombo("Model", items[currentItem])) {
 		for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
@@ -172,22 +185,22 @@ void GameScene::Update() {
 		}
 		case 3: // "sprite"が選択された場合
 		{
-			sprite_.emplace_back(std::unique_ptr<Sprite>(Sprite::Create(0)));
-			spriteWorldTransform_.emplace_back(std::make_unique<WorldTransform>());
-			spriteWorldTransform_.back()->Initialize();
-			spriteUseTexture_.emplace_back(0);
-			spriteUseToon_.emplace_back(0);
+			plane_.emplace_back(std::unique_ptr<Plane>(Plane::Create(0)));
+			planeWorldTransform_.emplace_back(std::make_unique<WorldTransform>());
+			planeWorldTransform_.back()->Initialize();
+			planeUseTexture_.emplace_back(0);
+			planeUseToon_.emplace_back(0);
 
 			std::unique_ptr<UVtranslation> uvTranslation = std::make_unique<UVtranslation>();
 			uvTranslation->scale_ = Vector3(1.0f, 1.0f, 1.0f);
 			uvTranslation->rotate_ = Vector3(0.0f, 0.0f, 0.0f);
 			uvTranslation->translate_ = Vector3(0.0f, 0.0f, 0.0f);
-			spriteUVtranslation_.emplace_back(std::move(uvTranslation));
+			planeUVtranslation_.emplace_back(std::move(uvTranslation));
 
 			std::unique_ptr<cMaterial> material = std::make_unique<cMaterial>();
 			material->color_ = { 1.0f,1.0f,1.0f,1.0f };
 			material->enableLightint_ = 1;
-			spriteMaterial_.emplace_back(std::move(material));
+			planeMaterial_.emplace_back(std::move(material));
 			break;
 		}
 		case 4: // "teapot"が選択された場合
@@ -547,13 +560,13 @@ void GameScene::Update() {
 			}
 		}
 	}
-	if (!sprite_.empty()) {
+	if (!plane_.empty()) {
 		bool flag = false;
-		for (size_t i = 0; i < sprite_.size(); ++i) {
-			auto& worldTransform = spriteWorldTransform_[i];
-			auto& material = spriteMaterial_[i];
-			auto& uvTranslate = spriteUVtranslation_[i];
-			if (ImGui::TreeNode(("SPRITE_" + std::to_string(i)).c_str())) {
+		for (size_t i = 0; i < plane_.size(); ++i) {
+			auto& worldTransform = planeWorldTransform_[i];
+			auto& material = planeMaterial_[i];
+			auto& uvTranslate = planeUVtranslation_[i];
+			if (ImGui::TreeNode(("Plane_" + std::to_string(i)).c_str())) {
 #pragma region worldtransform
 				ImGui::SliderFloat3(("scale_" + std::to_string(i)).c_str(), &worldTransform->scale_.x, -5.0f, 5.0f);
 				ImGui::SliderFloat3(("rotate_" + std::to_string(i)).c_str(), &worldTransform->rotation_.x, -5.0f, 5.0f);
@@ -573,18 +586,18 @@ void GameScene::Update() {
 				}*/
 #pragma endregion
 #pragma region USETexture
-				if (spriteUseTexture_[i] == 0) {
+				if (planeUseTexture_[i] == 0) {
 					flag = false;
 				}
 				else {
 					flag = true;
 				}
-				if (ImGui::Checkbox(("SpriteUseTexture_" + std::to_string(i)).c_str(), &flag)) {
-					spriteUseTexture_[i] ^= true;
+				if (ImGui::Checkbox(("PlaneUseTexture_" + std::to_string(i)).c_str(), &flag)) {
+					planeUseTexture_[i] ^= true;
 				}
 #pragma endregion
 #pragma region material
-				if (spriteUseTexture_[i] && ImGui::TreeNode(("Sprite_MATERIAL_" + std::to_string(i)).c_str())) {
+				if (planeUseTexture_[i] && ImGui::TreeNode(("Plane_MATERIAL_" + std::to_string(i)).c_str())) {
 					ImVec4 color = ImVec4(material->color_.x, material->color_.y, material->color_.z, 0.0f); // 初期値は赤色
 					ImGui::ColorEdit3(("Color_" + std::to_string(i)).c_str(), (float*)&color, ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_AlphaBar);
 					material->color_.x = color.x, material->color_.y = color.y, material->color_.z = color.z;
@@ -605,18 +618,18 @@ void GameScene::Update() {
 						ImGui::EndCombo();
 					}
 					material->enableLightint_ = sprite_CurrentLiting;
-					sprite_[i]->SetMaterial(*material.get());
+					plane_[i]->SetMaterial(*material.get());
 					ImGui::TreePop();
 				}
 #pragma endregion
 #pragma region Delete
 				if (ImGui::Button("Delete")) {
-					sprite_.erase(sprite_.begin() + i);
-					spriteWorldTransform_.erase(spriteWorldTransform_.begin() + i);
-					spriteMaterial_.erase(spriteMaterial_.begin() + i);
-					spriteUVtranslation_.erase(spriteUVtranslation_.begin() + i);
-					spriteUseTexture_.erase(spriteUseTexture_.begin() + i);
-					spriteUseToon_.erase(spriteUseToon_.begin() + i);
+					plane_.erase(plane_.begin() + i);
+					planeWorldTransform_.erase(planeWorldTransform_.begin() + i);
+					planeMaterial_.erase(planeMaterial_.begin() + i);
+					planeUVtranslation_.erase(planeUVtranslation_.begin() + i);
+					planeUseTexture_.erase(planeUseTexture_.begin() + i);
+					planeUseToon_.erase(planeUseToon_.begin() + i);
 					// 削除した要素の後ろの要素が前にずれるため、インデックスを調整する
 					--i;
 				}
@@ -1041,9 +1054,9 @@ void GameScene::Draw() {
 	Cube::PreDraw(commandList);
 	Sphere::PreDraw(commandList);
 	OBJ::PreDraw(commandList);
-	Basic::PreDraw(commandList);
 	Model::PreDraw(commandList);
 	Line::PreDraw(commandList);
+	Plane::PreDraw(commandList);
 
 	
 
@@ -1079,6 +1092,16 @@ void GameScene::Draw() {
 			}
 			else {
 				sphere_[i]->Draw(*sphereWorldTransform_[i], viewProjection_, textureHandle_);
+			}
+		}
+	}
+	if (!plane_.empty()) {
+		for (size_t i = 0; i < plane_.size(); ++i) {
+			if (!planeUseTexture_[i]) {
+				plane_[i]->Draw(*planeWorldTransform_[i], viewProjection_);
+			}
+			else {
+				plane_[i]->Draw(*planeWorldTransform_[i], viewProjection_, textureHandle_);
 			}
 		}
 	}
@@ -1134,9 +1157,9 @@ void GameScene::Draw() {
 	}
 	Line::GetInstance()->Line::Draw();
 	// 3Dオブジェクト描画後処理
+	Plane::PostDraw();
 	Line::PostDraw();
 	Model::PostDraw();
-	Basic::PostDraw();
 	Sphere::PostDraw();
 	OBJ::PostDraw();
 	Cube::PostDraw();
@@ -1151,16 +1174,8 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
-	if (!sprite_.empty()) {
-		for (size_t i = 0; i < sprite_.size(); ++i) {
-			if (!spriteUseTexture_[i]) {
-				sprite_[i]->Draw(*spriteWorldTransform_[i], viewProjection_);
-			}
-			else {
-				sprite_[i]->Draw(*spriteWorldTransform_[i], viewProjection_, textureHandle_);
-			}
-		}
-	}
+	//sprite_->Draw();
+
 	// スプライト描画後処理
 	Sprite::PostDraw();
 

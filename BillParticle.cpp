@@ -46,8 +46,8 @@ void BillParticle::Create() {
 			particle.time_ = /*std::rand() % 15 + 15*/30;
 			// フラグ
 			particle.IsAlive_ = true;
-			// sprite生成
-			particle.sprite_ = Sprite::Create();
+			// Plane生成
+			particle.sprite_ = Plane::Create();
 			// 生成カウントリセット
 			createParticleCount = 0;
 			break;

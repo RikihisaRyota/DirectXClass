@@ -142,6 +142,12 @@ public: // メンバ関数
 	/// <returns></returns>
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
+	/// <summary>
+	/// リソース情報取得
+	/// </summary>
+	/// <param name="textureHandle">テクスチャハンドル</param>
+	/// <returns>リソース情報</returns>
+	const D3D12_RESOURCE_DESC GetResoureDesc(uint32_t textureHandle);
 private: // メンバ変数
 	// デバイス
 	static DirectXCommon* device_;

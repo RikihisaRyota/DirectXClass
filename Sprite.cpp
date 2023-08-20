@@ -1,12 +1,14 @@
 #include "Sprite.h"
 
 #include "TextureManager.h"
+#include "WinApp.h"
 
 using namespace Microsoft::WRL;
 
 // 静的メンバ変数の実体化
 ID3D12Device* Sprite::sDevice = nullptr;
 Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> Sprite::cmdList_;
+Matrix4x4 Sprite::sMatProjection;
 
 void Sprite::SetDevice(ID3D12Device* device) {
 	// nullptrチェック
@@ -26,77 +28,76 @@ void Sprite::PostDraw() {
 	cmdList_ = nullptr;
 }
 
-Sprite* Sprite::Create(uint32_t IsLighting, bool IsToon) {
+Sprite* Sprite::Create(
+	uint32_t textureHandle, const Vector2& position, const Vector4& color,const Vector2& anchorpoint, bool isFlipX , bool isFlipY) {
 	// Spriteのインスタンスを生成
 	Sprite* sptite = new Sprite();
 	assert(sptite);
-	// パイプライン初期化
-	sptite->basicGraphicsPipline_ = std::make_unique<BasicGraphicsPipline>();
-	sptite->toonGraphicsPipline_ = std::make_unique<ToonGraphicsPipline>();
+	// 仮サイズ
+	Vector2 size = { 100.0f, 100.0f };
+	{
+		// テクスチャ情報取得
+		const D3D12_RESOURCE_DESC& resDesc =
+			TextureManager::GetInstance()->GetResoureDesc(textureHandle);
+		// スプライトのサイズをテクスチャのサイズに設定
+		size = { (float)resDesc.Width, (float)resDesc.Height };
+	}
 
-	sptite->basicGraphicsPipline_->InitializeGraphicsPipeline();
-	sptite->toonGraphicsPipline_->InitializeGraphicsPipeline();
-	// ライティングするか
-	sptite->IsLighting_ = IsLighting;
-	// トゥーンシェーディングするか
-	sptite->IsToon_ = IsToon;
+	// パイプライン初期化
+	sptite->spriteGraphicsPipline_ = std::make_unique<SpriteGraphicsPipline>();
+	sptite->spriteGraphicsPipline_->InitializeGraphicsPipeline();
+	
 	// 初期化
-	sptite->Initialize();
+	sptite->Initialize(textureHandle,position,size, color , anchorpoint , isFlipX , isFlipY );
 	return sptite;
 }
 
-void Sprite::Draw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
-	if (IsToon_) {
-		ToonDraw(worldTransform, viewProjection, textureHadle);
-	}
-	BasicDraw(worldTransform, viewProjection, textureHadle);
+void Sprite::Draw() {
+	BasicDraw();
 }
 
-void Sprite::SetToon(uint32_t IsToon) {
-	IsToon_ = IsToon;
-}
-
-void Sprite::SetDirectionalLight(const cDirectionalLight& DirectionalLight) {
-	directionalLight_->color_ = DirectionalLight.color_;
-	directionalLight_->direction_ = Normalize(DirectionalLight.direction_);
-	directionalLight_->intensiy_ = DirectionalLight.intensiy_;
-	directionalLight_->sharpness_ = DirectionalLight.sharpness_;
-}
-
-void Sprite::SetMaterial(const cMaterial& material) {
-	material_->color_ = material.color_;
-	material_->enableLightint_ = material.enableLightint_;
-	material_->uvTransform_ = material.uvTransform_;
-}
-
-
-void Sprite::Initialize() {
+void Sprite::Initialize(uint32_t textureHandle, const Vector2& position, const Vector2& size, const Vector4& color,
+	const Vector2& anchorpoint, bool isFlipX, bool isFlipY) {
 	HRESULT result = S_FALSE;
 
+	resourceDesc_ = TextureManager::GetInstance()->GetResoureDesc(textureHandle_);
+
+	position_ = position;
+	size_ = size;
+	anchorPoint_ = anchorpoint;
+	matWorld_ = MakeIdentity4x4();
+	color_ = color;
+	textureHandle_ = textureHandle;
+	isFlipX_ = isFlipX;
+	isFlipY_ = isFlipY;
+	texSize_ = size;
+
 	vertices_ = {
-		//	x      y     z      w      nx    ny    nz     u     v
-		{{-1.0f, -1.0f, 0.0f, +1.0f},{0.0f, 0.0f,-1.0f},{0.0f, 1.0f}}, // 左下 0
-		{{-1.0f, +1.0f, 0.0f, +1.0f},{0.0f, 0.0f,-1.0f},{0.0f, 0.0f}}, // 左上 1
-		{{+1.0f, +1.0f, 0.0f, +1.0f},{0.0f, 0.0f,-1.0f},{1.0f, 0.0f}}, // 右上 2
-		{{+1.0f, -1.0f, 0.0f, +1.0f},{0.0f, 0.0f,-1.0f},{1.0f, 1.0f}}, // 右下 3
+		//	x      y     z      w      u     v
+		{{-1.0f, -1.0f, 0.0f, +1.0f},{0.0f, 1.0f}}, // 左下 0
+		{{-1.0f, +1.0f, 0.0f, +1.0f},{0.0f, 0.0f}}, // 左上 1
+		{{+1.0f, +1.0f, 0.0f, +1.0f},{1.0f, 0.0f}}, // 右上 2
+		{{+1.0f, -1.0f, 0.0f, +1.0f},{1.0f, 1.0f}}, // 右下 3
 	};
+
 	// 頂点インデックスの設定
 	indices_ = { 0, 1, 2,
 				 0, 2, 3,
 	};
 #pragma region 頂点バッファ
 	// 頂点データのサイズ
-	UINT sizeVB = static_cast<UINT>(sizeof(cVertexPos) * vertices_.size());
+	UINT sizeVB = static_cast<UINT>(sizeof(VertexPosUv) * vertices_.size());
 	vertBuff_ = CreateBuffer(sizeVB);
 	// 頂点バッファへのデータ転送
 	{
-		cVertexPos* vertMap = nullptr;
+		VertexPosUv* vertMap = nullptr;
 		result = vertBuff_->Map(0, nullptr, reinterpret_cast<void**>(&vertMap));
 		if (SUCCEEDED(result)) {
 			std::copy(vertices_.begin(), vertices_.end(), vertMap);
 			vertBuff_->Unmap(0, nullptr);
 		}
 	}
+	TransferVertices();
 	// 頂点バッファビューの作成
 	vbView_.BufferLocation = vertBuff_->GetGPUVirtualAddress();
 	vbView_.SizeInBytes = sizeVB;
@@ -120,35 +121,34 @@ void Sprite::Initialize() {
 	ibView_.SizeInBytes = sizeIB; // 修正: インデックスバッファのバイトサイズを代入
 #pragma endregion インデックスバッファ
 #pragma region マテリアルバッファ
-	materialBuff_ = CreateBuffer(sizeof(cMaterial));
+	materialBuff_ = CreateBuffer(sizeof(ConstBufferData));
 	// マテリアルへのデータ転送
-	result = materialBuff_->Map(0, nullptr, reinterpret_cast<void**>(&material_));
-	material_->color_ = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	// Lightingを有効化
-	material_->enableLightint_ = IsLighting_;
-	material_->uvTransform_ = MakeAffineMatrix(Vector3(1.0f, 1.0f, 1.0f), Vector3(0.0f, 0.0f, 0.0f), Vector3(0.0f, 0.0f, 0.0f));
+	result = materialBuff_->Map(0, nullptr, reinterpret_cast<void**>(&constMap));
+	constMap->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	constMap->mat = MakeIdentity4x4();
 #pragma endregion
-#pragma region ライティングバッファ
-	directionalLightBuff_ = CreateBuffer(sizeof(cDirectionalLight));
-	// ライティングバッファへのデータ転送
-	result = directionalLightBuff_->Map(0, nullptr, reinterpret_cast<void**>(&directionalLight_));
-	// 初期値代入
-	directionalLight_->color_ = { 1.0f,1.0f,1.0f };
-	directionalLight_->direction_ = { 0.5f,-0.7f,1.0f };
-	directionalLight_->intensiy_ = 1.0f;
-	directionalLight_->sharpness_ = 1.0f;
-#pragma endregion
+	sMatProjection = MakeOrthographicMatrix(0.0f,0.0f, (float)WinApp::kWindowWidth, (float)WinApp::kWindowHeight, 0.0f, 1.0f);
 }
 
-void Sprite::BasicDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
+void Sprite::BasicDraw() {
 	// ルートシグネチャの設定
-	cmdList_->SetGraphicsRootSignature(basicGraphicsPipline_->GetRootSignature());
+	cmdList_->SetGraphicsRootSignature(spriteGraphicsPipline_->GetRootSignature());
 
 	// パイプラインステートの設定
-	cmdList_->SetPipelineState(basicGraphicsPipline_->GetPipelineStatee());
+	cmdList_->SetPipelineState(spriteGraphicsPipline_->GetPipelineStatee());
 
 	// プリミティブ形状を設定
 	cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+	// ワールド行列の更新
+	matWorld_ = MakeIdentity4x4();
+	matWorld_ *= MakeRotateZMatrix(rotation_);
+	matWorld_ *= MakeTranslateMatrix(Vector3(position_.x, position_.y, 0.0f));
+
+	// 定数バッファにデータ転送
+	constMap->color = color_;
+	constMap->mat = matWorld_ * sMatProjection; // 行列の合成
 
 	// 頂点バッファの設定
 	cmdList_->IASetVertexBuffers(0, 1, &vbView_);
@@ -156,59 +156,69 @@ void Sprite::BasicDraw(const WorldTransform& worldTransform, const ViewProjectio
 	// インデックスバッファの設定
 	cmdList_->IASetIndexBuffer(&ibView_);
 
-	// CBVをセット（ワールド行列）
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::WORLDTRANSFORM), worldTransform.constBuff_->GetGPUVirtualAddress());
-
-	// CBVをセット（ビュープロジェクション行列）
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::VIEWPROJECTION), viewProjection.constBuff_->GetGPUVirtualAddress());
-
 	// CBVをセット（Material）
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::MATERIAL), materialBuff_->GetGPUVirtualAddress());
-
-	// DirectionalLight用のCBufferの場所を設定
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::LIGHTING), directionalLightBuff_->GetGPUVirtualAddress());
+	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(SpriteGraphicsPipline::ROOT_PARAMETER_TYP::MATERIAL), materialBuff_->GetGPUVirtualAddress());
 
 	// SRVをセット
-	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(cmdList_.Get(), static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::TEXTURE), textureHadle);
+	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(cmdList_.Get(), static_cast<int>(SpriteGraphicsPipline::ROOT_PARAMETER_TYP::TEXTURE), textureHandle_);
 
 	// 描画コマンド
 	cmdList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
 }
 
-void Sprite::ToonDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
-	// ルートシグネチャの設定
-	cmdList_->SetGraphicsRootSignature(toonGraphicsPipline_->GetRootSignature());
+void Sprite::SetTextureHandle(uint32_t textureHandle) {
+	textureHandle_ = textureHandle;
+	resourceDesc_ = TextureManager::GetInstance()->GetResoureDesc(textureHandle_);
+}
 
-	// パイプラインステートの設定
-	cmdList_->SetPipelineState(toonGraphicsPipline_->GetPipelineStatee());
+void Sprite::SetRotation(float rotation) {
+	rotation_ = rotation;
 
-	// プリミティブ形状を設定
-	cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	// 頂点バッファへのデータ転送
+	TransferVertices();
+}
 
-	// 頂点バッファの設定
-	cmdList_->IASetVertexBuffers(0, 1, &vbView_);
+void Sprite::SetPosition(const Vector2& position) {
+	position_ = position;
 
-	// インデックスバッファの設定
-	cmdList_->IASetIndexBuffer(&ibView_);
+	// 頂点バッファへのデータ転送
+	TransferVertices();
+}
 
-	// CBVをセット（ワールド行列）
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(ToonGraphicsPipline::ROOT_PARAMETER_TYP::WORLDTRANSFORM), worldTransform.constBuff_->GetGPUVirtualAddress());
+void Sprite::SetSize(const Vector2& size) {
+	size_ = size;
 
-	// CBVをセット（ビュープロジェクション行列）
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(ToonGraphicsPipline::ROOT_PARAMETER_TYP::VIEWPROJECTION), viewProjection.constBuff_->GetGPUVirtualAddress());
+	// 頂点バッファへのデータ転送
+	TransferVertices();
+}
 
-	// CBVをセット（Material）
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(ToonGraphicsPipline::ROOT_PARAMETER_TYP::MATERIAL), materialBuff_->GetGPUVirtualAddress());
+void Sprite::SetAnchorPoint(const Vector2& anchorpoint) {
+	anchorPoint_ = anchorpoint;
 
-	// DirectionalLight用のCBufferの場所を設定
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(ToonGraphicsPipline::ROOT_PARAMETER_TYP::LIGHTING), directionalLightBuff_->GetGPUVirtualAddress());
+	// 頂点バッファへのデータ転送
+	TransferVertices();
+}
 
-	// SRVをセット
-	// トゥーンシェーダー用
-	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(cmdList_.Get(), static_cast<int>(ToonGraphicsPipline::ROOT_PARAMETER_TYP::TOONTEXTURE), static_cast<int>(TextureManager::TextureHandle::TOON));
+void Sprite::SetIsFlipX(bool isFlipX) {
+	isFlipX_ = isFlipX;
 
-	// 描画コマンド
-	cmdList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
+	// 頂点バッファへのデータ転送
+	TransferVertices();
+}
+
+void Sprite::SetIsFlipY(bool isFlipY) {
+	isFlipY_ = isFlipY;
+
+	// 頂点バッファへのデータ転送
+	TransferVertices();
+}
+
+void Sprite::SetTextureRect(const Vector2& texBase, const Vector2& texSize) {
+	texBase_ = texBase;
+	texSize_ = texSize;
+
+	// 頂点バッファへのデータ転送
+	TransferVertices();
 }
 
 ComPtr<ID3D12Resource> Sprite::CreateBuffer(UINT size) {
@@ -225,4 +235,53 @@ ComPtr<ID3D12Resource> Sprite::CreateBuffer(UINT size) {
 		IID_PPV_ARGS(&buffer));
 	assert(SUCCEEDED(result));
 	return buffer;
+}
+
+void Sprite::TransferVertices() {
+	HRESULT result = S_FALSE;
+
+	// 左下、左上、右下、右上
+	enum { LB, LT, RT, RB  };
+
+	float left = (0.0f - anchorPoint_.x) * size_.x;
+	float right = (1.0f - anchorPoint_.x) * size_.x;
+	float top = (0.0f - anchorPoint_.y) * size_.y;
+	float bottom = (1.0f - anchorPoint_.y) * size_.y;
+	if (isFlipX_) { // 左右入れ替え
+		left = -left;
+		right = -right;
+	}
+
+	if (isFlipY_) { // 上下入れ替え
+		top = -top;
+		bottom = -bottom;
+	}
+
+	vertices_[LB].pos_ = { left, bottom, 0.0f , 1.0f };  // 左下
+	vertices_[LT].pos_ = { left, top, 0.0f , 1.0f };     // 左上
+	vertices_[RT].pos_ = { right, top, 0.0f , 1.0f }; // 右上
+	vertices_[RB].pos_ = { right, bottom, 0.0f , 1.0f };    // 右下
+
+	// テクスチャ情報取得
+	{
+		float tex_left = texBase_.x / resourceDesc_.Width;
+		float tex_right = (texBase_.x + texSize_.x) / resourceDesc_.Width;
+		float tex_top = texBase_.y / resourceDesc_.Height;
+		float tex_bottom = (texBase_.y + texSize_.y) / resourceDesc_.Height;
+
+		vertices_[LB].uv_ = { tex_left, tex_bottom };  // 左下
+		vertices_[LT].uv_ = { tex_left, tex_top };     // 左上
+		vertices_[RT].uv_ = { tex_right, tex_top }; // 右上
+		vertices_[RB].uv_ = { tex_right, tex_bottom };    // 右下
+	}
+
+	// 頂点バッファへのデータ転送
+	{
+		VertexPosUv* vertMap = nullptr;
+		result = vertBuff_->Map(0, nullptr, reinterpret_cast<void**>(&vertMap));
+		if (SUCCEEDED(result)) {
+			std::copy(vertices_.begin(), vertices_.end(), vertMap);
+			vertBuff_->Unmap(0, nullptr);
+		}
+	}
 }

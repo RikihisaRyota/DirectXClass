@@ -118,9 +118,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Pera.cpp" />
     <ClCompile Include="PeraGraphicsPipeline.cpp" />
     <ClCompile Include="Sphere.cpp" />
+    <ClCompile Include="Plane.cpp" />
     <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="SpriteGraphicsPipline.cpp" />
     <ClCompile Include="TextureManager.cpp" />
-    <ClCompile Include="Basic.cpp" />
     <ClCompile Include="ToonGraphicsPipline.cpp" />
     <ClCompile Include="Vector3.cpp" />
     <ClCompile Include="ViewProjection.cpp" />
@@ -159,9 +160,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="PeraGraphicsPipeline.h" />
     <ClInclude Include="SafeDelete.h" />
     <ClInclude Include="Sphere.h" />
+    <ClInclude Include="Plane.h" />
     <ClInclude Include="Sprite.h" />
+    <ClInclude Include="SpriteGraphicsPipline.h" />
     <ClInclude Include="TextureManager.h" />
-    <ClInclude Include="Basic.h" />
     <ClInclude Include="ToonGraphicsPipline.h" />
     <ClInclude Include="Vector2.h" />
     <ClInclude Include="Vector3.h" />
