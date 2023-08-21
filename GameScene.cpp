@@ -31,7 +31,7 @@ void GameScene::Initialize() {
 	viewProjection_.Initialize();
 	Line::GetInstance()->SetViewProjection(&viewProjection_);
 
-	sprite_.reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
+	sprite_.reset(Sprite::Create(textureHandle_, Vector2(100.0f, 100.0f)));
 
 	// 音声再生
 	audio = new Audio;
@@ -47,17 +47,18 @@ void GameScene::Update() {
 
 
 	ImGui::Begin("Sprite:");
-	
-		//ImVec4 color = ImVec4(directionalLight_->color_.x, directionalLight_->color_.y, directionalLight_->color_.z, 0.0f); // 初期値は赤色
-		//ImGui::ColorEdit3("Color", (float*)&color, ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_AlphaBar);
-		//directionalLight_->color_.x = color.x, directionalLight_->color_.y = color.y, directionalLight_->color_.z = color.z;
-		Vector2 size = sprite_->GetSize();
+		/*Vector2 size = sprite_->GetSize();
 		ImGui::SliderFloat2("size", &size.x, 512.0f, -512.0f);
 		sprite_->SetSize(size);
 		Vector2 position = sprite_->GetPosition();
 		ImGui::SliderFloat2("position", &position.x, 0.0f, 1280.0f);
-		sprite_->SetPosition(position);
+		sprite_->SetPosition(position);*/
 	
+		ImGui::SliderFloat2("position_0", &sprite_->vertices_.at(0).pos_.x, -1.0f, 1.0f);
+		ImGui::SliderFloat2("position_1", &sprite_->vertices_.at(1).pos_.x, -1.0f, 1.0f);
+		ImGui::SliderFloat2("position_2", &sprite_->vertices_.at(2).pos_.x, -1.0f, 1.0f);
+		ImGui::SliderFloat2("position_3", &sprite_->vertices_.at(3).pos_.x, -1.0f, 1.0f);
+		sprite_->testUpdate();
 	ImGui::End();
 
 #pragma region ライト
@@ -1174,7 +1175,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
-	//sprite_->Draw();
+	sprite_->Draw();
 
 	// スプライト描画後処理
 	Sprite::PostDraw();

@@ -21,8 +21,8 @@ public: // サブクラス
 	/// 定数バッファ用データ構造体
 	/// </summary>
 	struct ConstBufferData {
-		Vector4 color; // 色 (RGBA)
-		Matrix4x4 mat;   // ３Ｄ変換行列
+		Vector4 color_; // 色 (RGBA)
+		Matrix4x4 mat_;   // ３Ｄ変換行列
 	};
 public:
 	static void SetDevice(ID3D12Device* device);
@@ -103,6 +103,9 @@ public:
 	/// <param name="texBase">テクスチャ左上座標</param>
 	/// <param name="texSize">テクスチャサイズ</param>
 	void SetTextureRect(const Vector2& texBase, const Vector2& texSize);
+
+	std::vector<VertexPosUv> vertices_;
+	void testUpdate();
 private:
 	void Initialize(uint32_t textureHandle, const Vector2& position,const Vector2& size, const Vector4& color,
 		const Vector2& anchorpoint, bool isFlipX , bool isFlipY);
@@ -126,7 +129,7 @@ private:
 	D3D12_VERTEX_BUFFER_VIEW vbView_{};
 	// 頂点データ配列
 	VertexPosUv* vertMap_ = nullptr;
-	std::vector<VertexPosUv> vertices_;
+	
 #pragma endregion
 #pragma region インデックスバッファ
 	// インデックスバッファ

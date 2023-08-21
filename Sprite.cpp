@@ -48,7 +48,7 @@ Sprite* Sprite::Create(
 	sptite->spriteGraphicsPipline_->InitializeGraphicsPipeline();
 	
 	// 初期化
-	sptite->Initialize(textureHandle,position,size, color , anchorpoint , isFlipX , isFlipY );
+	sptite->Initialize(textureHandle,position, size, color , anchorpoint , isFlipX , isFlipY );
 	return sptite;
 }
 
@@ -60,7 +60,6 @@ void Sprite::Initialize(uint32_t textureHandle, const Vector2& position, const V
 	const Vector2& anchorpoint, bool isFlipX, bool isFlipY) {
 	HRESULT result = S_FALSE;
 
-	resourceDesc_ = TextureManager::GetInstance()->GetResoureDesc(textureHandle_);
 
 	position_ = position;
 	size_ = size;
@@ -68,17 +67,20 @@ void Sprite::Initialize(uint32_t textureHandle, const Vector2& position, const V
 	matWorld_ = MakeIdentity4x4();
 	color_ = color;
 	textureHandle_ = textureHandle;
+	resourceDesc_ = TextureManager::GetInstance()->GetResoureDesc(textureHandle_);
 	isFlipX_ = isFlipX;
 	isFlipY_ = isFlipY;
 	texSize_ = size;
 
-	vertices_ = {
-		//	x      y     z      w      u     v
-		{{-1.0f, -1.0f, 0.0f, +1.0f},{0.0f, 1.0f}}, // 左下 0
-		{{-1.0f, +1.0f, 0.0f, +1.0f},{0.0f, 0.0f}}, // 左上 1
-		{{+1.0f, +1.0f, 0.0f, +1.0f},{1.0f, 0.0f}}, // 右上 2
-		{{+1.0f, -1.0f, 0.0f, +1.0f},{1.0f, 1.0f}}, // 右下 3
-	};
+	//vertices_ = {
+	//	//	x      y     z      w      u     v
+	//	{{-0.5f, -0.5f, 0.0f, +1.0f},{0.0f, 1.0f}}, // 左下 0
+	//	{{-0.5f, +0.5f, 0.0f, +1.0f},{0.0f, 0.0f}}, // 左上 1
+	//	{{+0.5f, +0.5f, 0.0f, +1.0f},{1.0f, 0.0f}}, // 右上 2
+	//	{{+0.5f, -0.5f, 0.0f, +1.0f},{1.0f, 1.0f}}, // 右下 3
+	//};
+
+	vertices_.resize(4);
 
 	// 頂点インデックスの設定
 	indices_ = { 0, 1, 2,
@@ -124,8 +126,8 @@ void Sprite::Initialize(uint32_t textureHandle, const Vector2& position, const V
 	materialBuff_ = CreateBuffer(sizeof(ConstBufferData));
 	// マテリアルへのデータ転送
 	result = materialBuff_->Map(0, nullptr, reinterpret_cast<void**>(&constMap));
-	constMap->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	constMap->mat = MakeIdentity4x4();
+	constMap->color_ = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	constMap->mat_ = MakeIdentity4x4();
 #pragma endregion
 	sMatProjection = MakeOrthographicMatrix(0.0f,0.0f, (float)WinApp::kWindowWidth, (float)WinApp::kWindowHeight, 0.0f, 1.0f);
 }
@@ -147,8 +149,8 @@ void Sprite::BasicDraw() {
 	matWorld_ *= MakeTranslateMatrix(Vector3(position_.x, position_.y, 0.0f));
 
 	// 定数バッファにデータ転送
-	constMap->color = color_;
-	constMap->mat = matWorld_ * sMatProjection; // 行列の合成
+	constMap->color_ = color_;
+	constMap->mat_ = matWorld_ * sMatProjection; // 行列の合成
 
 	// 頂点バッファの設定
 	cmdList_->IASetVertexBuffers(0, 1, &vbView_);
@@ -274,6 +276,20 @@ void Sprite::TransferVertices() {
 		vertices_[RT].uv_ = { tex_right, tex_top }; // 右上
 		vertices_[RB].uv_ = { tex_right, tex_bottom };    // 右下
 	}
+
+	// 頂点バッファへのデータ転送
+	{
+		VertexPosUv* vertMap = nullptr;
+		result = vertBuff_->Map(0, nullptr, reinterpret_cast<void**>(&vertMap));
+		if (SUCCEEDED(result)) {
+			std::copy(vertices_.begin(), vertices_.end(), vertMap);
+			vertBuff_->Unmap(0, nullptr);
+		}
+	}
+}
+
+void Sprite::testUpdate() {
+	HRESULT result = S_FALSE;
 
 	// 頂点バッファへのデータ転送
 	{
