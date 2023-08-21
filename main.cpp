@@ -31,7 +31,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	TextureManager::GetInstance()->Initialize(dxCommon);
 
 	// スプライト静的初期化
-	Sprite::SetDevice(dxCommon->GetDevice());
+	Sprite::StaticInitialize(dxCommon->GetDevice(),WinApp::kWindowWidth,WinApp::kWindowHeight);
 
 	// BasicGraphicsPiplineの静的初期化
 	BasicGraphicsPipline::SetDevice(dxCommon->GetDevice());
@@ -43,7 +43,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	LineGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
 	// SpriteGraphicsPiplineの静的初期化
-	SpriteGraphicsPipline::SetDevice(dxCommon->GetDevice());
+	//SpriteGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
 	// Spriteの静的初期化
 	Plane::SetDevice(dxCommon->GetDevice());

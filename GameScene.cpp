@@ -31,7 +31,7 @@ void GameScene::Initialize() {
 	viewProjection_.Initialize();
 	Line::GetInstance()->SetViewProjection(&viewProjection_);
 
-	sprite_.reset(Sprite::Create(textureHandle_, Vector2(100.0f, 100.0f)));
+	sprite_.reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
 
 	// 音声再生
 	audio = new Audio;
@@ -47,18 +47,15 @@ void GameScene::Update() {
 
 
 	ImGui::Begin("Sprite:");
-		/*Vector2 size = sprite_->GetSize();
-		ImGui::SliderFloat2("size", &size.x, 512.0f, -512.0f);
-		sprite_->SetSize(size);
 		Vector2 position = sprite_->GetPosition();
-		ImGui::SliderFloat2("position", &position.x, 0.0f, 1280.0f);
-		sprite_->SetPosition(position);*/
-	
-		ImGui::SliderFloat2("position_0", &sprite_->vertices_.at(0).pos_.x, -1.0f, 1.0f);
-		ImGui::SliderFloat2("position_1", &sprite_->vertices_.at(1).pos_.x, -1.0f, 1.0f);
-		ImGui::SliderFloat2("position_2", &sprite_->vertices_.at(2).pos_.x, -1.0f, 1.0f);
-		ImGui::SliderFloat2("position_3", &sprite_->vertices_.at(3).pos_.x, -1.0f, 1.0f);
-		sprite_->testUpdate();
+		ImGui::SliderFloat2("position", &position.x, -10.0f, 10.0f);
+		sprite_->SetPosition(position);
+		Vector4 color = sprite_->GetColor();
+		ImGui::SliderFloat4("color", &color.x, -1.0f, 1.0f);
+		sprite_->SetColor(color);
+		Vector2 size = sprite_->GetSize();
+		ImGui::SliderFloat2("size", &size.x, -5.0f, 5.0f);
+		sprite_->SetSize(size);
 	ImGui::End();
 
 #pragma region ライト
@@ -1048,7 +1045,7 @@ void GameScene::Draw() {
 	
 	// スプライト描画後処理
 	Sprite::PostDraw();
-
+	dxCommon_->ClearDepthBuffer();
 #pragma endregion
 #pragma region 3Dオブジェクト描画
 	// 3Dオブジェクト描画前処理

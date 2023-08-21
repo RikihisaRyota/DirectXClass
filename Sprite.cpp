@@ -1,40 +1,209 @@
 #include "Sprite.h"
-
 #include "TextureManager.h"
-#include "WinApp.h"
+#include <cassert>
+#include <d3dcompiler.h>
+#include <d3dx12.h>
 
+#pragma comment(lib, "d3dcompiler.lib")
+
+using namespace DirectX;
 using namespace Microsoft::WRL;
 
-// 静的メンバ変数の実体化
+/// <summary>
+/// 静的メンバ変数の実体
+/// </summary>
 ID3D12Device* Sprite::sDevice = nullptr;
-Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> Sprite::cmdList_;
+UINT Sprite::sDescriptorHandleIncrementSize;
+ID3D12GraphicsCommandList* Sprite::sCommandList = nullptr;
+ComPtr<ID3D12RootSignature> Sprite::sRootSignature;
+ComPtr<ID3D12PipelineState> Sprite::sPipelineState;
 Matrix4x4 Sprite::sMatProjection;
 
-void Sprite::SetDevice(ID3D12Device* device) {
+void Sprite::StaticInitialize(
+	ID3D12Device* device, int window_width, int window_height, const std::wstring& directoryPath) {
 	// nullptrチェック
 	assert(device);
 
 	sDevice = device;
+
+	// デスクリプタサイズを取得
+	sDescriptorHandleIncrementSize =
+		sDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+	HRESULT result = S_FALSE;
+	ComPtr<ID3DBlob> vsBlob;    // 頂点シェーダオブジェクト
+	ComPtr<ID3DBlob> psBlob;    // ピクセルシェーダオブジェクト
+	ComPtr<ID3DBlob> errorBlob; // エラーオブジェクト
+
+	// 頂点シェーダの読み込みとコンパイル
+	std::wstring vsFile = /*directoryPath + */L"Sprite.VS.hlsl";
+	result = D3DCompileFromFile(
+		vsFile.c_str(), // シェーダファイル名
+		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE, // インクルード可能にする
+		"main", "vs_5_0", // エントリーポイント名、シェーダーモデル指定
+		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, // デバッグ用設定
+		0, &vsBlob, &errorBlob);
+	if (FAILED(result)) {
+		// errorBlobからエラー内容をstring型にコピー
+		std::string errstr;
+		errstr.resize(errorBlob->GetBufferSize());
+
+		std::copy_n(
+			(char*)errorBlob->GetBufferPointer(), errorBlob->GetBufferSize(), errstr.begin());
+		errstr += "\n";
+		// エラー内容を出力ウィンドウに表示
+		OutputDebugStringA(errstr.c_str());
+		assert(0);
+		//exit(1);
+	}
+
+	// ピクセルシェーダの読み込みとコンパイル
+	std::wstring psFile = /*directoryPath + */L"Sprite.PS.hlsl";
+	result = D3DCompileFromFile(
+		psFile.c_str(), // シェーダファイル名
+		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE, // インクルード可能にする
+		"main", "ps_5_0", // エントリーポイント名、シェーダーモデル指定
+		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, // デバッグ用設定
+		0, &psBlob, &errorBlob);
+	if (FAILED(result)) {
+		// errorBlobからエラー内容をstring型にコピー
+		std::string errstr;
+		errstr.resize(errorBlob->GetBufferSize());
+
+		std::copy_n(
+			(char*)errorBlob->GetBufferPointer(), errorBlob->GetBufferSize(), errstr.begin());
+		errstr += "\n";
+		// エラー内容を出力ウィンドウに表示
+		OutputDebugStringA(errstr.c_str());
+
+		exit(1);
+	}
+
+	// 頂点レイアウト
+	D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+	  {// xy座標(1行で書いたほうが見やすい)
+	   "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,
+	   D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+	  {// uv座標(1行で書いたほうが見やすい)
+	   "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, D3D12_APPEND_ALIGNED_ELEMENT,
+	   D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+	};
+
+	// グラフィックスパイプラインの流れを設定
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC gpipeline{};
+	gpipeline.VS = CD3DX12_SHADER_BYTECODE(vsBlob.Get());
+	gpipeline.PS = CD3DX12_SHADER_BYTECODE(psBlob.Get());
+
+	// サンプルマスク
+	gpipeline.SampleMask = D3D12_DEFAULT_SAMPLE_MASK; // 標準設定
+	// ラスタライザステート
+	gpipeline.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	gpipeline.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	// デプスステンシルステート
+	gpipeline.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	gpipeline.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS; // 常に上書きルール
+
+	// レンダーターゲットのブレンド設定
+	D3D12_RENDER_TARGET_BLEND_DESC blenddesc{};
+	blenddesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL; // RBGA全てのチャンネルを描画
+	blenddesc.BlendEnable = true;
+	blenddesc.BlendOp = D3D12_BLEND_OP_ADD;
+	blenddesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blenddesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+
+	blenddesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+
+	// ブレンドステートの設定
+	gpipeline.BlendState.RenderTarget[0] = blenddesc;
+
+	// 深度バッファのフォーマット
+	gpipeline.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+
+	// 頂点レイアウトの設定
+	gpipeline.InputLayout.pInputElementDescs = inputLayout;
+	gpipeline.InputLayout.NumElements = _countof(inputLayout);
+
+	// 図形の形状設定（三角形）
+	gpipeline.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+	gpipeline.NumRenderTargets = 1;                            // 描画対象は1つ
+	gpipeline.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; // 0～255指定のRGBA
+	gpipeline.SampleDesc.Count = 1; // 1ピクセルにつき1回サンプリング
+
+	// デスクリプタレンジ
+	CD3DX12_DESCRIPTOR_RANGE descRangeSRV;
+	descRangeSRV.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0); // t0 レジスタ
+
+	// ルートパラメータ
+	CD3DX12_ROOT_PARAMETER rootparams[2] = {};
+	rootparams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
+	rootparams[1].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);
+
+	// スタティックサンプラー
+	CD3DX12_STATIC_SAMPLER_DESC samplerDesc =
+		CD3DX12_STATIC_SAMPLER_DESC(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // s0 レジスタ
+	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+
+	// ルートシグネチャの設定
+	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
+	rootSignatureDesc.Init_1_0(
+		_countof(rootparams), rootparams, 1, &samplerDesc,
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+	ComPtr<ID3DBlob> rootSigBlob;
+	// バージョン自動判定のシリアライズ
+	result = D3DX12SerializeVersionedRootSignature(
+		&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootSigBlob, &errorBlob);
+	assert(SUCCEEDED(result));
+	// ルートシグネチャの生成
+	result = sDevice->CreateRootSignature(
+		0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(),
+		IID_PPV_ARGS(&sRootSignature));
+	assert(SUCCEEDED(result));
+
+	gpipeline.pRootSignature = sRootSignature.Get();
+
+	// グラフィックスパイプラインの生成
+	result = sDevice->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&sPipelineState));
+	assert(SUCCEEDED(result));
+
+	// 射影行列計算
+	sMatProjection = MakeOrthographicMatrix(
+		0.0f, 0.0f, (float)window_width, (float)window_height, 0.0f, 1.0f);
 }
 
-void Sprite::PreDraw(ID3D12GraphicsCommandList* cmdList) {
+void Sprite::PreDraw(ID3D12GraphicsCommandList* commandList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
-	assert(cmdList_ == nullptr);
+	assert(Sprite::sCommandList == nullptr);
+
 	// コマンドリストをセット
-	cmdList_ = cmdList;
+	sCommandList = commandList;
+
+	// パイプラインステートの設定
+	sCommandList->SetPipelineState(sPipelineState.Get());
+	// ルートシグネチャの設定
+	sCommandList->SetGraphicsRootSignature(sRootSignature.Get());
+	// プリミティブ形状を設定
+	sCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 }
+
 void Sprite::PostDraw() {
-	// コマンドリストの解除
-	cmdList_ = nullptr;
+	// コマンドリストを解除
+	Sprite::sCommandList = nullptr;
 }
 
 Sprite* Sprite::Create(
-	uint32_t textureHandle, const Vector2& position, const Vector4& color,const Vector2& anchorpoint, bool isFlipX , bool isFlipY) {
-	// Spriteのインスタンスを生成
-	Sprite* sptite = new Sprite();
-	assert(sptite);
+	uint32_t textureHandle, Vector2 position, Vector4 color, Vector2 anchorpoint, bool isFlipX,
+	bool isFlipY) {
 	// 仮サイズ
 	Vector2 size = { 100.0f, 100.0f };
+
 	{
 		// テクスチャ情報取得
 		const D3D12_RESOURCE_DESC& resDesc =
@@ -43,129 +212,92 @@ Sprite* Sprite::Create(
 		size = { (float)resDesc.Width, (float)resDesc.Height };
 	}
 
-	// パイプライン初期化
-	sptite->spriteGraphicsPipline_ = std::make_unique<SpriteGraphicsPipline>();
-	sptite->spriteGraphicsPipline_->InitializeGraphicsPipeline();
-	
+	// Spriteのインスタンスを生成
+	Sprite* sprite =
+		new Sprite(textureHandle, position, size, color, anchorpoint, isFlipX, isFlipY);
+	if (sprite == nullptr) {
+		return nullptr;
+	}
+
 	// 初期化
-	sptite->Initialize(textureHandle,position, size, color , anchorpoint , isFlipX , isFlipY );
-	return sptite;
+	if (!sprite->Initialize()) {
+		delete sprite;
+		assert(0);
+		return nullptr;
+	}
+
+	return sprite;
 }
 
-void Sprite::Draw() {
-	BasicDraw();
-}
+Sprite::Sprite() {}
 
-void Sprite::Initialize(uint32_t textureHandle, const Vector2& position, const Vector2& size, const Vector4& color,
-	const Vector2& anchorpoint, bool isFlipX, bool isFlipY) {
-	HRESULT result = S_FALSE;
-
-
+Sprite::Sprite(
+	uint32_t textureHandle, Vector2 position, Vector2 size, Vector4 color, Vector2 anchorpoint,
+	bool isFlipX, bool isFlipY) {
 	position_ = position;
 	size_ = size;
 	anchorPoint_ = anchorpoint;
 	matWorld_ = MakeIdentity4x4();
 	color_ = color;
 	textureHandle_ = textureHandle;
-	resourceDesc_ = TextureManager::GetInstance()->GetResoureDesc(textureHandle_);
 	isFlipX_ = isFlipX;
 	isFlipY_ = isFlipY;
 	texSize_ = size;
-
-	//vertices_ = {
-	//	//	x      y     z      w      u     v
-	//	{{-0.5f, -0.5f, 0.0f, +1.0f},{0.0f, 1.0f}}, // 左下 0
-	//	{{-0.5f, +0.5f, 0.0f, +1.0f},{0.0f, 0.0f}}, // 左上 1
-	//	{{+0.5f, +0.5f, 0.0f, +1.0f},{1.0f, 0.0f}}, // 右上 2
-	//	{{+0.5f, -0.5f, 0.0f, +1.0f},{1.0f, 1.0f}}, // 右下 3
-	//};
-
-	vertices_.resize(4);
-
-	// 頂点インデックスの設定
-	indices_ = { 0, 1, 2,
-				 0, 2, 3,
-	};
-#pragma region 頂点バッファ
-	// 頂点データのサイズ
-	UINT sizeVB = static_cast<UINT>(sizeof(VertexPosUv) * vertices_.size());
-	vertBuff_ = CreateBuffer(sizeVB);
-	// 頂点バッファへのデータ転送
-	{
-		VertexPosUv* vertMap = nullptr;
-		result = vertBuff_->Map(0, nullptr, reinterpret_cast<void**>(&vertMap));
-		if (SUCCEEDED(result)) {
-			std::copy(vertices_.begin(), vertices_.end(), vertMap);
-			vertBuff_->Unmap(0, nullptr);
-		}
-	}
-	TransferVertices();
-	// 頂点バッファビューの作成
-	vbView_.BufferLocation = vertBuff_->GetGPUVirtualAddress();
-	vbView_.SizeInBytes = sizeVB;
-	vbView_.StrideInBytes = sizeof(vertices_[0]);
-#pragma endregion 頂点バッファ
-#pragma region インデックスバッファ
-	// インデックスデータのサイズ
-	UINT sizeIB = static_cast<UINT>(sizeof(uint16_t) * indices_.size());
-	idxBuff_ = CreateBuffer(sizeIB);
-	// インデックスバッファへのデータ転送
-	uint16_t* indexMap = nullptr;
-	result = idxBuff_->Map(0, nullptr, reinterpret_cast<void**>(&indexMap));
-	if (SUCCEEDED(result)) {
-		std::copy(indices_.begin(), indices_.end(), indexMap);
-		idxBuff_->Unmap(0, nullptr);
-	}
-
-	// インデックスバッファビューの作成
-	ibView_.BufferLocation = idxBuff_->GetGPUVirtualAddress();
-	ibView_.Format = DXGI_FORMAT_R16_UINT;
-	ibView_.SizeInBytes = sizeIB; // 修正: インデックスバッファのバイトサイズを代入
-#pragma endregion インデックスバッファ
-#pragma region マテリアルバッファ
-	materialBuff_ = CreateBuffer(sizeof(ConstBufferData));
-	// マテリアルへのデータ転送
-	result = materialBuff_->Map(0, nullptr, reinterpret_cast<void**>(&constMap));
-	constMap->color_ = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	constMap->mat_ = MakeIdentity4x4();
-#pragma endregion
-	sMatProjection = MakeOrthographicMatrix(0.0f,0.0f, (float)WinApp::kWindowWidth, (float)WinApp::kWindowHeight, 0.0f, 1.0f);
 }
 
-void Sprite::BasicDraw() {
-	// ルートシグネチャの設定
-	cmdList_->SetGraphicsRootSignature(spriteGraphicsPipline_->GetRootSignature());
+bool Sprite::Initialize() {
+	// nullptrチェック
+	assert(sDevice);
 
-	// パイプラインステートの設定
-	cmdList_->SetPipelineState(spriteGraphicsPipline_->GetPipelineStatee());
+	HRESULT result = S_FALSE;
 
-	// プリミティブ形状を設定
-	cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	resourceDesc_ = TextureManager::GetInstance()->GetResoureDesc(textureHandle_);
 
+	{
+		// ヒーププロパティ
+		CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		// リソース設定
+		CD3DX12_RESOURCE_DESC resourceDesc =
+			CD3DX12_RESOURCE_DESC::Buffer(sizeof(VertexPosUv) * kVertNum);
 
-	// ワールド行列の更新
-	matWorld_ = MakeIdentity4x4();
-	matWorld_ *= MakeRotateZMatrix(rotation_);
-	matWorld_ *= MakeTranslateMatrix(Vector3(position_.x, position_.y, 0.0f));
+		// 頂点バッファ生成
+		result = sDevice->CreateCommittedResource(
+			&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr, IID_PPV_ARGS(&vertBuff_));
+		assert(SUCCEEDED(result));
 
-	// 定数バッファにデータ転送
-	constMap->color_ = color_;
-	constMap->mat_ = matWorld_ * sMatProjection; // 行列の合成
+		// 頂点バッファマッピング
+		result = vertBuff_->Map(0, nullptr, (void**)&vertMap);
+		assert(SUCCEEDED(result));
+	}
 
-	// 頂点バッファの設定
-	cmdList_->IASetVertexBuffers(0, 1, &vbView_);
+	// 頂点バッファへのデータ転送
+	TransferVertices();
 
-	// インデックスバッファの設定
-	cmdList_->IASetIndexBuffer(&ibView_);
+	// 頂点バッファビューの作成
+	vbView_.BufferLocation = vertBuff_->GetGPUVirtualAddress();
+	vbView_.SizeInBytes = sizeof(VertexPosUv) * 4;
+	vbView_.StrideInBytes = sizeof(VertexPosUv);
 
-	// CBVをセット（Material）
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(SpriteGraphicsPipline::ROOT_PARAMETER_TYP::MATERIAL), materialBuff_->GetGPUVirtualAddress());
+	{
+		// ヒーププロパティ
+		CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		// リソース設定
+		CD3DX12_RESOURCE_DESC resourceDesc =
+			CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferData) + 0xff) & ~0xff);
 
-	// SRVをセット
-	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(cmdList_.Get(), static_cast<int>(SpriteGraphicsPipline::ROOT_PARAMETER_TYP::TEXTURE), textureHandle_);
+		// 定数バッファの生成
+		result = sDevice->CreateCommittedResource(
+			&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr, IID_PPV_ARGS(&constBuff_));
+		assert(SUCCEEDED(result));
+	}
 
-	// 描画コマンド
-	cmdList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
+	// 定数バッファマッピング
+	result = constBuff_->Map(0, nullptr, (void**)&constMap);
+	assert(SUCCEEDED(result));
+
+	return true;
 }
 
 void Sprite::SetTextureHandle(uint32_t textureHandle) {
@@ -223,27 +355,32 @@ void Sprite::SetTextureRect(const Vector2& texBase, const Vector2& texSize) {
 	TransferVertices();
 }
 
-ComPtr<ID3D12Resource> Sprite::CreateBuffer(UINT size) {
-	HRESULT result = S_FALSE;
-	// ヒーププロパティ
-	CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	// リソース設定
-	CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(size);
+void Sprite::Draw() {
+	// ワールド行列の更新
+	matWorld_ = MakeIdentity4x4();
+	matWorld_ *= MakeRotateZMatrix(rotation_);
+	matWorld_ *= MakeTranslateMatrix(Vector3(position_.x, position_.y, 0.0f));
 
-	// バッファ生成
-	ComPtr<ID3D12Resource> buffer;
-	result = sDevice->CreateCommittedResource(
-		&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
-		IID_PPV_ARGS(&buffer));
-	assert(SUCCEEDED(result));
-	return buffer;
+	// 定数バッファにデータ転送
+	constMap->color = color_;
+	constMap->mat = matWorld_ * sMatProjection; // 行列の合成
+
+	// 頂点バッファの設定
+	sCommandList->IASetVertexBuffers(0, 1, &vbView_);
+
+	// 定数バッファビューをセット
+	sCommandList->SetGraphicsRootConstantBufferView(0, constBuff_->GetGPUVirtualAddress());
+	// シェーダリソースビューをセット
+	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(sCommandList, 1, textureHandle_);
+	// 描画コマンド
+	sCommandList->DrawInstanced(4, 1, 0, 0);
 }
 
 void Sprite::TransferVertices() {
 	HRESULT result = S_FALSE;
 
 	// 左下、左上、右下、右上
-	enum { LB, LT, RT, RB  };
+	enum { LB, LT, RB, RT };
 
 	float left = (0.0f - anchorPoint_.x) * size_.x;
 	float right = (1.0f - anchorPoint_.x) * size_.x;
@@ -259,10 +396,13 @@ void Sprite::TransferVertices() {
 		bottom = -bottom;
 	}
 
-	vertices_[LB].pos_ = { left, bottom, 0.0f , 1.0f };  // 左下
-	vertices_[LT].pos_ = { left, top, 0.0f , 1.0f };     // 左上
-	vertices_[RT].pos_ = { right, top, 0.0f , 1.0f }; // 右上
-	vertices_[RB].pos_ = { right, bottom, 0.0f , 1.0f };    // 右下
+	// 頂点データ
+	VertexPosUv vertices[kVertNum];
+
+	vertices[LB].pos = { left, bottom, 0.0f,1.0f };  // 左下
+	vertices[LT].pos = { left, top, 0.0f,1.0f };     // 左上
+	vertices[RB].pos = { right, bottom, 0.0f ,1.0f }; // 右下
+	vertices[RT].pos = { right, top, 0.0f ,1.0f };    // 右上
 
 	// テクスチャ情報取得
 	{
@@ -271,33 +411,12 @@ void Sprite::TransferVertices() {
 		float tex_top = texBase_.y / resourceDesc_.Height;
 		float tex_bottom = (texBase_.y + texSize_.y) / resourceDesc_.Height;
 
-		vertices_[LB].uv_ = { tex_left, tex_bottom };  // 左下
-		vertices_[LT].uv_ = { tex_left, tex_top };     // 左上
-		vertices_[RT].uv_ = { tex_right, tex_top }; // 右上
-		vertices_[RB].uv_ = { tex_right, tex_bottom };    // 右下
+		vertices[LB].uv = { tex_left, tex_bottom };  // 左下
+		vertices[LT].uv = { tex_left, tex_top };     // 左上
+		vertices[RB].uv = { tex_right, tex_bottom }; // 右下
+		vertices[RT].uv = { tex_right, tex_top };    // 右上
 	}
 
 	// 頂点バッファへのデータ転送
-	{
-		VertexPosUv* vertMap = nullptr;
-		result = vertBuff_->Map(0, nullptr, reinterpret_cast<void**>(&vertMap));
-		if (SUCCEEDED(result)) {
-			std::copy(vertices_.begin(), vertices_.end(), vertMap);
-			vertBuff_->Unmap(0, nullptr);
-		}
-	}
-}
-
-void Sprite::testUpdate() {
-	HRESULT result = S_FALSE;
-
-	// 頂点バッファへのデータ転送
-	{
-		VertexPosUv* vertMap = nullptr;
-		result = vertBuff_->Map(0, nullptr, reinterpret_cast<void**>(&vertMap));
-		if (SUCCEEDED(result)) {
-			std::copy(vertices_.begin(), vertices_.end(), vertMap);
-			vertBuff_->Unmap(0, nullptr);
-		}
-	}
+	memcpy(vertMap, vertices, sizeof(vertices));
 }

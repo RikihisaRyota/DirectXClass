@@ -1,37 +1,108 @@
 #pragma once
 
-#include <d3dx12.h>
-#include <vector>
+#include <DirectXMath.h>
+#include <Windows.h>
+#include <d3d12.h>
+#include <dxcapi.h>
+#include <string>
+#include <wrl.h>
 
-#include "SpriteGraphicsPipline.h"
+#include "Vector2.h"
+#include "Vector3.h"
+#include "Vector4.h"
 #include "Matrix4x4.h"
 
+#pragma comment(lib,"dxcompiler.lib")
+/// <summary>
+/// スプライト
+/// </summary>
 class Sprite {
-public:
 public: // サブクラス
 	/// <summary>
 	/// 頂点データ構造体
 	/// </summary>
 	struct VertexPosUv {
-		Vector4 pos_; // xyz座標
-		Vector2 uv_;  // uv座標
+		Vector4 pos; // xyz座標
+		Vector2 uv;  // uv座標
 	};
 
 	/// <summary>
 	/// 定数バッファ用データ構造体
 	/// </summary>
 	struct ConstBufferData {
-		Vector4 color_; // 色 (RGBA)
-		Matrix4x4 mat_;   // ３Ｄ変換行列
+		Vector4 color; // 色 (RGBA)
+		Matrix4x4 mat;   // ３Ｄ変換行列
 	};
-public:
-	static void SetDevice(ID3D12Device* device);
+
+public: // 静的メンバ関数
+	/// <summary>
+	/// 静的初期化
+	/// </summary>
+	/// <param name="device">デバイス</param>
+	/// <param name="window_width">画面幅</param>
+	/// <param name="window_height">画面高さ</param>
+	static void StaticInitialize(
+		ID3D12Device* device, int window_width, int window_height,
+		const std::wstring& directoryPath = L"Resources/");
+
+	/// <summary>
+	/// 描画前処理
+	/// </summary>
+	/// <param name="cmdList">描画コマンドリスト</param>
 	static void PreDraw(ID3D12GraphicsCommandList* cmdList);
+
+	/// <summary>
+	/// 描画後処理
+	/// </summary>
 	static void PostDraw();
+
+	/// <summary>
+	/// スプライト生成
+	/// </summary>
+	/// <param name="texNumber">テクスチャハンドル</param>
+	/// <param name="position">座標</param>
+	/// <param name="color">色</param>
+	/// <param name="anchorpoint">アンカーポイント</param>
+	/// <param name="isFlipX">左右反転</param>
+	/// <param name="isFlipY">上下反転</param>
+	/// <returns>生成されたスプライト</returns>
 	static Sprite* Create(
-		uint32_t textureHandle, const Vector2& position, const Vector4& color = { 1, 1, 1, 1 },
-		const Vector2& anchorpoint = { 0.0f, 0.0f }, bool isFlipX = false, bool isFlipY = false);
-	void Draw();
+		uint32_t textureHandle, Vector2 position, Vector4 color = { 1, 1, 1, 1 },
+		Vector2 anchorpoint = { 0.0f, 0.0f }, bool isFlipX = false, bool isFlipY = false);
+
+private: // 静的メンバ変数
+	// 頂点数
+	static const int kVertNum = 4;
+	// デバイス
+	static ID3D12Device* sDevice;
+	// デスクリプタサイズ
+	static UINT sDescriptorHandleIncrementSize;
+	// コマンドリスト
+	static ID3D12GraphicsCommandList* sCommandList;
+	// ルートシグネチャ
+	static Microsoft::WRL::ComPtr<ID3D12RootSignature> sRootSignature;
+	// パイプラインステートオブジェクト
+	static Microsoft::WRL::ComPtr<ID3D12PipelineState> sPipelineState;
+	// 射影行列
+	static Matrix4x4 sMatProjection;
+
+public: // メンバ関数
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	Sprite();
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	Sprite(
+		uint32_t textureHandle, Vector2 position, Vector2 size,
+		Vector4 color, Vector2 anchorpoint, bool isFlipX, bool isFlipY);
+
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	/// <returns>成否</returns>
+	bool Initialize();
 
 	/// <summary>
 	/// テクスチャハンドルの設定
@@ -104,47 +175,24 @@ public:
 	/// <param name="texSize">テクスチャサイズ</param>
 	void SetTextureRect(const Vector2& texBase, const Vector2& texSize);
 
-	std::vector<VertexPosUv> vertices_;
-	void testUpdate();
-private:
-	void Initialize(uint32_t textureHandle, const Vector2& position,const Vector2& size, const Vector4& color,
-		const Vector2& anchorpoint, bool isFlipX , bool isFlipY);
-	void BasicDraw();
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(UINT size);
-	void TransferVertices();
-private:
-#pragma region DirectX関連
-	// デバイス
-	static ID3D12Device* sDevice;
-	// コマンドリスト
-	static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList_;
-	// 射影行列
-	static Matrix4x4 sMatProjection;
-	// グラフィックパイプライン
-	std::unique_ptr<SpriteGraphicsPipline> spriteGraphicsPipline_ = nullptr;
-#pragma region 頂点バッファ
+	/// <summary>
+	/// 描画
+	/// </summary>
+	void Draw();
+
+private: // メンバ変数
 	// 頂点バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertBuff_;
-	// 頂点バッファビュー
-	D3D12_VERTEX_BUFFER_VIEW vbView_{};
-	// 頂点データ配列
-	VertexPosUv* vertMap_ = nullptr;
-	
-#pragma endregion
-#pragma region インデックスバッファ
-	// インデックスバッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> idxBuff_;
-	// インデックスバッファビュー
-	D3D12_INDEX_BUFFER_VIEW ibView_{};
-	// 頂点インデックスデータ
-	std::vector<uint16_t> indices_;
-#pragma endregion
-#pragma region マテリアル
-	// マテリアルリソース
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialBuff_;
+	// 定数バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> constBuff_;
+	// 頂点バッファマップ
+	VertexPosUv* vertMap = nullptr;
 	// 定数バッファマップ
 	ConstBufferData* constMap = nullptr;
-#pragma endregion
+	// 頂点バッファビュー
+	D3D12_VERTEX_BUFFER_VIEW vbView_{};
+	// テクスチャ番号
+	UINT textureHandle_ = 0;
 	// Z軸回りの回転角
 	float rotation_ = 0.0f;
 	// 座標
@@ -165,8 +213,26 @@ private:
 	Vector2 texBase_ = { 0, 0 };
 	// テクスチャ幅、高さ
 	Vector2 texSize_ = { 100.0f, 100.0f };
-	// テクスチャハンドル
-	uint32_t textureHandle_;
 	// リソース設定
 	D3D12_RESOURCE_DESC resourceDesc_;
+
+private: // メンバ関数
+	/// <summary>
+	/// 頂点データ転送
+	/// </summary>
+	void TransferVertices();
+
+	/// <summary>
+	/// CompileShader関数
+	/// </summary>
+	static IDxcBlob* CompileShader(
+		//ConpilerするShaderファイルへのパス
+		const std::wstring& filePath,
+		//Compilerに使用するProfile
+		const wchar_t* profile,
+		//初期化で生成したのもを3つ
+		IDxcUtils* dxcUtils,
+		IDxcCompiler3* dxcCompiler,
+		IDxcIncludeHandler* includeHandler
+	);
 };
