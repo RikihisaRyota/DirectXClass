@@ -18,7 +18,7 @@ void GameScene::Initialize() {
 	debugCamera_ = new DebugCamera();
 
 	// 入力
-	input_ = Input::GetInstans();
+	input_ = Input::GetInstance();
 
 	// ライト
 	directionalLight_ = new cDirectionalLight();

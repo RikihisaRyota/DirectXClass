@@ -36,6 +36,10 @@ struct Vector3 {
 		return Vector3(this->x - a.x, this->y - a.y, this->z - a.z);
 	}
 
+	Vector3 operator-() const {
+		return Vector3(-this->x, -this->y, -this->z);
+	}
+
 	Vector3 operator*(const Vector3& a) const {
 		return Vector3(this->x * a.x, this->y * a.y, this->z * a.z);
 	}

@@ -9,7 +9,7 @@
 #include "Sprite.h"
 #include "WorldTransform.h"
 #include "ViewProjection.h"
-#include "input/Input.h"
+#include "Input.h"
 
 class PlayerAttack;
 class Player : public BaseCharacter, public Collider {
