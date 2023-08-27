@@ -111,9 +111,9 @@ void GameScene::Initialize() {
 	uint32_t chage_Handle = TextureManager::Load("resources/chageAttack.png");
 	uint32_t triple_Handle = TextureManager::Load("resources/tripleAttack.png");
 	uint32_t dash_Handle = TextureManager::Load("resources/dash.png");
-	uint32_t y_buttan_Handle = TextureManager::Load("resources//y_buttan.png");
-	uint32_t b_buttan_Handle = TextureManager::Load("resources//b_buttan.png");
-	uint32_t x_buttan_Handle = TextureManager::Load("resources//x_buttan.png");
+	uint32_t y_buttan_Handle = TextureManager::Load("resources/y_buttan.png");
+	uint32_t b_buttan_Handle = TextureManager::Load("resources/b_buttan.png");
+	uint32_t x_buttan_Handle = TextureManager::Load("resources/x_buttan.png");
 	player_->SetSprite(
 		chage_Handle, triple_Handle, dash_Handle,
 		static_cast<uint32_t>(TextureManager::TextureHandle::WHITE1x1),
