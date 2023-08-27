@@ -147,7 +147,7 @@
     <ClCompile Include="OBJ.cpp">
       <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
-    <ClCompile Include="Sphere.cpp">
+    <ClCompile Include="ModelSphere.cpp">
       <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
     <ClCompile Include="Plate.cpp">
@@ -359,9 +359,6 @@
     <ClInclude Include="LineGraphicsPipline.h">
       <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
     </ClInclude>
-    <ClInclude Include="PrimitiveDrawer.h">
-      <Filter>ヘッダー ファイル\Figure</Filter>
-    </ClInclude>
     <ClInclude Include="Sprite.h">
       <Filter>ヘッダー ファイル\Figure</Filter>
     </ClInclude>
@@ -490,6 +487,12 @@
     </ClInclude>
     <ClInclude Include="BaseCharacter.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="PrimitiveDrawer.h">
+      <Filter>ヘッダー ファイル\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelSphere.h">
+      <Filter>ヘッダー ファイル\Figure</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

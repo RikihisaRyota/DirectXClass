@@ -140,7 +140,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="PlayerHP.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="Skydome.cpp" />
-    <ClCompile Include="Sphere.cpp" />
+    <ClCompile Include="ModelSphere.cpp" />
     <ClCompile Include="Plate.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="SpriteGraphicsPipline.cpp" />
@@ -193,6 +193,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Input.h" />
     <ClInclude Include="cMaterial.h" />
     <ClInclude Include="Line.h" />
+    <ClInclude Include="ModelSphere.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="PrimitiveDrawer.h" />
     <ClInclude Include="LineGraphicsPipline.h" />
