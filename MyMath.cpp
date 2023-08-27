@@ -378,6 +378,14 @@ Matrix4x4 MakeRotateZMatrix(float radian) {
 	return mat;
 }
 
+Matrix4x4 MakeRotateXYZMatrix(const Vector3& rotation) {
+	Matrix4x4 mat = MakeIdentity4x4();
+	mat *= MakeRotateXMatrix(rotation.x);
+	mat *= MakeRotateYMatrix(rotation.y);
+	mat *= MakeRotateZMatrix(rotation.z);
+	return mat;
+}
+
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {
 	Matrix4x4 tmp = Mul(
 	    MakeRotateXMatrix(rotate.x), Mul(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
@@ -430,11 +438,57 @@ Matrix4x4 MakeViewportMatrix(
 	return mat;
 }
 
+Matrix4x4 MakeViewMatrix(const Vector3& rotation, const Vector3& translation) {
+	Matrix4x4 cameraMatrix = MakeAffineMatrix(Vector3(1.0f, 1.0f, 1.0f), rotation, translation);
+	return Inverse(cameraMatrix);
+}
+
 Matrix4x4 MakeViewProjectMatrixMatrix(const ViewProjection& viewProjection) {
 	Matrix4x4 viewMatrix = Inverse(MakeAffineMatrix(
 	    Vector3(1.0f, 1.0f, 1.0f), viewProjection.rotation_, viewProjection.translation_));
-	return Mul(viewMatrix, viewProjection.matProjection);
+	return Mul(viewMatrix, viewProjection.matProjection_);
 }
+
+Matrix4x4 MakeLookAtLH(const Vector3& target, const Vector3& eye, const Vector3& up) {
+	Vector3 zaxis = Normalize(target - eye);
+	Vector3 xaxis = Normalize(Cross(up, zaxis));
+	Vector3 yaxis = Cross(zaxis, xaxis);
+	return {
+		xaxis.x,yaxis.x,zaxis.x,0.0f,
+		xaxis.y,yaxis.y,zaxis.y,0.0f,
+		xaxis.z,yaxis.z,zaxis.z,0.0f,
+		-Dot(xaxis, eye),-Dot(yaxis, eye),-Dot(zaxis, eye),1.0f
+	};
+}
+
+Matrix4x4 MakeBillboard(const Vector3& target, const Vector3& eye, const Vector3& up) {
+	// ビルボード回転行列
+	// X軸
+	Vector3 zaxis = Normalize(target - eye);
+	// Y軸
+	Vector3 xaxis = Normalize(Cross(up, zaxis));
+	// Z軸
+	Vector3 yaxis = Cross(zaxis, xaxis);
+	return {
+		xaxis.x,xaxis.y,xaxis.z,0.0f,
+		yaxis.x,yaxis.y,yaxis.z,0.0f,
+		zaxis.x,zaxis.y,zaxis.z,0.0f,
+		0.0f,0.0f,0.0f,1.0f
+	};
+}
+
+Vector3 GetXAxis(const Matrix4x4& mat) {
+	return Vector3(mat.m[0][0], mat.m[0][1], mat.m[0][2]);
+}
+
+Vector3 GetYAxis(const Matrix4x4& mat) {
+	return Vector3(mat.m[1][0], mat.m[1][1], mat.m[1][2]);
+}
+
+Vector3 GetZAxis(const Matrix4x4& mat) {
+	return Vector3(mat.m[2][0], mat.m[2][1], mat.m[2][2]);
+}
+
 
 Matrix4x4 Convert(const Matrix4x4& m1) {
 	Matrix4x4 mat;
@@ -489,15 +543,15 @@ void ChackHitBox(const WorldTransform& worldtransform, const ViewProjection& vie
 	Matrix4x4 viewMatrix = MakeViewProjectMatrixMatrix(viewProjection);
 	for (int i = 0; i < 4; i++) {
 		int j = (i + 1) % 4;
-		line->DrawLine3d(
+		line->SetDraw(
 		    Transform(vertices[i], viewMatrix), 
 			Transform(vertices[j], viewMatrix), 
 			color);
-		line->DrawLine3d(
+		line->SetDraw(
 		    Transform(vertices[i], viewMatrix), 
 			Transform(vertices[i + 4], viewMatrix), 
 			color);
-		line->DrawLine3d(
+		line->SetDraw(
 		    Transform(vertices[i + 4], viewMatrix),
 			Transform(vertices[j + 4], viewMatrix), 
 			color);

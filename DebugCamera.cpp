@@ -3,6 +3,7 @@
 #include "ImGuiManager.h"
 #include "Input.h"
 #include "Vector2.h"
+#include "MyMath.h"
 
 
 DebugCamera::DebugCamera() {

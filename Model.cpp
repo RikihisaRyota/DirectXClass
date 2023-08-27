@@ -46,14 +46,7 @@ void Model::Draw(const WorldTransform& worldTransform, const ViewProjection& vie
 		if (IsToon_) {
 			ToonDraw(worldTransform, viewProjection, i);
 		}
-		uint32_t tex = textureHadle;
-		if (tex == 10) {
-			tex = 0;
-		}
-		else {
-			tex = materials_[i]->GetTextureHandle();
-		}
-		BasicDraw(worldTransform, viewProjection, tex, i);
+		BasicDraw(worldTransform, viewProjection, textureHadle, i);
 	}
 }
 

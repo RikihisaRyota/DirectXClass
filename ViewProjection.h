@@ -60,4 +60,6 @@ struct ViewProjection
 	/// 行列を転送する
 	/// </summary>
 	void TransferMatrix();
+
+	void SetViewProjection(const ViewProjection* viewProjection);
 };

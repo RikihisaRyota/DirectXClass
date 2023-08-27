@@ -6,8 +6,6 @@
 #include "ImGuiManager.h"
 #include "WinApp.h"
 
-#pragma comment(lib, "dinput8.lib")
-
 Input* Input::GetInstance() {
 	static Input instans;
 	return &instans;
@@ -51,6 +49,27 @@ void Input::Initialize() {
 		devMouse_->SetCooperativeLevel(WinApp::GetInstance()->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(result));
 #pragma endregion マウス設定
+	// ジョイスティックデバイスの列挙と初期化
+	for (int i = 0; i < XUSER_MAX_COUNT; ++i) {
+		Joystick joystick;
+		joystick.type_ = PadType::XInput;
+		joystick.state_ = {};
+
+		// XInput ジョイスティックの初期化処理
+		XINPUT_STATE xInputState;
+		ZeroMemory(&xInputState, sizeof(XINPUT_STATE));
+
+		DWORD result = XInputGetState(i, &xInputState);
+		if (result == ERROR_SUCCESS) {
+			joystick.device_ = nullptr; // XInput では DirectInput デバイスは使用しない
+			joystick.state_.xInput_ = xInputState;
+			joystick.statePre_.xInput_ = xInputState;
+		}
+
+		if (SUCCEEDED(result)) {
+			devJoysticks_.emplace_back(joystick);
+		}
+	}
 }
 
 void Input::Update() {
@@ -130,4 +149,40 @@ int32_t Input::GetWheel() const {
 
 Vector2 Input::GetMouseMove() const {
 	return {(float)mouse_.lX,(float)mouse_.lY};
+}
+
+bool Input::GetJoystickState(int32_t stickNo, DIJOYSTATE2& out) const {
+	if (stickNo >= 0 && stickNo < static_cast<int32_t>(devJoysticks_.size())) {
+		out = devJoysticks_[stickNo].state_.directInput_;
+		return true;
+	}
+	return false;
+}
+
+bool Input::GetJoystickStatePrevious(int32_t stickNo, DIJOYSTATE2& out) const {
+	if (stickNo >= 0 && stickNo < static_cast<int32_t>(devJoysticks_.size())) {
+		out = devJoysticks_[stickNo].statePre_.directInput_;
+		return true;
+	}
+	return false;
+}
+
+bool Input::GetJoystickState(int32_t stickNo, XINPUT_STATE& out) const {
+	if (stickNo >= 0 && stickNo < static_cast<int32_t>(devJoysticks_.size())) {
+		if (devJoysticks_[stickNo].type_ == PadType::XInput) {
+			out = devJoysticks_[stickNo].state_.xInput_;
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Input::GetJoystickStatePrevious(int32_t stickNo, XINPUT_STATE& out) const {
+	if (stickNo >= 0 && stickNo < static_cast<int32_t>(devJoysticks_.size())) {
+		if (devJoysticks_[stickNo].type_ == PadType::XInput) {
+			out = devJoysticks_[stickNo].statePre_.xInput_;
+			return true;
+		}
+	}
+	return false;
 }

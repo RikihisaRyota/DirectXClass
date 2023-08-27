@@ -1,5 +1,6 @@
 #include "TitleScene.h"
 
+#include "DirectXCommon.h"
 #include "SceneManager.h"
 #include "TextureManager.h"
 
@@ -10,9 +11,9 @@ TitleScene::~TitleScene() {}
 void TitleScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
-	audio_ = Audio::GetInstance();
+	//audio_ = Audio::GetInstance();
 	viewProjection_.Initialize();
-	titie_Sprite_TextureHandle_ = TextureManager::Load("title.png");
+	titie_Sprite_TextureHandle_ = TextureManager::Load("resources/title.png");
 	titie_Sprite_.reset(Sprite::Create(
 	    titie_Sprite_TextureHandle_, Vector2(WinApp::kWindowWidth*0.5f, WinApp::kWindowHeight*0.5f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)));
 }

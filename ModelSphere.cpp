@@ -1,34 +1,35 @@
-#include "Sphere.h"
+#include "ModelSphere.h"
 
 #include "TextureManager.h"
+#include "MyMath.h"
 
 using namespace Microsoft::WRL;
 
 // 静的メンバ変数の実体化
-ID3D12Device* Sphere::sDevice = nullptr;
-Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> Sphere::cmdList_;
+ID3D12Device* ModelSphere::sDevice = nullptr;
+Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> ModelSphere::cmdList_;
 
-void Sphere::SetDevice(ID3D12Device* device) {
+void ModelSphere::SetDevice(ID3D12Device* device) {
 	// nullptrチェック
 	assert(device);
 
 	sDevice = device;
 }
 
-void Sphere::PreDraw(ID3D12GraphicsCommandList* cmdList) {
+void ModelSphere::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
 	assert(cmdList_ == nullptr);
 	// コマンドリストをセット
 	cmdList_ = cmdList;
 }
-void Sphere::PostDraw() {
+void ModelSphere::PostDraw() {
 	// コマンドリストの解除
 	cmdList_ = nullptr;
 }
 
-Sphere* Sphere::Create(uint32_t IsLighting, bool IsToon) {
+ModelSphere* ModelSphere::Create(uint32_t IsLighting, bool IsToon) {
 	// Sphereのインスタンスを生成
-	Sphere* sphere = new Sphere();
+	ModelSphere* sphere = new ModelSphere();
 	assert(sphere);
 	// パイプライン初期化
 	sphere->basicGraphicsPipline_ = std::make_unique<BasicGraphicsPipline>();
@@ -44,31 +45,31 @@ Sphere* Sphere::Create(uint32_t IsLighting, bool IsToon) {
 	return sphere;
 }
 
-void Sphere::Draw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
+void ModelSphere::Draw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
 	if (IsToon_) {
 		ToonDraw(worldTransform, viewProjection, textureHadle);
 	}
 	BasicDraw(worldTransform, viewProjection, textureHadle);
 }
 
-void Sphere::SetToon(uint32_t IsToon) {
+void ModelSphere::SetToon(uint32_t IsToon) {
 	IsToon_ = IsToon;
 }
 
-void Sphere::SetDirectionalLight(const cDirectionalLight& DirectionalLight) {
+void ModelSphere::SetDirectionalLight(const cDirectionalLight& DirectionalLight) {
 	directionalLight_->color_ = DirectionalLight.color_;
 	directionalLight_->direction_ = Normalize(DirectionalLight.direction_);
 	directionalLight_->intensiy_ = DirectionalLight.intensiy_;
 	directionalLight_->sharpness_ = DirectionalLight.sharpness_;
 }
 
-void Sphere::SetMaterial(const cMaterial& material) {
+void ModelSphere::SetMaterial(const cMaterial& material) {
 	material_->color_ = material.color_;
 	material_->enableLightint_ = material.enableLightint_;
 	material_->uvTransform_ = material.uvTransform_;
 }
 
-void Sphere::Initialize() {
+void ModelSphere::Initialize() {
 	HRESULT result = S_FALSE;
 
 	// 経度分割1つ分の角度
@@ -201,7 +202,7 @@ void Sphere::Initialize() {
 #pragma endregion
 }
 
-void Sphere::BasicDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
+void ModelSphere::BasicDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
 	// ルートシグネチャの設定
 	cmdList_->SetGraphicsRootSignature(basicGraphicsPipline_->GetRootSignature());
 
@@ -233,7 +234,7 @@ void Sphere::BasicDraw(const WorldTransform& worldTransform, const ViewProjectio
 	cmdList_->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
 }
 
-void Sphere::ToonDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
+void ModelSphere::ToonDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
 	// ルートシグネチャの設定
 	cmdList_->SetGraphicsRootSignature(toonGraphicsPipline_->GetRootSignature());
 
@@ -266,7 +267,7 @@ void Sphere::ToonDraw(const WorldTransform& worldTransform, const ViewProjection
 	cmdList_->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
 }
 
-ComPtr<ID3D12Resource> Sphere::CreateBuffer(UINT size) {
+ComPtr<ID3D12Resource> ModelSphere::CreateBuffer(UINT size) {
 	HRESULT result = S_FALSE;
 	// ヒーププロパティ
 	CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);

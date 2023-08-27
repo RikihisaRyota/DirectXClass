@@ -4,18 +4,30 @@
 
 #include "Audio.h"
 #include "Cube.h"
-#include "DebugCamera.h"
 #include "Input.h"
-#include "Line.h"
 #include "Model.h"
 #include "OBJ.h"
-
-#include "Pera.h"
-
+#include "PrimitiveDrawer.h"
 #include "SafeDelete.h"
-#include "Plane.h"
-#include "Sphere.h"
+#include "Plate.h"
+#include "ModelSphere.h"
 #include "Sprite.h"
+
+#include "CollisionManager.h"
+#include "DebugCamera.h"
+#include "Enemy.h"
+#include "EnemyAttack.h"
+#include "EnemyHP.h"
+#include "FollowCamera.h"
+#include "Ground.h"
+#include "Player.h"
+#include "PlayerAttack.h"
+#include "PlayerHP.h"
+#include "SafeDelete.h"
+#include "Skydome.h"
+#include "ViewProjection.h"
+#include "WorldTransform.h"
+
 
 class DirectXCommon;
 /// <summary>
@@ -69,80 +81,37 @@ private: // メンバ変数
 		Vector3 rotate_;
 		Vector3 translate_;
 	};
-	std::unique_ptr<Sprite> sprite_;
-
-	/// <summary>
-	/// ゲーム用
-	/// </summary>
 	ViewProjection viewProjection_;
-	// obj
-	std::vector<std::unique_ptr<OBJ>> obj_;
-	std::vector<std::unique_ptr<WorldTransform>> objWorldTransform_;
-	std::vector<uint32_t> objUseTexture_;
-	std::vector<uint32_t> objUseToon_;
-	std::vector< std::unique_ptr<cMaterial>> objMaterial_;
-	std::vector< std::unique_ptr<UVtranslation>> objUVtranslation_;
-	// teapot
-	std::vector<std::unique_ptr<OBJ>> teapot_;
-	std::vector<std::unique_ptr<WorldTransform>> teapotWorldTransform_;
-	std::vector<uint32_t> teapotUseTexture_;
-	std::vector<uint32_t> teapotUseToon_;
-	std::vector< std::unique_ptr<cMaterial>> teapotMaterial_;
-	std::vector< std::unique_ptr<UVtranslation>> teapotUVtranslation_;
-	// bunny
-	std::vector<std::unique_ptr<OBJ>> bunny_;
-	std::vector<std::unique_ptr<WorldTransform>> bunnyWorldTransform_;
-	std::vector<uint32_t> bunnyUseTexture_;
-	std::vector<uint32_t> bunnyUseToon_;
-	std::vector< std::unique_ptr<cMaterial>> bunnyMaterial_;
-	std::vector< std::unique_ptr<UVtranslation>> bunnyUVtranslation_;
-	// multiMesh
-	std::vector<std::unique_ptr<OBJ>> multiMesh_;
-	std::vector<std::unique_ptr<WorldTransform>> multiMeshWorldTransform_;
-	std::vector<uint32_t> multiMeshUseTexture_;
-	std::vector<uint32_t> multiMeshUseToon_;
-	std::vector< std::unique_ptr<cMaterial>>multiMeshMaterial_;
-	std::vector< std::unique_ptr<UVtranslation>> multiMeshUVtranslation_;
-	// cube
-	std::vector<std::unique_ptr<Cube>> cube_;
-	std::vector<std::unique_ptr<WorldTransform>> cubeWorldTransform_;
-	std::vector<uint32_t> cubeUseTexture_;
-	std::vector<uint32_t> cubeUseToon_;
-	std::vector< std::unique_ptr<cMaterial>> cubeMaterial_;
-	std::vector< std::unique_ptr<UVtranslation>> cubeUVtranslation_;
-	// sphere
-	std::vector<std::unique_ptr<Sphere>> sphere_;
-	std::vector<std::unique_ptr<WorldTransform>> sphereWorldTransform_;
-	std::vector<uint32_t> sphereUseTexture_;
-	std::vector<uint32_t> sphereUseToon_;
-	std::vector< std::unique_ptr<cMaterial>> sphereMaterial_;
-	std::vector< std::unique_ptr<UVtranslation>> sphereUVtranslation_;
-	// plane
-	std::vector<std::unique_ptr<Plane>> plane_;
-	std::vector<std::unique_ptr<WorldTransform>> planeWorldTransform_;
-	std::vector<uint32_t> planeUseTexture_;
-	std::vector<uint32_t> planeUseToon_;
-	std::vector<std::unique_ptr<cMaterial>> planeMaterial_;
-	std::vector<std::unique_ptr<UVtranslation>> planeUVtranslation_;
+	// デバックカメラ切り替え
+	bool debugCameraFlag_;
+	CollisionManager collisionManager;
 
-	// multiMaterial
-	std::vector<std::unique_ptr<Model>> multiMaterial_;
-	std::vector<std::unique_ptr<WorldTransform>> multiMaterialWorldTransform_;
-	std::vector<uint32_t> multiMaterialUseTexture_;
-	std::vector<uint32_t> multiMaterialUseToon_;
-	std::vector<std::vector<std::unique_ptr<cMaterial>>> multiMaterialMaterial_;
-	std::vector<std::vector<std::unique_ptr<UVtranslation>>> multiMaterialUVtranslation_;
-
-	// suzanne
-	std::vector<std::unique_ptr<Model>> suzanne_;
-	std::vector<std::unique_ptr<WorldTransform>> suzanneWorldTransform_;
-	std::vector<uint32_t> suzanneUseTexture_;
-	std::vector<uint32_t> suzanneUseToon_;
-	std::vector<std::vector<std::unique_ptr<cMaterial>>> suzanneMaterial_;
-	std::vector<std::vector<std::unique_ptr<UVtranslation>>> suzanneUVtranslation_;
-
-	// 音声再生
-	Audio* audio;
-
-	Audio::SoundData soundHandle_;
+#pragma endregion
+	/// <summary>
+	/// ゲームシーン用
+	/// </summary>
+#pragma region プレイヤー
+	// プレイヤー
+	std::unique_ptr<Player> player_;
+	std::unique_ptr<PlayerAttack> playerAttack_;
+	std::unique_ptr<PlayerHP> playerHP_;
+#pragma endregion
+#pragma region 天球
+	// 天球
+	std::unique_ptr<Skydome> skydome_;
+#pragma endregion
+#pragma region 地面
+	// 地面
+	std::unique_ptr<Ground> ground_;
+#pragma endregion
+#pragma region 追従カメラ
+	// 追従カメラ
+	std::unique_ptr<FollowCamera> followCamera_;
+#pragma endregion
+#pragma region 敵
+	// 敵
+	std::unique_ptr<Enemy> enemy_;
+	std::unique_ptr<EnemyAttack> enemyAttack_;
+	std::unique_ptr<EnemyHP> enemyHP_;
+#pragma endregion
 };

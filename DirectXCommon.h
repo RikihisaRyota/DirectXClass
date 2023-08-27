@@ -4,7 +4,6 @@
 
 #include "WinApp.h"
 
-
 class DirectXCommon {
 public:// 静的メンバ関数
 	/// <summary>

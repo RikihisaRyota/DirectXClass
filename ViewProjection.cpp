@@ -3,6 +3,7 @@
 #include <cassert>
 #include <d3dx12.h>
 #include "DirectXCommon.h"
+#include "MyMath.h"
 
 void ViewProjection::Initialize() {
 	// 定数バッファの生成
@@ -70,4 +71,9 @@ void ViewProjection::TransferMatrix() {
 	constMap_->view = matView_;
 	constMap_->projection = matProjection_;
 	constMap_->cameraPos = translation_;
+}
+
+void ViewProjection::SetViewProjection(const ViewProjection* viewProjection) {
+	matView_ = viewProjection->matView_;
+	matProjection_ = viewProjection->matProjection_;
 }

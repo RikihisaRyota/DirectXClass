@@ -1,7 +1,6 @@
 #pragma once
 #include "Audio.h"
 #include "DebugCamera.h"
-#include "DirectXCommon.h"
 #include "FollowCamera.h"
 #include "Input.h"
 #include "Model.h"
@@ -10,6 +9,8 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 
+
+class DirectXCommon;
 class GameOver {
 public: // メンバ関数
 	/// <summary>

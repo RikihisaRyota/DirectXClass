@@ -1,5 +1,6 @@
 #include "GameOver.h"
 
+#include "DirectXCommon.h"
 #include "TextureManager.h"
 #include "SceneManager.h"
 
@@ -13,7 +14,7 @@ void GameOver::Initialize() {
 	//audio_ = Audio::GetInstance();
 	viewProjection_.Initialize();
 
-	over_Sprite_TextureHandle_ = TextureManager::Load("over.png");
+	over_Sprite_TextureHandle_ = TextureManager::Load("resources./over.png");
 	over_Sprite_.reset(Sprite::Create(
 	    over_Sprite_TextureHandle_,
 	    Vector2(WinApp::kWindowWidth * 0.5f, WinApp::kWindowHeight * 0.5f),

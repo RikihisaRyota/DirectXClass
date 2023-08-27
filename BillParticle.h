@@ -1,7 +1,7 @@
 #pragma once
 #include "WorldTransform.h"
 #include "Vector3.h"
-#include "Plane.h"
+#include "Plate.h"
 #include <array>
 class BillParticle {
 	static const int kPaticles = 50;
@@ -10,7 +10,7 @@ class BillParticle {
 		Vector3 velocity_;
 		int time_;
 		bool IsAlive_;
-		Plane* sprite_;
+		Plate* sprite_;
 	};
 public:
 	BillParticle();

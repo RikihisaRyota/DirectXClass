@@ -1,8 +1,10 @@
 #include "WinApp.h"
 #include "DirectXCommon.h"
 #include "GameScene.h"
+#include "GlobalVariables.h"
 #include "ImGuiManager.h"
 #include "TextureManager.h"
+#include "SceneManager.h"
 
 #include <dxgidebug.h>
 #include <cassert>
@@ -43,7 +45,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	LineGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
 	// Spriteの静的初期化
-	Plane::SetDevice(dxCommon->GetDevice());
+	Plate::SetDevice(dxCommon->GetDevice());
 
 	// OBJの静的初期化
 	OBJ::SetDevice(dxCommon->GetDevice());
@@ -52,7 +54,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Cube::SetDevice(dxCommon->GetDevice());
 
 	// Sphereのデバイスセット
-	Sphere::SetDevice(dxCommon->GetDevice());
+	ModelSphere::SetDevice(dxCommon->GetDevice());
 
 	// Material
 	Material::SetDevice(dxCommon->GetDevice());
@@ -64,22 +66,19 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Model::SetDevice(dxCommon->GetDevice());
 
 	// Line
-	Line::SetDevice(dxCommon->GetDevice());
-	Line::GetInstance()->Initialize();
+	PrimitiveDrawer::SetDevice(dxCommon->GetDevice());
+	PrimitiveDrawer::GetInstance()->Initialize();
 
 	// ImGuiの初期化
 	ImGuiManager* imguiManager = ImGuiManager::GetInstance();
 	imguiManager->Initialize(win, dxCommon);
 
-	// ゲームシーンの初期化
-	GameScene* gameScene = nullptr;
-	gameScene = new GameScene();
-	gameScene->Initialize();
+	// グローバル変数の読み込み
+	GlobalVariables::GetInstance()->LoadFiles();
 
-	// Pera
-	Pera* pera = nullptr;
-	pera = new Pera();
-	pera->Initialize(dxCommon, dxCommon->GetBackBuff(), dxCommon->GetRTVDescriptorHeap());
+	// ゲームシーンの初期化
+	SceneManager* sceneManager = nullptr;
+	sceneManager = new SceneManager(static_cast<uint32_t>(TextureManager::TextureHandle::WHITE1x1));
 
 	// メインループ
 	while (true) {
@@ -91,40 +90,30 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		imguiManager->Begin();
 		// 入力関連の毎フレーム処理
 		input->Update();
-		//// ゲームシーンの毎フレーム処理
-		gameScene->Update();
+		// ゲームシーンの毎フレーム処理
+		sceneManager->Update();
 		// ImGui受付終了
 		imguiManager->End();
 		// テクスチャマネージャーの描画準備
 		TextureManager::GetInstance()->PreDraw();
-		//// SRV->RTV
-		//pera->PreDraw();
-		//// ゲームシーンの描画
-		//gameScene->Draw2();
-		//// RTV->SRV
-		//pera->PostDraw();
 		// 描画開始
-		dxCommon->PreDraw();
-		// LineのPreDraw
-		
+		dxCommon->PreDraw();		
 		// ゲームシーンの描画
-		gameScene->Draw();
+		sceneManager->Draw();
 		// ImGui描画
 		imguiManager->Draw();
 		// 描画終わり
 		dxCommon->PostDraw();
 	}
-	SafeDelete(pera);
 
 	// ゲームシーン解放
-	gameScene->Release();
-	SafeDelete(gameScene);
+	SafeDelete(sceneManager);
 
 	// ImGui解放
 	imguiManager->Finalize();
 
 	// Line解放
-	Line::Release();
+	PrimitiveDrawer::Release();
 
 	Sprite::Release();
 

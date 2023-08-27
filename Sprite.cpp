@@ -4,6 +4,7 @@
 #include <d3dcompiler.h>
 #include <d3dx12.h>
 
+#include "MyMath.h"
 #pragma comment(lib, "d3dcompiler.lib")
 
 using namespace DirectX;

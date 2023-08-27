@@ -1,6 +1,7 @@
 #include "Plate.h"
 
 #include "TextureManager.h"
+#include "MyMath.h"
 
 using namespace Microsoft::WRL;
 

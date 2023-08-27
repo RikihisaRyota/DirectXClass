@@ -1,7 +1,8 @@
 #include "GameClear.h"
 
+#include "DirectXCommon.h"
 #include "SceneManager.h"
-
+#include "TextureManager.h"
 GameClear::GameClear() {}
 
 GameClear::~GameClear() {}
@@ -12,7 +13,7 @@ void GameClear::Initialize() {
 	//audio_ = Audio::GetInstance();
 	viewProjection_.Initialize();
 
-	clear_Sprite_TextureHandle_ = TextureManager::Load("clear.png");
+	clear_Sprite_TextureHandle_ = TextureManager::Load("resources/clear.png");
 	clear_Sprite_.reset(Sprite::Create(
 	    clear_Sprite_TextureHandle_,
 	    Vector2(WinApp::kWindowWidth * 0.5f, WinApp::kWindowHeight * 0.5f),
