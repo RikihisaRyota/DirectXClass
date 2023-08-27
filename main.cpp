@@ -42,9 +42,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// LineGraphicsPiplineの静的初期化
 	LineGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
-	// SpriteGraphicsPiplineの静的初期化
-	//SpriteGraphicsPipline::SetDevice(dxCommon->GetDevice());
-
 	// Spriteの静的初期化
 	Plane::SetDevice(dxCommon->GetDevice());
 
@@ -128,6 +125,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// Line解放
 	Line::Release();
+
+	Sprite::Release();
 
 	// テクスチャマネージャーの解放
 	TextureManager::Release();

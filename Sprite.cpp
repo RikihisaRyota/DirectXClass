@@ -229,6 +229,21 @@ Sprite* Sprite::Create(
 	return sprite;
 }
 
+void Sprite::Release() {
+	
+	// ルートシグネチャの解放
+	sRootSignature.Reset();
+
+	// パイプラインステートオブジェクトの解放
+	sPipelineState.Reset();
+
+	// メンバー変数のリセット
+	sDevice = nullptr;
+	sCommandList = nullptr;
+	sDescriptorHandleIncrementSize = 0;
+	sMatProjection = MakeIdentity4x4();
+}
+
 Sprite::Sprite() {}
 
 Sprite::Sprite(
