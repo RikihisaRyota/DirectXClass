@@ -5,6 +5,7 @@
 #include "Input.h"
 #include "MyMath.h"
 #include "EnemyAttack.h"
+#include "Player.h"
 
 #include "RandomNumberGenerator.h"
 
@@ -191,35 +192,55 @@ void Enemy::RootUpdate() {
 		behaviorRequest_ = Behavior::kAttack;
 		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kMeteoAttack);
 	}
-	// 移動
-	Move();
-	// 動き
-	Motion();
+	if (std::fabs(Length(worldTransform_.at(0).translation_ - player_->GetWorldTransform().translation_))< kDistance_) {
+		RandomNumberGenerator rnd;
+		int type = rnd.NextUIntRange(0,static_cast<int>(EnemyAttack::Behavior::kCount) - 1);
+		switch (type) {
+		case static_cast<int>(EnemyAttack::Behavior::kPressAttack):
+			behaviorRequest_ = Behavior::kAttack;
+			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
+			break;
+		case static_cast<int>(EnemyAttack::Behavior::kDashAttack):
+			behaviorRequest_ = Behavior::kAttack;
+			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kDashAttack);
+			break;
+		case static_cast<int>(EnemyAttack::Behavior::kPunchAttack):
+			behaviorRequest_ = Behavior::kAttack;
+			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
+			break;
+		case static_cast<int>(EnemyAttack::Behavior::kTornadoAttack):
+			behaviorRequest_ = Behavior::kAttack;
+			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kTornadoAttack);
+			break;
+		case static_cast<int>(EnemyAttack::Behavior::kMeteoAttack):
+			behaviorRequest_ = Behavior::kAttack;
+			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kMeteoAttack);
+			break;
+		}
+	}
+	else {
+		// 移動
+		Move();
+		// 動き
+		Motion();
+	}
 }
 bool move = false;
 void Enemy::Move() {
 	vector_ = {0.0f, 0.0f, 0.0f};
-	if (ImGui::Button("move")) {
-		move ^= true;
+	
+	Vector3 end = player_->GetWorldTransform().translation_- worldTransform_.at(0).translation_;
+	end.y = 0.0f;
+	if (end != Vector3(0.0f, 0.0f, 0.0f)) {
+		end.Normalize();
 	}
-	if (move) {
-		// 円運動の計算
-		float radius = 5.0f;
-		float x = radius * std::cos(angle_);
-		float z = radius * std::sin(angle_);
-		vector_ = {x, 0.0f, z};
-		vector_.Normalize();
-	} else {
-		worldTransform_.at(0).translation_ = Vector3(0.0f, kFloor_Distance_, 10.0f);
-		worldTransform_.at(0).rotation_ = Vector3(0.0f, 0.0f, 0.0f);
-	}
-	// 移動量に速さを反映
+	vector_ = Slerp(vector_, end, 0.01f);
 	if (vector_ != Vector3(0.0f, 0.0f, 0.0f)) {
 		vector_.Normalize();
 	}
-	velocity_ = vector_ * 0.1f;
-	velocity_ += acceleration_;
+	velocity_ = vector_ * kMove_Speed_;
 	worldTransform_.at(0).translation_ += velocity_;
+	worldTransform_.at(0).translation_.y = kFloor_Distance_;
 	// 角度の更新
 	angle_ += 0.02f;
 }

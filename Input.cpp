@@ -6,6 +6,11 @@
 #include "ImGuiManager.h"
 #include "WinApp.h"
 
+// デバイス発見時に実行される
+BOOL CALLBACK DeviceFindCallBack(LPCDIDEVICEINSTANCE ipddi, LPVOID pvRef) {
+	return DIENUM_CONTINUE;
+}
+
 Input* Input::GetInstance() {
 	static Input instans;
 	return &instans;
@@ -49,33 +54,39 @@ void Input::Initialize() {
 		devMouse_->SetCooperativeLevel(WinApp::GetInstance()->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(result));
 #pragma endregion マウス設定
-	// ジョイスティックデバイスの列挙と初期化
-	for (int i = 0; i < XUSER_MAX_COUNT; ++i) {
-		Joystick joystick;
-		joystick.type_ = PadType::XInput;
-		joystick.state_ = {};
+#pragma region ジョイスティック
+	LPVOID* parameter=new LPVOID();
+	if (dInput_->EnumDevices(
+		DI8DEVTYPE_JOYSTICK,
+		DeviceFindCallBack,
+		&parameter,
+		DIEDFL_ATTACHEDONLY)) {
+	Joystick* devJoysticks = new Joystick();
+	// ジョイスティック生成
+	result = dInput_->CreateDevice(GUID_Joystick, &devJoysticks->device_, NULL);
+	assert(SUCCEEDED(result));
 
-		// XInput ジョイスティックの初期化処理
-		XINPUT_STATE xInputState;
-		ZeroMemory(&xInputState, sizeof(XINPUT_STATE));
+	// 入力データ形式のセット
+	result = devJoysticks->device_->SetDataFormat(&c_dfDIJoystick); // ジョイスティック用のデータ・フォーマットを設定
+	assert(SUCCEEDED(result));
 
-		DWORD result = XInputGetState(i, &xInputState);
-		if (result == ERROR_SUCCESS) {
-			joystick.device_ = nullptr; // XInput では DirectInput デバイスは使用しない
-			joystick.state_.xInput_ = xInputState;
-			joystick.statePre_.xInput_ = xInputState;
-		}
+	// 排他制御レベルのセット
+	result = devJoysticks->device_->SetCooperativeLevel(WinApp::GetInstance()->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	assert(SUCCEEDED(result));
 
-		if (SUCCEEDED(result)) {
-			devJoysticks_.emplace_back(joystick);
-		}
+	devJoysticks_.emplace_back(devJoysticks);
+	delete devJoysticks;
 	}
+#pragma endregion
 }
 
 void Input::Update() {
 	devKeyboard_->Acquire(); // キーボード動作開始
 	devMouse_->Acquire(); // マウス動作開始
-
+	// ゲームパット
+	for (auto joystic : devJoysticks_) {
+		joystic->device_->Acquire();
+	}
 	// 前回のキー入力を保存
 	keyPre_ = key_;
 
@@ -86,6 +97,12 @@ void Input::Update() {
 
 	// マウスの入力
 	devMouse_->GetDeviceState(sizeof(DIMOUSESTATE), &mouse_);
+
+	// ゲームパット
+	for (auto joystic : devJoysticks_) {
+		joystic->statePre_ = joystic->state_;
+		joystic->device_->GetDeviceState(sizeof(joystic->state_), &joystic->state_);
+	}
 }
 
 bool Input::PushKey(BYTE keyNumber) const {
@@ -153,7 +170,7 @@ Vector2 Input::GetMouseMove() const {
 
 bool Input::GetJoystickState(int32_t stickNo, DIJOYSTATE2& out) const {
 	if (stickNo >= 0 && stickNo < static_cast<int32_t>(devJoysticks_.size())) {
-		out = devJoysticks_[stickNo].state_.directInput_;
+		out = devJoysticks_[stickNo]->state_.directInput_;
 		return true;
 	}
 	return false;
@@ -161,7 +178,7 @@ bool Input::GetJoystickState(int32_t stickNo, DIJOYSTATE2& out) const {
 
 bool Input::GetJoystickStatePrevious(int32_t stickNo, DIJOYSTATE2& out) const {
 	if (stickNo >= 0 && stickNo < static_cast<int32_t>(devJoysticks_.size())) {
-		out = devJoysticks_[stickNo].statePre_.directInput_;
+		out = devJoysticks_[stickNo]->statePre_.directInput_;
 		return true;
 	}
 	return false;
@@ -169,8 +186,8 @@ bool Input::GetJoystickStatePrevious(int32_t stickNo, DIJOYSTATE2& out) const {
 
 bool Input::GetJoystickState(int32_t stickNo, XINPUT_STATE& out) const {
 	if (stickNo >= 0 && stickNo < static_cast<int32_t>(devJoysticks_.size())) {
-		if (devJoysticks_[stickNo].type_ == PadType::XInput) {
-			out = devJoysticks_[stickNo].state_.xInput_;
+		if (devJoysticks_[stickNo]->type_ == PadType::XInput) {
+			out = devJoysticks_[stickNo]->state_.xInput_;
 			return true;
 		}
 	}
@@ -179,8 +196,8 @@ bool Input::GetJoystickState(int32_t stickNo, XINPUT_STATE& out) const {
 
 bool Input::GetJoystickStatePrevious(int32_t stickNo, XINPUT_STATE& out) const {
 	if (stickNo >= 0 && stickNo < static_cast<int32_t>(devJoysticks_.size())) {
-		if (devJoysticks_[stickNo].type_ == PadType::XInput) {
-			out = devJoysticks_[stickNo].statePre_.xInput_;
+		if (devJoysticks_[stickNo]->type_ == PadType::XInput) {
+			out = devJoysticks_[stickNo]->statePre_.xInput_;
 			return true;
 		}
 	}

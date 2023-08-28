@@ -85,7 +85,7 @@ void Model::BasicDraw(const WorldTransform& worldTransform, const ViewProjection
 	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::LIGHTING), materials_[i]->GeLightingBuff()->GetGPUVirtualAddress());
 
 	// SRVをセット
-	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(cmdList_.Get(), static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::TEXTURE), textureHadle);
+	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(cmdList_.Get(), static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::TEXTURE), materials_[i]->GetTextureHandle());
 
 	// 描画コマンド
 	cmdList_->DrawInstanced(static_cast<UINT>(meshs_[i]->GetVertices().size()), 1, 0, 0);

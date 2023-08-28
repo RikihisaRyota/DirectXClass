@@ -60,14 +60,14 @@ PixelShaderOutput main(VertexShaderOutput input)
         float4 specular = gDirectionLight.color * t * gDirectionLight.sharpness;
         // アンビエント
         float4 ambient = float4(0.1f, 0.1f, 0.1f, 0.0f);
-        output.color = gMaterial.color * textureColor * (diffuse + specular + ambient);
+        output.color = gMaterial.color * textureColor * (diffuse /*+ specular*/ + ambient);
     }
     else if (gMaterial.enableLighting == 2)
     {
         // ranbert
         float cos = saturate(dot(normalize(input.normal), -gDirectionLight.direction));
         float4 diffuse = gDirectionLight.color * cos * gDirectionLight.intensity;
-         // スペキュラー
+        // スペキュラー
         float3 refVec = reflect(gDirectionLight.direction, input.normal);
         float3 toEye = normalize(gViewProjection.cameraPos - input.ray.xyz);
         float t = saturate(dot(refVec, toEye));
@@ -75,7 +75,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         float4 specular = gDirectionLight.color * t * gDirectionLight.sharpness;
         // アンビエント
         float4 ambient = float4(0.1f, 0.1f, 0.1f, 0.0f);
-        output.color = gMaterial.color * textureColor * (diffuse + specular + ambient);
+        output.color = gMaterial.color * textureColor * (diffuse /*+ specular*/ + ambient);
     }
     else
     {

@@ -3,6 +3,7 @@
 #include "BaseCharacter.h"
 
 class EnemyAttack;
+class Player;
 class Enemy : public BaseCharacter, public Collider {
 public:
 	// ふるまい
@@ -41,7 +42,7 @@ public:
 	void SetEnemyAttack(EnemyAttack* enemyAttack) { enemyAttack_ = enemyAttack; }
 	void EnemyRotate(const Vector3& vector);
 	float GetFloorDistance() { return kFloor_Distance_; }
-
+	void SetPlayer(Player* player) { player_ = player; }
 private:
 	void HitBoxInitialize() override;
 	void RootInitialize();
@@ -67,14 +68,17 @@ private:
 
 	// 衝突を検出したら呼び出されるコールバック関数
 	void OnCollision(const OBB& obb, uint32_t type) override;
-
 private:
 	// 振り向き速度
 	const float kTurn = 0.4f;
 
 	const float kFloor_Distance_ = 2.5f;
 
+	const float kMove_Speed_ = 0.5f;
+
+	const float kDistance_ = 5.0f;
 private:
+	Player* player_;
 	// 向き
 	Vector3 interRotate_;
 	// さいしゅうてきに向きたい方向

@@ -22,6 +22,7 @@ public:
 		kPunchAttack,  // パンチ
 		kTornadoAttack, // 回転
 		kMeteoAttack, // メテオ
+		kCount,
 	};
 
 	enum class Parts {

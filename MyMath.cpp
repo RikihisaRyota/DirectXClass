@@ -29,7 +29,9 @@ float Lerp(float start, float end, float t) {
 Vector3 Slerp(const Vector3& v1, const Vector3& v2, float t) {
 	// 2つのベクトルの内積を計算
 	const float cosTheta = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
-
+	if (cosTheta < -1.0f || cosTheta > 1.0f) {
+		return Lerp(v1,v2,t);
+	}
 	// 角度（ラジアン）を計算
 	const float theta = std::acos(cosTheta);
 

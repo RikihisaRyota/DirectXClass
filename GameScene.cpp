@@ -35,7 +35,7 @@ void GameScene::Initialize() {
 	// 天球モデル
 	std::unique_ptr<Model> skydomeModel;
 	// 天球のモデル
-	skydomeModel.reset(Model::Create("sky", true, true));
+	skydomeModel.reset(Model::Create("sky", true,false));
 	// 天球生成
 	skydome_ = std::make_unique<Skydome>();
 	// 天球初期化
@@ -45,7 +45,7 @@ void GameScene::Initialize() {
 	// 地面モデル
 	std::unique_ptr<Model> groundModel;
 	// 地面のモデル
-	groundModel.reset(Model::Create("Ground", true, true));
+	groundModel.reset(Model::Create("Ground", true, false));
 	// 地面生成
 	ground_ = std::make_unique<Ground>();
 	// 地面初期化
@@ -65,14 +65,10 @@ void GameScene::Initialize() {
 	std::vector<std::unique_ptr<Model>> enemyAttackModel(
 		static_cast<int>(EnemyAttack::Parts::COUNT));
 	// 敵モデル
-	enemyModel[static_cast<int>(Enemy::Parts::BODY)].reset(
-		Model::Create("enemy_Body", true, true));
-	enemyModel[static_cast<int>(Enemy::Parts::HEAD)].reset(
-		Model::Create("enemy_Head", true, true));
-	enemyModel[static_cast<int>(Enemy::Parts::ARML)].reset(
-		Model::Create("enemy_armL", true, true));
-	enemyModel[static_cast<int>(Enemy::Parts::ARMR)].reset(
-		Model::Create("enemy_armR", true, true));
+	enemyModel[static_cast<int>(Enemy::Parts::BODY)].reset(Model::Create("enemy_Body", true));
+	enemyModel[static_cast<int>(Enemy::Parts::HEAD)].reset(Model::Create("enemy_Head", true));
+	enemyModel[static_cast<int>(Enemy::Parts::ARML)].reset(Model::Create("enemy_armL", true));
+	enemyModel[static_cast<int>(Enemy::Parts::ARMR)].reset(Model::Create("enemy_armR", true));
 
 	// 敵攻撃モデル
 	enemyAttackModel[static_cast<int>(EnemyAttack::Parts::CIRCLE)].reset(
@@ -83,6 +79,7 @@ void GameScene::Initialize() {
 		Model::Create("enemy_Meteo", true,true));
 	// 敵初期化
 	enemy_->Initialize(std::move(enemyModel));
+	enemy_->SetPlayer(player_.get());
 	enemy_->SetEnemyAttack(enemyAttack_.get());
 	// 敵攻撃初期化
 	enemyAttack_->SetPlayerEnemy(player_.get(), enemy_.get());
@@ -97,10 +94,10 @@ void GameScene::Initialize() {
 	std::vector<std::unique_ptr<Model>> playerAttackModel(
 		static_cast<int>(PlayerAttack::Parts::COUNT));
 	// プレイヤーモデル
-	playerModel[static_cast<int>(Player::Parts::HEAD)].reset(Model::Create("head", true, true));
-	playerModel[static_cast<int>(Player::Parts::BODY)].reset(Model::Create("body", true, true));
-	playerModel[static_cast<int>(Player::Parts::ARML)].reset(Model::Create("armL", true, true));
-	playerModel[static_cast<int>(Player::Parts::ARMR)].reset(Model::Create("armR", true, true));
+	playerModel[static_cast<int>(Player::Parts::HEAD)].reset(Model::Create("head", true));
+	playerModel[static_cast<int>(Player::Parts::BODY)].reset(Model::Create("body", true));
+	playerModel[static_cast<int>(Player::Parts::ARML)].reset(Model::Create("armL", true));
+	playerModel[static_cast<int>(Player::Parts::ARMR)].reset(Model::Create("armR", true));
 	playerModel[static_cast<int>(Player::Parts::WEAPON)].reset(
 		Model::Create("player_Weapon", true,true));
 	playerAttackModel[static_cast<int>(PlayerAttack::Parts::WEAPON)].reset(

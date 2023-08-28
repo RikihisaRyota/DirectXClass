@@ -11,6 +11,7 @@
 #include <dinput.h>
 
 #pragma comment(lib, "dinput8.lib")
+#pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "XInput.lib")
 
 /// <summary>
@@ -145,7 +146,8 @@ private: // メンバ変数
 	Microsoft::WRL::ComPtr<IDirectInput8> dInput_;
 	Microsoft::WRL::ComPtr<IDirectInputDevice8> devKeyboard_;
 	Microsoft::WRL::ComPtr<IDirectInputDevice8> devMouse_;
-	std::vector<Joystick> devJoysticks_;
+	std::vector<Joystick*> devJoysticks_;
+
 	DIMOUSESTATE2 mouse_;
 	DIMOUSESTATE2 mousePre_;
 	std::array<BYTE, 256> key_;
