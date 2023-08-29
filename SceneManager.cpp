@@ -22,7 +22,9 @@ SceneManager::SceneManager(uint32_t textureHandle) {
 	t_Speed_ = 0.05f;
 }
 
-SceneManager::~SceneManager() {}
+SceneManager::~SceneManager() {
+	gameScene_->Release();
+}
 
 void SceneManager::Initialize() { 
 	switch (state_) {

@@ -264,4 +264,5 @@ void GameScene::Draw() {
 void GameScene::Release() {
 	SafeDelete(debugCamera_);
 	SafeDelete(directionalLight_);
+	playerAttack_->ParticleRelease();
 }

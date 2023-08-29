@@ -16,6 +16,8 @@ const double PI = 3.14159265359;
 // ベクトル変換
 Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m);
 
+Matrix4x4 NotTransform(const Matrix4x4& matrix);
+
 Vector3 Lerp(const Vector3& start, const Vector3& end, float t);
 float Lerp(float start, float end, float t);
 

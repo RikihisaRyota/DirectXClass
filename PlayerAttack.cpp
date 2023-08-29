@@ -86,7 +86,8 @@ void PlayerAttack::Update() {
 	HitBoxUpdate();
 	ParticleUpdate();
 	ImGui::Begin("playerAttack");
-	ImGui::SliderFloat("range_", &range_, 1.0f, 5.0f);
+	ImGui::SliderFloat("distance_min_", &distance_min_, 0.0f, 10.0f);
+	ImGui::SliderFloat("distance_max_", &distance_max_, 10.0f, 30.0f);
 	ImGui::SliderFloat("scale_", &scale_, 0.0f, 1.0f);
 	float min = static_cast<float>(time_min_);
 	float max = static_cast<float>(time_max_);
@@ -115,6 +116,10 @@ void PlayerAttack::Draw(const ViewProjection& viewProjection) {
 
 		break;
 	}
+}
+
+void PlayerAttack::ParticleRelease() {
+	particles_.clear();
 }
 
 void PlayerAttack::ChageAttackInitialize() {
@@ -162,7 +167,7 @@ void PlayerAttack::ChageAttackUpdate() {
 			(Input::GetInstance()->GetJoystickState(0, joyState) &&
 				(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_Y))) {
 			// パーティクル
-			ParticleCreate(worldTransform_.at(0).translation_);
+			ChargeParticleCreate(worldTransform_.at(0).translation_);
 			// チャージ中は攻撃判定なし
 			hitFlag_ = true;
 			charge_T_ += charge_Speed_;
@@ -481,7 +486,7 @@ void PlayerAttack::Homing() {
 	}
 }
 
-void PlayerAttack::ParticleCreate(const Vector3& emitter) {
+void PlayerAttack::ChargeParticleCreate(const Vector3& emitter) {
 	if (particle_Count_ <= 0) {
 		RandomNumberGenerator rnd{};
 		Particle* particle = new Particle();
@@ -492,18 +497,19 @@ void PlayerAttack::ParticleCreate(const Vector3& emitter) {
 		particle->worldTransform_.scale_ = Vector3(scale_, scale_, scale_);
 		Vector3 range = Vector3(rnd.NextFloatRange(-kRondam, kRondam), rnd.NextFloatRange(-kRondam, kRondam), rnd.NextFloatRange(-kRondam, kRondam));
 		range.Normalize();
-		particle->worldTransform_.translation_ = emitter + range* range_;
+		float distance = rnd.NextFloatRange(distance_min_, distance_max_);
+		particle->worldTransform_.translation_ = emitter + range * distance;
 		// 速度と向き
 		Vector3 velocity = Vector3(player_->GetWorldTransform().translation_ - particle->worldTransform_.translation_);
 		particle->velocity_ = Normalize(velocity) * kSpeed;
 		// 寿命
-		particle->time_ = rnd.NextUIntRange(time_min_, time_max_);
+		particle->time_ = time_max_;
 		// フラグ
 		particle->IsAlive_ = true;
 		// Plane生成
 		particle->plate_ = Plate::Create();
 		cMaterial material;
-		material.color_ = Vector4(1.0f, Clamp(1.0f - charge_T_, 0.0f, 1.0f), 20.0f / 255.0f, 0.7f);
+		material.color_ = Vector4(1.0f, Clamp(1.0f - charge_T_, 0.0f, 1.0f), 20.0f / 255.0f, 0.4f);
 		particle->plate_->SetMaterial(material);
 
 		particles_.emplace_back(particle);
@@ -515,6 +521,31 @@ void PlayerAttack::ParticleCreate(const Vector3& emitter) {
 	}
 }
 
+void PlayerAttack::HitParticleCreate(const Vector3& emitter) {
+	const size_t kMaxParticles = 10;
+	RandomNumberGenerator rnd{};
+	for (size_t i = 0; i < kMaxParticles; i++) {
+	Particle* particle = new Particle();
+	// 座標
+	particle->worldTransform_.Initialize();
+	float scale = rnd.NextFloatRange(2.0f,7.0f);
+	particle->worldTransform_.scale_ = Vector3(scale, 1.0f, scale);
+	//particle->worldTransform_.rotation_.z = DegToRad(rnd.NextFloatRange(0.0f, 360.0f));
+	particle->worldTransform_.translation_ = emitter;
+	// 寿命
+	particle->time_ = 3;
+	// フラグ
+	particle->IsAlive_ = true;
+	// Plane生成
+	particle->plate_ = Plate::Create();
+	cMaterial material;
+	material.color_ = Vector4(0.9f, 0.5f, 0.5f, 0.4f);
+	particle->plate_->SetMaterial(material);
+
+	particles_.emplace_back(particle);
+	}
+}
+
 void PlayerAttack::ParticleUpdate() {
 	for (auto it = particles_.begin(); it != particles_.end();) {
 		auto& particle = *it;
@@ -522,12 +553,16 @@ void PlayerAttack::ParticleUpdate() {
 
 		if (particle->time_ < 0) {
 			particle->IsAlive_ = false;
+			delete particle->plate_;
 			it = particles_.erase(it); // イテレータを次の要素に進める
 			break;
 		}
 		else {
 			particle->worldTransform_.translation_ += particle->velocity_;
 			particle->worldTransform_.UpdateMatrix();
+			cMaterial material = *particle->plate_->GetMaterial();
+			material.color_.w = static_cast<float>(particle->time_ / time_max_);
+			particle->plate_->SetMaterial(material);
 			++it; // 次の要素に進める
 		}
 	}
@@ -538,11 +573,12 @@ void PlayerAttack::ParticleDraw(const ViewProjection& viewProjection) {
 	if (!particles_.empty()) {
 		for (auto& particle : particles_) {
 			// ビルボード回転行列
-			Matrix4x4 Bill = MakeLookAtLH(particle->worldTransform_.translation_, viewProjection.translation_, Vector3(0.0f, 1.0f, 0.0f));
-			Matrix4x4 InversBill = Inverse(Bill);
-			InversBill = NotTransform(InversBill);
+			Matrix4x4 bill = MakeBillboard(
+				particle->worldTransform_.translation_, 
+				viewProjection.translation_, 
+				Vector3(0.0f, 1.0f, 0.0f));
 			Matrix4x4 worldTransformAffin = MakeAffineMatrix(particle->worldTransform_.scale_, particle->worldTransform_.rotation_, particle->worldTransform_.translation_);
-			particle->worldTransform_.matWorld_ = InversBill * worldTransformAffin;
+			particle->worldTransform_.matWorld_ = bill * worldTransformAffin;
 			particle->worldTransform_.TransferMatrix();
 			particle->plate_->Draw(particle->worldTransform_, viewProjection, 0);
 		}
@@ -586,6 +622,7 @@ void PlayerAttack::OnCollision(const OBB& obb, uint32_t type) {
 		if (!hitFlag_) {
 			EnemyHP::SetAdd(static_cast<uint32_t>(30 * (charge_T_ + 1.0f)));
 			hitFlag_ = true;
+			HitParticleCreate(enemy_->GetWorldTransform().translation_);
 		}
 
 		break;
@@ -596,18 +633,21 @@ void PlayerAttack::OnCollision(const OBB& obb, uint32_t type) {
 			if (!hitFlag_) {
 				EnemyHP::SetAdd(5);
 				hitFlag_ = true;
+				HitParticleCreate(enemy_->GetWorldTransform().translation_);
 			}
 			break;
 		case PlayerAttack::TripleAttack::kSecond:
 			if (!hitFlag_) {
 				EnemyHP::SetAdd(10);
 				hitFlag_ = true;
+				HitParticleCreate(enemy_->GetWorldTransform().translation_);
 			}
 			break;
 		case PlayerAttack::TripleAttack::kThird:
 			if (!hitFlag_) {
 				EnemyHP::SetAdd(15);
 				hitFlag_ = true;
+				HitParticleCreate(enemy_->GetWorldTransform().translation_);
 			}
 			break;
 		default:

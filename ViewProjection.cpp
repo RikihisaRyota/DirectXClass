@@ -76,4 +76,6 @@ void ViewProjection::TransferMatrix() {
 void ViewProjection::SetViewProjection(const ViewProjection* viewProjection) {
 	matView_ = viewProjection->matView_;
 	matProjection_ = viewProjection->matProjection_;
+	rotation_ = viewProjection->rotation_;
+	translation_ = viewProjection->translation_;
 }

@@ -76,6 +76,8 @@ public:
 	bool GetChageAttackFlag() { return IsChageAttack_; }
 	bool GetTripleAttackFlag() { return IsTripleAttack_; }
 
+	void ParticleRelease();
+
 private:
 	void ChageAttackInitialize();
 	void TripleAttackInitialize();
@@ -93,7 +95,8 @@ private:
 	void HitBoxUpdate() override;
 	void Homing();
 
-	void ParticleCreate(const Vector3& emitter);
+	void ChargeParticleCreate(const Vector3& emitter);
+	void HitParticleCreate(const Vector3& emitter);
 	void ParticleUpdate();
 	void ParticleDraw(const ViewProjection& viewProjection);
 private:
@@ -166,9 +169,10 @@ private:
 
 	std::list<std::unique_ptr<Particle>> particles_;
 	uint32_t particle_Count_;
-	uint32_t particle_Cooltime_ = 6;
-	float range_ = 5.0f;
-	float scale_ = 0.05f;
+	uint32_t particle_Cooltime_ = 3;
+	float distance_min_ = 5.0f;
+	float distance_max_ = 10.0f;
+	float scale_ = 0.1f;
 	uint32_t time_min_ = 5;
-	uint32_t time_max_ = 15;
+	uint32_t time_max_ = 10;
 };
