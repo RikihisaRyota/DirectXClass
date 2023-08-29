@@ -1,8 +1,10 @@
 #pragma once
 #include <optional>
+#include <list>
 
 #include "BaseCharacter.h"
 #include "Collider.h"
+#include "Plate.h"
 
 class Player;
 class Enemy;
@@ -25,6 +27,14 @@ public:
 		kFirst,
 		kSecond,
 		kThird,
+	};
+
+	struct Particle {
+		WorldTransform worldTransform_;
+		Vector3 velocity_;
+		int time_;
+		bool IsAlive_;
+		Plate* plate_;
 	};
 
 public:
@@ -82,6 +92,10 @@ private:
 
 	void HitBoxUpdate() override;
 	void Homing();
+
+	void ParticleCreate(const Vector3& emitter);
+	void ParticleUpdate();
+	void ParticleDraw(const ViewProjection& viewProjection);
 private:
 	Player* player_;
 	Enemy* enemy_;
@@ -149,4 +163,12 @@ private:
 	const int32_t kTripleAttackCoolTime = 60;
 	const int32_t kTripleAttack_Count = 120;
 	int32_t kTripleAttackCount;
+
+	std::list<std::unique_ptr<Particle>> particles_;
+	uint32_t particle_Count_;
+	uint32_t particle_Cooltime_ = 6;
+	float range_ = 5.0f;
+	float scale_ = 0.05f;
+	uint32_t time_min_ = 5;
+	uint32_t time_max_ = 15;
 };

@@ -14,17 +14,7 @@
 class PlayerAttack;
 class Player : public BaseCharacter, public Collider {
 public:
-	// ててて
-	Vector2 test_pos_ = {1075.0f, 564.0f};
-	float distance_X = 61.0f;
-	float distance_Y = 30.0f;
-	float test_Scale_ = 61.0f;
-
-	Vector2 test_buttan_pos_ = {1094.0f, 616.0f};
-	float distance_buttan_X = 13.0f;
-	float distance_buttan_Y = 12.0f;
-	float test_buttan_Scale_ = 24.0f;
-
+	
 	void SetSpritePos();
 	// 体のパーツ
 	enum class Parts { 
@@ -272,4 +262,16 @@ private: // メンバ変数
 	std::unique_ptr<Sprite> x_Buttan_Sprite_;
 	std::unique_ptr<Sprite> b_Buttan_Sprite_;
 	std::unique_ptr<Sprite> y_Buttan_Sprite_;
+
+	// ててて
+	Vector2 test_pos_ = { 1075.0f, 564.0f };
+	float distance_X = 61.0f;
+	float distance_Y = 30.0f;
+	float test_Scale_ = 61.0f;
+
+	Vector2 test_buttan_pos_ = { 1094.0f, 616.0f };
+	float distance_buttan_X = 13.0f;
+	float distance_buttan_Y = 12.0f;
+	float test_buttan_Scale_ = 24.0f;
+
 };

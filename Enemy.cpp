@@ -67,7 +67,7 @@ void Enemy::Update() {
 	switch (behavior_) {
 	case Enemy::Behavior::kRoot:
 	default:
-		RootUpdate();
+		//RootUpdate();
 		break;
 	case Enemy::Behavior::kAttack:
 		enemyAttack_->Update();
@@ -159,7 +159,6 @@ void Enemy::RootInitialize() {
 }
 
 void Enemy::RootUpdate() {
-	RandomNumberGenerator rnd;
 	/*int i = rnd.NextUIntRange(0, 2);
 	if (i == 0) {
 		behaviorRequest_ = Behavior::kAttack;
