@@ -143,10 +143,13 @@ public: // メンバ関数
 	/// <returns>正しく取得できたか</returns>
 	bool GetJoystickStatePrevious(int32_t stickNo, XINPUT_STATE& out) const;
 private: // メンバ変数
+	BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* instance, VOID* context);
+	BOOL CALLBACK EnumJoystickObjectsCallback(const DIDEVICEOBJECTINSTANCE* instance, VOID* context);
+private: // メンバ変数
 	Microsoft::WRL::ComPtr<IDirectInput8> dInput_;
 	Microsoft::WRL::ComPtr<IDirectInputDevice8> devKeyboard_;
 	Microsoft::WRL::ComPtr<IDirectInputDevice8> devMouse_;
-	std::vector<Joystick*> devJoysticks_;
+	std::vector<Joystick> devJoysticks_;
 
 	DIMOUSESTATE2 mouse_;
 	DIMOUSESTATE2 mousePre_;

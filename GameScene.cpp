@@ -221,6 +221,8 @@ void GameScene::Draw() {
 	if (enemy_->GetBehavior() == Enemy::Behavior::kAttack) {
 		enemyAttack_->Draw(viewProjection_);
 	}
+	// パーティクル
+	playerAttack_->ParticleDraw(viewProjection_);
 	//////////////Debug//////////////////
 	player_->HitBoxDraw(viewProjection_);
 	if (player_->GetBehavior() == Player::Behavior::kAttack) {

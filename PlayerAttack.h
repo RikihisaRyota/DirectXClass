@@ -37,6 +37,14 @@ public:
 		Plate* plate_;
 	};
 
+	struct HitParticle {
+		WorldTransform worldTransform_;
+		Vector3 velocity_;
+		int time_;
+		bool IsAlive_;
+		Model* model_;
+	};
+
 public:
 	/// <summary>
 	/// 初期化（モデル代入）
@@ -51,7 +59,7 @@ public:
 	/// 描画
 	/// </summary>
 	void Draw(const ViewProjection& viewProjection);
-
+	void ParticleDraw(const ViewProjection& viewProjection);
 	void HitBoxInitialize() override;
 	void HitBoxDraw(const ViewProjection& viewProjection) override;
 
@@ -96,9 +104,13 @@ private:
 	void Homing();
 
 	void ChargeParticleCreate(const Vector3& emitter);
+	void ChargeParticleUpdate();
 	void HitParticleCreate(const Vector3& emitter);
+	void HitParticleUpdate();
 	void ParticleUpdate();
-	void ParticleDraw(const ViewProjection& viewProjection);
+	
+	void ChargeParticleDraw(const ViewProjection& viewProjection);
+	void HitParticleDraw(const ViewProjection& viewProjection);
 private:
 	Player* player_;
 	Enemy* enemy_;
@@ -167,12 +179,14 @@ private:
 	const int32_t kTripleAttack_Count = 120;
 	int32_t kTripleAttackCount;
 
-	std::list<std::unique_ptr<Particle>> particles_;
+	std::list<std::unique_ptr<Particle>> chage_Particles_;
+	std::list<std::unique_ptr<Particle>> hit_Particles_;
 	uint32_t particle_Count_;
 	uint32_t particle_Cooltime_ = 3;
 	float distance_min_ = 5.0f;
 	float distance_max_ = 10.0f;
 	float scale_ = 0.1f;
+	float max_scale_ = 1.0f;
 	uint32_t time_min_ = 5;
 	uint32_t time_max_ = 10;
 };

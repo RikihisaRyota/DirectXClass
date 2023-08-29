@@ -81,6 +81,9 @@ Matrix4x4 MakeLookAtLH(const Vector3& target, const Vector3& eye, const Vector3&
 
 // Billbord
 Matrix4x4 MakeBillboard(const Vector3& target, const Vector3& eye, const Vector3& up);
+Matrix4x4 MakeBillboardXAxsizLook(const Vector3& target, const Vector3& eye, const Vector3& up);
+Matrix4x4 MakeBillboardYAxsizLook(const Vector3& target, const Vector3& eye, const Vector3& up);
+Matrix4x4 MakeBillboardZAxsizLook(const Vector3& target, const Vector3& eye, const Vector3& up);
 
 //1,X軸
 Vector3 GetXAxis(const Matrix4x4& mat);

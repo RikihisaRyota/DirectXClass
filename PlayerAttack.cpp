@@ -95,15 +95,12 @@ void PlayerAttack::Update() {
 	ImGui::SliderFloat("time_max_", &max, 15.0f, 30.0f);
 	time_min_ = static_cast<uint32_t>(min);
 	time_max_ = static_cast<uint32_t>(max);
-	ImGui::Text("size:%d", particles_.size());
+	ImGui::Text("size:%d", chage_Particles_.size());
 	ImGui::Text("count:%d", particle_Count_);
 	ImGui::End();
 }
 
 void PlayerAttack::Draw(const ViewProjection& viewProjection) {
-	if (!particles_.empty()) {
-		ParticleDraw(viewProjection);
-	}
 	switch (behavior_) {
 	case PlayerAttack::Behavior::kRoot:
 	default:
@@ -119,7 +116,7 @@ void PlayerAttack::Draw(const ViewProjection& viewProjection) {
 }
 
 void PlayerAttack::ParticleRelease() {
-	particles_.clear();
+	chage_Particles_.clear();
 }
 
 void PlayerAttack::ChageAttackInitialize() {
@@ -512,7 +509,7 @@ void PlayerAttack::ChargeParticleCreate(const Vector3& emitter) {
 		material.color_ = Vector4(1.0f, Clamp(1.0f - charge_T_, 0.0f, 1.0f), 20.0f / 255.0f, 0.4f);
 		particle->plate_->SetMaterial(material);
 
-		particles_.emplace_back(particle);
+		chage_Particles_.emplace_back(particle);
 
 		particle_Count_ = particle_Cooltime_;
 	}
@@ -521,43 +518,19 @@ void PlayerAttack::ChargeParticleCreate(const Vector3& emitter) {
 	}
 }
 
-void PlayerAttack::HitParticleCreate(const Vector3& emitter) {
-	const size_t kMaxParticles = 10;
-	RandomNumberGenerator rnd{};
-	for (size_t i = 0; i < kMaxParticles; i++) {
-	Particle* particle = new Particle();
-	// 座標
-	particle->worldTransform_.Initialize();
-	float scale = rnd.NextFloatRange(2.0f,7.0f);
-	particle->worldTransform_.scale_ = Vector3(scale, 1.0f, scale);
-	//particle->worldTransform_.rotation_.z = DegToRad(rnd.NextFloatRange(0.0f, 360.0f));
-	particle->worldTransform_.translation_ = emitter;
-	// 寿命
-	particle->time_ = 3;
-	// フラグ
-	particle->IsAlive_ = true;
-	// Plane生成
-	particle->plate_ = Plate::Create();
-	cMaterial material;
-	material.color_ = Vector4(0.9f, 0.5f, 0.5f, 0.4f);
-	particle->plate_->SetMaterial(material);
-
-	particles_.emplace_back(particle);
-	}
-}
-
-void PlayerAttack::ParticleUpdate() {
-	for (auto it = particles_.begin(); it != particles_.end();) {
+void PlayerAttack::ChargeParticleUpdate() {
+	for (auto it = chage_Particles_.begin(); it != chage_Particles_.end();) {
 		auto& particle = *it;
 		particle->time_--;
 
 		if (particle->time_ < 0) {
 			particle->IsAlive_ = false;
 			delete particle->plate_;
-			it = particles_.erase(it); // イテレータを次の要素に進める
+			it = chage_Particles_.erase(it); // イテレータを次の要素に進める
 			break;
 		}
 		else {
+			particle->worldTransform_.scale_ = Lerp(Vector3(0.1f, 0.1f, 0.1f), Vector3(max_scale_, max_scale_, max_scale_), static_cast<float>(particle->time_ / time_max_));
 			particle->worldTransform_.translation_ += particle->velocity_;
 			particle->worldTransform_.UpdateMatrix();
 			cMaterial material = *particle->plate_->GetMaterial();
@@ -566,16 +539,62 @@ void PlayerAttack::ParticleUpdate() {
 			++it; // 次の要素に進める
 		}
 	}
-	
 }
 
-void PlayerAttack::ParticleDraw(const ViewProjection& viewProjection) {
-	if (!particles_.empty()) {
-		for (auto& particle : particles_) {
+void PlayerAttack::HitParticleCreate(const Vector3& emitter) {
+	const size_t kMaxParticles = 3;
+	RandomNumberGenerator rnd{};
+	for (size_t i = 0; i < kMaxParticles; i++) {
+	Particle* particle = new Particle();
+	// 座標
+	particle->worldTransform_.Initialize();
+	float scale = rnd.NextFloatRange(2.0f,7.0f);
+	particle->worldTransform_.scale_ = Vector3(0.05f, scale, 0.05f);
+	particle->worldTransform_.rotation_.z = DegToRad(rnd.NextFloatRange(0.0f, 180.0f));
+	particle->worldTransform_.translation_ = emitter;
+	// 寿命
+	particle->time_ = 8;
+	// フラグ
+	particle->IsAlive_ = true;
+	// Plane生成
+	particle->plate_= Plate::Create();
+	cMaterial material;
+	material.color_ = Vector4(0.9f,0.5f, 20.0f / 255.0f, 0.4f);
+	particle->plate_->SetMaterial(material);
+
+	hit_Particles_.emplace_back(particle);
+	}
+}
+
+void PlayerAttack::HitParticleUpdate() {
+	for (auto it = hit_Particles_.begin(); it != hit_Particles_.end();) {
+		auto& particle = *it;
+		particle->time_--;
+
+		if (particle->time_ < 0) {
+			particle->IsAlive_ = false;
+			delete particle->plate_;
+			it = hit_Particles_.erase(it); // イテレータを次の要素に進める
+			break;
+		}
+		else {
+			++it; // 次の要素に進める
+		}
+	}
+}
+
+void PlayerAttack::ParticleUpdate() {
+	ChargeParticleUpdate();
+	HitParticleUpdate();
+}
+
+void PlayerAttack::ChargeParticleDraw(const ViewProjection& viewProjection) {
+	if (!chage_Particles_.empty()) {
+		for (auto& particle : chage_Particles_) {
 			// ビルボード回転行列
-			Matrix4x4 bill = MakeBillboard(
-				particle->worldTransform_.translation_, 
-				viewProjection.translation_, 
+			Matrix4x4 bill = MakeBillboardZAxsizLook(
+				particle->worldTransform_.translation_,
+				viewProjection.translation_,
 				Vector3(0.0f, 1.0f, 0.0f));
 			Matrix4x4 worldTransformAffin = MakeAffineMatrix(particle->worldTransform_.scale_, particle->worldTransform_.rotation_, particle->worldTransform_.translation_);
 			particle->worldTransform_.matWorld_ = bill * worldTransformAffin;
@@ -583,6 +602,27 @@ void PlayerAttack::ParticleDraw(const ViewProjection& viewProjection) {
 			particle->plate_->Draw(particle->worldTransform_, viewProjection, 0);
 		}
 	}
+}
+
+void PlayerAttack::HitParticleDraw(const ViewProjection& viewProjection) {
+	if (!hit_Particles_.empty()) {
+		for (auto& particle : hit_Particles_) {
+			// ビルボード回転行列
+			Matrix4x4 bill = MakeBillboardZAxsizLook(
+				particle->worldTransform_.translation_,
+				viewProjection.translation_,
+				Vector3(0.0f, 1.0f, 0.0f));
+			Matrix4x4 worldTransformAffin = MakeAffineMatrix(particle->worldTransform_.scale_, particle->worldTransform_.rotation_, particle->worldTransform_.translation_);
+			particle->worldTransform_.matWorld_ = bill * worldTransformAffin;
+			particle->worldTransform_.TransferMatrix();
+			particle->plate_->Draw(particle->worldTransform_, viewProjection);
+		}
+}
+}
+
+void PlayerAttack::ParticleDraw(const ViewProjection& viewProjection) {
+	ChargeParticleDraw(viewProjection);
+	HitParticleDraw(viewProjection);
 }
 
 void PlayerAttack::HitBoxInitialize() {
