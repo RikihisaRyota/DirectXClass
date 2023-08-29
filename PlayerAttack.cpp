@@ -537,6 +537,13 @@ void PlayerAttack::ParticleUpdate() {
 void PlayerAttack::ParticleDraw(const ViewProjection& viewProjection) {
 	if (!particles_.empty()) {
 		for (auto& particle : particles_) {
+			// ビルボード回転行列
+			Matrix4x4 Bill = MakeLookAtLH(particle->worldTransform_.translation_, viewProjection.translation_, Vector3(0.0f, 1.0f, 0.0f));
+			Matrix4x4 InversBill = Inverse(Bill);
+			InversBill = NotTransform(InversBill);
+			Matrix4x4 worldTransformAffin = MakeAffineMatrix(particle->worldTransform_.scale_, particle->worldTransform_.rotation_, particle->worldTransform_.translation_);
+			particle->worldTransform_.matWorld_ = InversBill * worldTransformAffin;
+			particle->worldTransform_.TransferMatrix();
 			particle->plate_->Draw(particle->worldTransform_, viewProjection, 0);
 		}
 	}
