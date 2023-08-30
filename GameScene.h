@@ -69,12 +69,15 @@ private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
 	DebugCamera* debugCamera_ = nullptr;
+	Audio* audio_ = nullptr;
 	// ライト
 	cDirectionalLight* directionalLight_ = nullptr;
 
 	uint32_t textureHandle_ = 0u;
 
 	uint32_t peraTextureHandle_=0u;
+
+	size_t ingame_SoundHandle_ = 0u;
 
 	struct UVtranslation {
 		Vector3 scale_;

@@ -11,7 +11,7 @@ public:
 	void Update();
 	void Draw();
 	static void SetAdd(int32_t add) { add_HP_ = add; }
-
+	bool GetAlive() { return IsAlive_; }
 private:
 	float Conversion(int32_t num);
 
@@ -25,4 +25,5 @@ private:
 	int32_t now_HP_;
 	int32_t delay_HP_;
 	static int32_t add_HP_;
+	bool IsAlive_;
 };

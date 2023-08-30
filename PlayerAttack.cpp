@@ -1,6 +1,7 @@
 #include "PlayerAttack.h"
 #include <ctime>
 
+#include "Audio.h"
 #include "Collision.h"
 #include "Draw.h"
 #include "Enemy.h"
@@ -19,6 +20,11 @@ void PlayerAttack::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	// 衝突対象を自分以外に設定
 	SetCollisionMask(~kCollisionAttributePlayerAttack);
 	HitBoxInitialize();
+
+	first_SoundHandle_ = Audio::GetInstance()->SoundLoadWave("resources/first_attack.wav");
+	third_SoundHandle_ = Audio::GetInstance()->SoundLoadWave("resources/third_attack.wav");
+	chage_SoundHandle_ = Audio::GetInstance()->SoundLoadWave("resources/chage_attack.wav");
+	
 }
 
 void PlayerAttack::Initialize() {
@@ -85,7 +91,7 @@ void PlayerAttack::Update() {
 	BaseCharacter::Update();
 	HitBoxUpdate();
 	ParticleUpdate();
-	ImGui::Begin("playerAttack");
+	/*ImGui::Begin("playerAttack");
 	ImGui::SliderFloat("distance_min_", &distance_min_, 0.0f, 10.0f);
 	ImGui::SliderFloat("distance_max_", &distance_max_, 10.0f, 30.0f);
 	ImGui::SliderFloat("over_scale_", &scale_, 0.0f, 1.0f);
@@ -97,7 +103,7 @@ void PlayerAttack::Update() {
 	time_max_ = static_cast<uint32_t>(max);
 	ImGui::Text("size:%d", chage_Particles_.size());
 	ImGui::Text("count:%d", particle_Count_);
-	ImGui::End();
+	ImGui::End();*/
 }
 
 void PlayerAttack::Draw(const ViewProjection& viewProjection) {
@@ -663,6 +669,7 @@ void PlayerAttack::OnCollision(const OBB& obb, uint32_t type) {
 			EnemyHP::SetAdd(static_cast<uint32_t>(30 * (charge_T_ + 1.0f)));
 			hitFlag_ = true;
 			HitParticleCreate(enemy_->GetWorldTransform().translation_);
+			Audio::GetInstance()->SoundPlayWave(chage_SoundHandle_);
 		}
 
 		break;
@@ -674,6 +681,7 @@ void PlayerAttack::OnCollision(const OBB& obb, uint32_t type) {
 				EnemyHP::SetAdd(5);
 				hitFlag_ = true;
 				HitParticleCreate(enemy_->GetWorldTransform().translation_);
+				Audio::GetInstance()->SoundPlayWave(first_SoundHandle_);
 			}
 			break;
 		case PlayerAttack::TripleAttack::kSecond:
@@ -681,6 +689,7 @@ void PlayerAttack::OnCollision(const OBB& obb, uint32_t type) {
 				EnemyHP::SetAdd(10);
 				hitFlag_ = true;
 				HitParticleCreate(enemy_->GetWorldTransform().translation_);
+				Audio::GetInstance()->SoundPlayWave(first_SoundHandle_);
 			}
 			break;
 		case PlayerAttack::TripleAttack::kThird:
@@ -688,6 +697,7 @@ void PlayerAttack::OnCollision(const OBB& obb, uint32_t type) {
 				EnemyHP::SetAdd(15);
 				hitFlag_ = true;
 				HitParticleCreate(enemy_->GetWorldTransform().translation_);
+				Audio::GetInstance()->SoundPlayWave(third_SoundHandle_);
 			}
 			break;
 		default:

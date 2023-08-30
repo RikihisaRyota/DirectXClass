@@ -10,8 +10,11 @@ GameClear::~GameClear() {}
 void GameClear::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
-	//audio_ = Audio::GetInstance();
+	audio_ = Audio::GetInstance();
 	viewProjection_.Initialize();
+
+	select_SoundHandle_ = audio_->SoundLoadWave("resources/select.wav");
+	gameclear_SoundHandle_ = audio_->SoundLoadWave("resources/gameclear.wav");
 
 	clear_Sprite_TextureHandle_ = TextureManager::Load("resources./clear.png");
 	clear_Sprite_.reset(Sprite::Create(
@@ -44,12 +47,15 @@ void GameClear::Initialize() {
 void GameClear::Update() {
 	// ゲームパットの状態を得る変数
 	XINPUT_STATE joyState{};
+	audio_->SoundPlayLoopStart(gameclear_SoundHandle_);
 	//
 	if (Input::GetInstance()->TriggerKey(DIK_SPACE) ||
 	    (Input::GetInstance()->GetJoystickState(0, joyState) &&
 	     (joyState.Gamepad.wButtons & XINPUT_GAMEPAD_B))) {
 		SceneManager::SetState(SceneManager::State::TITLE);
 		pless_b_Flag_ = true;
+		audio_->SoundPlayWave(select_SoundHandle_);
+		audio_->SoundPlayLoopEnd(gameclear_SoundHandle_);
 	}
 }
 

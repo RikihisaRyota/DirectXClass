@@ -29,6 +29,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	input = Input::GetInstance();
 	input->Initialize();
 
+	// 入力の初期化
+	Audio* audio = nullptr;
+	audio = Audio::GetInstance();
+	audio->Initialize();
+
 	// テクスチャマネージャの初期化
 	TextureManager::GetInstance()->Initialize(dxCommon);
 

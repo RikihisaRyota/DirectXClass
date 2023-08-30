@@ -19,6 +19,7 @@ public:
 	SceneManager(uint32_t textureHandle);
 	~SceneManager();
 	static void SetState(State state) { stateRequest_ = state; }
+	static State GetState() {return state_; }
 
 	void Initialize();
 	void Update();
@@ -29,12 +30,13 @@ private:
 	std::unique_ptr<GameScene> gameScene_;
 	std::unique_ptr<GameOver> gameOver_;
 	std::unique_ptr<GameClear> gameClear_;
-	State state_ = State::TITLE;
-	State preState_ = state_;
+	static State state_;
+	State preState_ = State::TITLE;
 	std::unique_ptr<Sprite> back_Sprite = nullptr;
 
 	bool IsStart_;
 	bool IsDark_;
+	bool IsInitialize_;
 	float t_;
 	float t_Speed_;
 };

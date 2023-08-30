@@ -11,13 +11,13 @@ public:
 	void Update();
 	void Draw();
 	static void SetAdd(int32_t add) { add_HP_ = add; }
-
+	bool GetAlive() { return IsAlive_; }
 private:
 	float Conversion(int32_t num);
 
 private:
 	const uint32_t kMax_HP_ = 1000;
-	const Vector2 position_ = {60.0f, 20.0f};
+	const Vector2 position_ = {100.0f, 20.0f};
 	const float kWidth_ = 1280.0f - position_.x * 2.0f;
 	const float kHeight_ = 30.0f;
 	std::unique_ptr<Sprite> now_HP_Sprite_;
@@ -25,4 +25,5 @@ private:
 	int32_t now_HP_;
 	int32_t delay_HP_;
 	static int32_t add_HP_;
+	bool IsAlive_;
 };

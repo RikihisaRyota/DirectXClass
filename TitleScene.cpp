@@ -11,7 +11,10 @@ TitleScene::~TitleScene() {}
 void TitleScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
-	audio_->Initialize();
+	audio_ = Audio::GetInstance();
+
+	select_SoundHandle_ = audio_->SoundLoadWave("resources/select.wav");
+	title_SoundHandle_ = audio_->SoundLoadWave("resources/title.wav");
 
 	viewProjection_.Initialize();
 	titie_Sprite_TextureHandle_ = TextureManager::Load("resources/title.png");
@@ -110,6 +113,7 @@ void TitleScene::Initialize() {
 }
 
 void TitleScene::Update() {
+	audio_->SoundPlayLoopStart(title_SoundHandle_);
 #pragma region カメラ関連
 	// 追従カメラの更新
 	followCamera_->Update();
@@ -126,6 +130,8 @@ void TitleScene::Update() {
 			(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_B))) {
 		SceneManager::SetState(SceneManager::State::INGAME);
 		pless_b_Flag_ = true;
+		audio_->SoundPlayWave(select_SoundHandle_);
+		audio_->SoundPlayLoopEnd(title_SoundHandle_);
 	}
 }
 

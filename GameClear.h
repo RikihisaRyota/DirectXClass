@@ -46,6 +46,9 @@ private: // メンバ変数
 	Audio* audio_ = nullptr;
 	ViewProjection viewProjection_;
 
+	size_t select_SoundHandle_ = 0u;
+	size_t gameclear_SoundHandle_ = 0u;
+
 	std::unique_ptr<Sprite> clear_Sprite_;
 	uint32_t clear_Sprite_TextureHandle_;
 	Vector2 clear_scale_;

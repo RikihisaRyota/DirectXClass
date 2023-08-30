@@ -3,7 +3,7 @@
 #include "Matrix4x4.h"
 #include "TextureManager.h"
 #include "ImGuiManager.h"
-
+#include "SceneManager.h"
 
 GameScene::GameScene() {}
 
@@ -21,6 +21,10 @@ void GameScene::Initialize() {
 	debugCameraFlag_ = false;
 	// 入力
 	input_ = Input::GetInstance();
+	// 音
+	audio_ = Audio::GetInstance();
+
+	ingame_SoundHandle_ = audio_->SoundLoadWave("resources/ingame.wav");
 
 	// ライト
 	directionalLight_ = new cDirectionalLight();
@@ -141,6 +145,15 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
+	audio_->SoundPlayLoopStart(ingame_SoundHandle_);
+	if (!playerHP_->GetAlive()) {
+		audio_->SoundPlayLoopEnd(ingame_SoundHandle_);
+		SceneManager::SetState(SceneManager::State::GAMEOVER);
+	}
+	if (!enemyHP_->GetAlive()) {
+		audio_->SoundPlayLoopEnd(ingame_SoundHandle_);
+		SceneManager::SetState(SceneManager::State::GAMECLEAR);
+	}
 	// プレイヤーの更新
 	playerAttack_->Update();
 	playerHP_->Update();

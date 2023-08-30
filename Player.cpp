@@ -2,13 +2,14 @@
 
 #include <cassert>
 
+#include "Audio.h"
 #include "Draw.h"
 #include "GlobalVariables.h"
 #include "ImGuiManager.h"
 #include "MyMath.h"
 #include "PlayerAttack.h"
 #include "TextureManager.h"
-
+#include "SceneManager.h"
 // テスト
 #include "PrimitiveDrawer.h"
 
@@ -74,6 +75,8 @@ void Player::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	SetCollisionMask(~kCollisionAttributePlayer);
 
 	HitBoxInitialize();
+
+	dash_SoundHandle_ = Audio::GetInstance()->SoundLoadWave("resources/dash.wav");
 #pragma endregion
 }
 
@@ -117,39 +120,39 @@ void Player::Update() {
 	BaseCharacter::Update();
 
 	// #ifdef DEBUG
-	ImGui::Begin("Player");
-	ImGui::SliderFloat("pos_X", &test_pos_.x, 0.0f, 1280.0f);
-	ImGui::SliderFloat("pos_Y", &test_pos_.y, 0.0f, 720.0f);
-	ImGui::SliderFloat("distance_X", &distance_X, 0.0f, 200.0f);
-	ImGui::SliderFloat("distance_Y", &distance_Y, 0.0f, 200.0f);
-	ImGui::SliderFloat("scale", &test_Scale_, 0.0f, 300.0f);
-	
+	//ImGui::Begin("Player");
+	//ImGui::SliderFloat("pos_X", &test_pos_.x, 0.0f, 1280.0f);
+	//ImGui::SliderFloat("pos_Y", &test_pos_.y, 0.0f, 720.0f);
+	//ImGui::SliderFloat("distance_X", &distance_X, 0.0f, 200.0f);
+	//ImGui::SliderFloat("distance_Y", &distance_Y, 0.0f, 200.0f);
+	//ImGui::SliderFloat("scale", &test_Scale_, 0.0f, 300.0f);
+	//
 
-	/*ImGui::Text(
-	    "translation_ x:%f,y:%f,z:%f", worldTransform_.translation_.x,
-	    worldTransform_.translation_.y, worldTransform_.translation_.z);
-	ImGui::Text(
-	    "rotate_ x:%f,y:%f,z:%f", worldTransform_.rotation_.x, worldTransform_.rotation_.y,
-	    worldTransform_.rotation_.z);
-	ImGui::Text("interRotate_:%f,y:%f,z:%f", interRotate_.x, interRotate_.y, interRotate_.z);
-	ImGui::Text(
-	    "destinationAngle_:%f,y:%f,z:%f", destinationAngle_.x, destinationAngle_.y,
-	    destinationAngle_.z);
-	ImGui::Text("vector_x:%f,y:%f,z:%f", vector_.x, vector_.y, vector_.z);
-	ImGui::Text("velocity_:%f,y:%f,z:%f", velocity_.x, velocity_.y, velocity_.z);
-	ImGui::Text("acceleration_:%f,y:%f,z:%f", acceleration_.x, acceleration_.y, acceleration_.z);
+	///*ImGui::Text(
+	//    "translation_ x:%f,y:%f,z:%f", worldTransform_.translation_.x,
+	//    worldTransform_.translation_.y, worldTransform_.translation_.z);
+	//ImGui::Text(
+	//    "rotate_ x:%f,y:%f,z:%f", worldTransform_.rotation_.x, worldTransform_.rotation_.y,
+	//    worldTransform_.rotation_.z);
+	//ImGui::Text("interRotate_:%f,y:%f,z:%f", interRotate_.x, interRotate_.y, interRotate_.z);
+	//ImGui::Text(
+	//    "destinationAngle_:%f,y:%f,z:%f", destinationAngle_.x, destinationAngle_.y,
+	//    destinationAngle_.z);
+	//ImGui::Text("vector_x:%f,y:%f,z:%f", vector_.x, vector_.y, vector_.z);
+	//ImGui::Text("velocity_:%f,y:%f,z:%f", velocity_.x, velocity_.y, velocity_.z);
+	//ImGui::Text("acceleration_:%f,y:%f,z:%f", acceleration_.x, acceleration_.y, acceleration_.z);
 
-	ImGui::SliderFloat3("AABB_min", &min_.x, -3.0f, 0.0f);
-	ImGui::SliderFloat3("AABB_max", &max_.x, 0.0f, 3.0f);
-	ImGui::SliderFloat("Sphere_radius", &radius_, 0.0f, 3.0f);*/
-	ImGui::End();
-	ImGui::Begin("Buttan");
-	ImGui::SliderFloat("buttan_pos_X", &test_buttan_pos_.x, 0.0f, 1280.0f);
-	ImGui::SliderFloat("buttan_pos_Y", &test_buttan_pos_.y, 0.0f, 720.0f);
-	ImGui::SliderFloat("buttan_distance_X", &distance_buttan_X, 0.0f, 200.0f);
-	ImGui::SliderFloat("buttan_distance_Y", &distance_buttan_Y, 0.0f, 200.0f);
-	ImGui::SliderFloat("buttan_scale", &test_buttan_Scale_, 0.0f, 300.0f);
-	ImGui::End();
+	//ImGui::SliderFloat3("AABB_min", &min_.x, -3.0f, 0.0f);
+	//ImGui::SliderFloat3("AABB_max", &max_.x, 0.0f, 3.0f);
+	//ImGui::SliderFloat("Sphere_radius", &radius_, 0.0f, 3.0f);*/
+	//ImGui::End();
+	//ImGui::Begin("Buttan");
+	//ImGui::SliderFloat("buttan_pos_X", &test_buttan_pos_.x, 0.0f, 1280.0f);
+	//ImGui::SliderFloat("buttan_pos_Y", &test_buttan_pos_.y, 0.0f, 720.0f);
+	//ImGui::SliderFloat("buttan_distance_X", &distance_buttan_X, 0.0f, 200.0f);
+	//ImGui::SliderFloat("buttan_distance_Y", &distance_buttan_Y, 0.0f, 200.0f);
+	//ImGui::SliderFloat("buttan_scale", &test_buttan_Scale_, 0.0f, 300.0f);
+	//ImGui::End();
 	// #endif // DEBUG
 	SetSpritePos();
 }
@@ -563,6 +566,7 @@ void Player::GamePadInput() {
 	// プレイヤー移動
 	Move();
 	// 攻撃開始
+	if (SceneManager::GetState() == SceneManager::State::INGAME) {
 	if (Input::GetInstance()->TriggerKey(DIK_Q) ||
 	    (Input::GetInstance()->GetJoystickState(0, joyState) &&
 	     (joyState.Gamepad.wButtons & XINPUT_GAMEPAD_Y))) {
@@ -581,9 +585,11 @@ void Player::GamePadInput() {
 	    (Input::GetInstance()->GetJoystickState(0, joyState) &&
 	     (joyState.Gamepad.wButtons & XINPUT_GAMEPAD_X)))) {
 		behaviorRequest_ = Behavior::kDash;
+		Audio::GetInstance()->SoundPlayWave(dash_SoundHandle_);
 	}
-	// ジャンプ
-	Jump();
+	}
+	//// ジャンプ
+	//Jump();
 	// 重力
 	Gravity();
 }

@@ -12,6 +12,7 @@
 #include "Input.h"
 
 class PlayerAttack;
+class SceneManager;
 class Player : public BaseCharacter, public Collider {
 public:
 	
@@ -188,6 +189,7 @@ public: // ゲッター,セッター
 	Vector3 GetPlayerRotate() const { return interRotate_; }
 
 	void SetGround(Ground* ground) { ground_ = ground; }
+
  private: // 定数系
 	// 地面から距離
 	const float kGroundDistanse = 1.0f;
@@ -273,5 +275,5 @@ private: // メンバ変数
 	float distance_buttan_X = 13.0f;
 	float distance_buttan_Y = 12.0f;
 	float test_buttan_Scale_ = 24.0f;
-
+	size_t	dash_SoundHandle_;
 };

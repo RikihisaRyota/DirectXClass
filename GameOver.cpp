@@ -1,5 +1,6 @@
 #include "GameOver.h"
 
+#include "Audio.h"
 #include "DirectXCommon.h"
 #include "TextureManager.h"
 #include "SceneManager.h"
@@ -13,8 +14,11 @@ GameOver::~GameOver() {}
 void GameOver::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
-	//audio_ = Audio::GetInstance();
+	audio_ = Audio::GetInstance();
 	viewProjection_.Initialize();
+
+	select_SoundHandle_ = audio_->SoundLoadWave("resources/select.wav");
+	gameover_SoundHandle_ = audio_->SoundLoadWave("resources/gameover.wav");
 
 	over_Sprite_TextureHandle_ = TextureManager::Load("resources./over.png");
 	over_Sprite_.reset(Sprite::Create(
@@ -47,12 +51,15 @@ void GameOver::Initialize() {
 void GameOver::Update() {
 	// ゲームパットの状態を得る変数
 	XINPUT_STATE joyState{};
+	audio_->SoundPlayLoopStart(gameover_SoundHandle_);
 	//
 	if (Input::GetInstance()->TriggerKey(DIK_SPACE) ||
 	    (Input::GetInstance()->GetJoystickState(0, joyState) &&
 	     (joyState.Gamepad.wButtons & XINPUT_GAMEPAD_B))) {
 		SceneManager::SetState(SceneManager::State::TITLE);
 		pless_b_Flag_ = true;
+		audio_->SoundPlayWave(select_SoundHandle_);
+		audio_->SoundPlayLoopEnd(gameover_SoundHandle_);
 	}
 	
 	ImGui::Begin("gameover");

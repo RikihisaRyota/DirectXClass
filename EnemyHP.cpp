@@ -3,8 +3,6 @@
 #include "ImGuiManager.h"
 #include "MyMath.h"
 
-#include "SceneManager.h"
-
 int32_t EnemyHP::add_HP_;
 
 void EnemyHP::Initialize(uint32_t now_TextureHandle, uint32_t delay_TextureHandle) {
@@ -17,6 +15,7 @@ void EnemyHP::Initialize(uint32_t now_TextureHandle, uint32_t delay_TextureHandl
 	    Sprite::Create(now_TextureHandle, position_, Vector4(1.0f, 0.0f, 0.0f, 1.0f)));
 	delay_HP_Sprite_.reset(
 	    Sprite::Create(delay_TextureHandle, position_, Vector4(0.0f, 0.0f, 1.0f, 0.8f)));
+	IsAlive_ = true;
 }
 
 void EnemyHP::Update() { 
@@ -24,7 +23,7 @@ void EnemyHP::Update() {
 		now_HP_ -= add_HP_;
 	} else {
 		now_HP_ = 0;
-		SceneManager::SetState(SceneManager::State::GAMECLEAR);
+		IsAlive_ = false;
 	}
 	now_HP_Sprite_->SetSize(Vector2(Conversion(now_HP_), kHeight_));
 	delay_HP_ = static_cast<int32_t>(

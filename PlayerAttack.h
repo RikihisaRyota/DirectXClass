@@ -189,4 +189,8 @@ private:
 	float max_scale_ = 1.0f;
 	uint32_t time_min_ = 5;
 	uint32_t time_max_ = 10;
+
+	size_t	first_SoundHandle_;
+	size_t	third_SoundHandle_;
+	size_t	chage_SoundHandle_;
 };

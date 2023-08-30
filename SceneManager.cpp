@@ -4,6 +4,7 @@
 #include "MyMath.h"
 
 std::optional<SceneManager::State> SceneManager::stateRequest_ = std::nullopt;
+SceneManager::State SceneManager::state_ = SceneManager::State::TITLE;
 
 SceneManager::SceneManager(uint32_t textureHandle) { 
 	titleScene_ = std::make_unique<TitleScene>();
@@ -18,6 +19,7 @@ SceneManager::SceneManager(uint32_t textureHandle) {
 	back_Sprite->SetSize(Vector2(WinApp::kWindowWidth, WinApp::kWindowHeight));
 	IsStart_ = true;
 	IsDark_ = false;
+	IsInitialize_ = false;
 	t_ = 1.0f;
 	t_Speed_ = 0.05f;
 }
@@ -43,11 +45,8 @@ void SceneManager::Initialize() {
 	default:
 		break;
 	}
-	// ふるまいリクエストをリセット
-	stateRequest_ = std::nullopt;
-	t_ = 0.0f;
-	IsStart_ = false;
-	IsDark_ = false;
+	
+	
 }
 
 void SceneManager::Update() {
@@ -56,7 +55,11 @@ void SceneManager::Update() {
 		preState_ = state_; 
 		// ふるまいを変更
 		state_ = stateRequest_.value();
-		Initialize();
+		// ふるまいリクエストをリセット
+		stateRequest_ = std::nullopt;
+		t_ = 0.0f;
+		IsStart_ = false;
+		IsDark_ = false;
 	}
 	if (IsStart_) {
 		switch (state_) {
@@ -77,21 +80,26 @@ void SceneManager::Update() {
 		}
 	} else {
 		t_ += t_Speed_;
+		if (IsInitialize_) {
+			Initialize();
+			IsInitialize_ = false;
+			IsDark_ = true;
+		}
 		if (!IsDark_) {
 			Vector4 color;
 			if (state_ == SceneManager::State::GAMECLEAR) {
 				color={ 1.0f, 1.0f, 1.0f, Lerp(0.0f, 1.0f, Clamp(t_, 0.0f, 1.0f)) };
 			}
 			else {
-				color={0.0f, 0.0f, 0.0f, Lerp(0.0f, 1.0f, Clamp(t_, 0.0f, 1.0f))};
+				color = {0.0f, 0.0f, 0.0f, Lerp(0.0f, 1.0f, Clamp(t_, 0.0f, 1.0f))};
 			}
 			back_Sprite->SetColor(color);
 			titleScene_->Flash(t_);
 			gameOver_->Flash(t_);
 			gameClear_->Flash(t_);
 			if (t_ >= 1.0f) {
-				IsDark_ = true;
 				t_ = 0.0f;
+				IsInitialize_ = true;
 			}
 		}
 		if (IsDark_) {
