@@ -34,9 +34,9 @@ void EnemyHP::Update() {
 	delay_HP_Sprite_->SetSize(Vector2(Conversion(delay_HP_), kHeight_));
 	// リセット
 	add_HP_ = 0;
-	ImGui::Begin("HP");
+	ImGui::Begin("enemyHP");
 	float now_HP_float = static_cast<float>(now_HP_);
-	ImGui::SliderFloat("hp", &now_HP_float, 0.0f, static_cast<float>(kMax_HP_));
+	ImGui::SliderFloat("enemyHP", &now_HP_float, 0.0f, static_cast<float>(kMax_HP_));
 	now_HP_ = static_cast<int32_t>(now_HP_float);
 	if (ImGui::Button("reset")) {
 		now_HP_ = kMax_HP_;

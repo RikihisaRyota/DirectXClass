@@ -88,7 +88,7 @@ void PlayerAttack::Update() {
 	ImGui::Begin("playerAttack");
 	ImGui::SliderFloat("distance_min_", &distance_min_, 0.0f, 10.0f);
 	ImGui::SliderFloat("distance_max_", &distance_max_, 10.0f, 30.0f);
-	ImGui::SliderFloat("scale_", &scale_, 0.0f, 1.0f);
+	ImGui::SliderFloat("over_scale_", &scale_, 0.0f, 1.0f);
 	float min = static_cast<float>(time_min_);
 	float max = static_cast<float>(time_max_);
 	ImGui::SliderFloat("time_min_", &min, 5.0f, 10.0f);
@@ -150,7 +150,7 @@ void PlayerAttack::ChageAttackInitialize() {
 	// チャージ中は攻撃判定なし
 	hitFlag_ = true;
 	IsChageAttack_ = false;
-
+	ChargeParticleCreate(worldTransform_.at(0).translation_);
 	particle_Count_ = 0;
 }
 

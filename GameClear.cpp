@@ -13,11 +13,32 @@ void GameClear::Initialize() {
 	//audio_ = Audio::GetInstance();
 	viewProjection_.Initialize();
 
-	clear_Sprite_TextureHandle_ = TextureManager::Load("resources/clear.png");
+	clear_Sprite_TextureHandle_ = TextureManager::Load("resources./clear.png");
 	clear_Sprite_.reset(Sprite::Create(
-	    clear_Sprite_TextureHandle_,
-	    Vector2(WinApp::kWindowWidth * 0.5f, WinApp::kWindowHeight * 0.5f),
-	    Vector4(1.0f, 1.0f, 1.0f, 1.0f)));
+		clear_Sprite_TextureHandle_,
+		Vector2(WinApp::kWindowWidth * 0.5f, WinApp::kWindowHeight * 0.25f),
+		Vector4(1.0f, 1.0f, 1.0f, 1.0f),
+		Vector2(0.5f, 0.5f))
+	);
+	clear_scale_ = { static_cast<float>(WinApp::kWindowWidth) * 0.4f,static_cast<float>(WinApp::kWindowHeight) * 0.4f };
+	clear_Sprite_->SetSize(clear_scale_);
+	pless_b_Sprite_TextureHandle_ = TextureManager::Load("resources./pless_b.png");
+	pless_b_Sprite_.reset(Sprite::Create(
+		pless_b_Sprite_TextureHandle_,
+		Vector2(WinApp::kWindowWidth * 0.5f, WinApp::kWindowHeight * 0.75f),
+		Vector4(1.0f, 1.0f, 1.0f, 1.0f),
+		Vector2(0.5f, 0.5f))
+	);
+	black_back_Sprite_.reset(Sprite::Create(
+		static_cast<int>(TextureManager::TextureHandle::WHITE1x1),
+		Vector2(0.0f, 0.0f),
+		Vector4(1.0f, 1.0f, 1.0f, 1.0f)));
+	black_back_Sprite_->SetSize(Vector2(static_cast<float>(WinApp::kWindowWidth), static_cast<float>(WinApp::kWindowHeight)));
+
+	pless_b_Flag_ = false;
+	color_flag_ = false;
+	count_max_ = 4;
+	count_ = count_max_;
 }
 
 void GameClear::Update() {
@@ -28,6 +49,7 @@ void GameClear::Update() {
 	    (Input::GetInstance()->GetJoystickState(0, joyState) &&
 	     (joyState.Gamepad.wButtons & XINPUT_GAMEPAD_B))) {
 		SceneManager::SetState(SceneManager::State::TITLE);
+		pless_b_Flag_ = true;
 	}
 }
 
@@ -66,11 +88,34 @@ void GameClear::Draw() {
 	/// <summary>
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
+	black_back_Sprite_->Draw();
 	clear_Sprite_->Draw();
-
+	pless_b_Sprite_->Draw();
+	
 	// test->Draw();
 	//  スプライト描画後処理
 	Sprite::PostDraw();
 
 #pragma endregion 
+}
+
+void GameClear::Flash(float count) {
+	if (count <= 0.5f) {
+		if (pless_b_Flag_) {
+			count_--;
+			if (count_ <= 0) {
+				color_flag_ ^= true;
+				count_ = count_max_;
+			}
+		}
+		if (color_flag_) {
+			pless_b_Sprite_->SetColor(Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+		}
+		else {
+			pless_b_Sprite_->SetColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+		}
+	}
+	else {
+		pless_b_Flag_ = false;
+	}
 }

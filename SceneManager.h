@@ -29,8 +29,8 @@ private:
 	std::unique_ptr<GameScene> gameScene_;
 	std::unique_ptr<GameOver> gameOver_;
 	std::unique_ptr<GameClear> gameClear_;
-	State state_ = State::INGAME;
-	State preState_ = State::INGAME;
+	State state_ = State::TITLE;
+	State preState_ = state_;
 	std::unique_ptr<Sprite> back_Sprite = nullptr;
 
 	bool IsStart_;

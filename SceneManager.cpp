@@ -78,8 +78,17 @@ void SceneManager::Update() {
 	} else {
 		t_ += t_Speed_;
 		if (!IsDark_) {
-			Vector4 color{0.0f, 0.0f, 0.0f, Lerp(0.0f, 1.0f, Clamp(t_, 0.0f, 1.0f))};
+			Vector4 color;
+			if (state_ == SceneManager::State::GAMECLEAR) {
+				color={ 1.0f, 1.0f, 1.0f, Lerp(0.0f, 1.0f, Clamp(t_, 0.0f, 1.0f)) };
+			}
+			else {
+				color={0.0f, 0.0f, 0.0f, Lerp(0.0f, 1.0f, Clamp(t_, 0.0f, 1.0f))};
+			}
 			back_Sprite->SetColor(color);
+			titleScene_->Flash(t_);
+			gameOver_->Flash(t_);
+			gameClear_->Flash(t_);
 			if (t_ >= 1.0f) {
 				IsDark_ = true;
 				t_ = 0.0f;

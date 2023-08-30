@@ -38,6 +38,8 @@ public: // メンバ関数
 	/// </summary>
 	void Draw();
 
+	void Flash(float count);
+
 private: // メンバ変数
 #pragma region 初期設定
 	     // 初期設定
@@ -47,5 +49,14 @@ private: // メンバ変数
 	ViewProjection viewProjection_;
 
 	std::unique_ptr<Sprite> over_Sprite_;
+	Vector2 over_scale_;
 	uint32_t over_Sprite_TextureHandle_;
+	std::unique_ptr<Sprite> pless_b_Sprite_;
+	Vector2 pless_b_scale_;
+	uint32_t pless_b_Sprite_TextureHandle_;
+	bool pless_b_Flag_;
+	bool color_flag_;
+	uint32_t count_;
+	uint32_t count_max_;
+	std::unique_ptr<Sprite> black_back_Sprite_;
 };
