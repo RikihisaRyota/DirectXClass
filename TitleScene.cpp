@@ -80,6 +80,7 @@ void TitleScene::Initialize() {
 	// プレイヤー初期化
 	player_->SetPlayerAttack(playerAttack_.get());
 	player_->SetGround(ground_.get());
+	//player_->SetEnemyAttack(enemyAttack_.get());
 	uint32_t chage_Handle = TextureManager::Load("resources/chageAttack.png");
 	uint32_t triple_Handle = TextureManager::Load("resources/tripleAttack.png");
 	uint32_t dash_Handle = TextureManager::Load("resources/dash.png");

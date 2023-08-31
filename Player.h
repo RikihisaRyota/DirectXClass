@@ -11,6 +11,7 @@
 #include "ViewProjection.h"
 #include "Input.h"
 
+class EnemyAttack;
 class PlayerAttack;
 class SceneManager;
 class Player : public BaseCharacter, public Collider {
@@ -190,6 +191,10 @@ public: // ゲッター,セッター
 
 	void SetGround(Ground* ground) { ground_ = ground; }
 
+	void SetEnemyAttack(EnemyAttack* enemyAttack) {
+		enemyAttack_ = enemyAttack;
+	}
+
  private: // 定数系
 	// 地面から距離
 	const float kGroundDistanse = 1.0f;
@@ -239,6 +244,7 @@ private: // メンバ変数
 
 	PlayerAttack* playerAttack_;
 	Ground* ground_;
+	EnemyAttack* enemyAttack_;
 
 	Vector2 chage_Position_;
 	Vector2 triple_Position_;
@@ -276,4 +282,9 @@ private: // メンバ変数
 	float distance_buttan_Y = 12.0f;
 	float test_buttan_Scale_ = 24.0f;
 	size_t	dash_SoundHandle_;
+
+	bool IsHit_ = false;
+	uint32_t hit_Count_;
+	uint32_t hit_Count_Max = 4;
+	Vector3 hit_Move_;
 };

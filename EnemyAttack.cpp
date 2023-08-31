@@ -11,7 +11,7 @@
 void EnemyAttack::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	// 基底クラス
 	BaseCharacter::Initialize(std::move(model));
-	worldTransform_.at(0).scale_ = {4.0f, 1.0f, 4.0f};
+	worldTransform_.at(0).scale_ = { 4.0f, 1.0f, 4.0f };
 	worldTransform_.at(0).UpdateMatrix();
 	// 衝突属性を設定
 	SetCollisionAttribute(kCollisionAttributeEnemyAttack);
@@ -70,10 +70,11 @@ void EnemyAttack::Initialize() {
 
 void EnemyAttack::RootInitialize() {
 	BaseCharacter::ResetCount();
-	worldTransform_.at(0).scale_ = {4.0f, 1.0f, 4.0f};
-	worldTransform_.at(0).rotation_ = {0.0f, 0.0f, 0.0f};
-	worldTransform_.at(0).translation_ = {0.0f, 0.0f, 0.0f};
+	worldTransform_.at(0).scale_ = { 4.0f, 1.0f, 4.0f };
+	worldTransform_.at(0).rotation_ = { 0.0f, 0.0f, 0.0f };
+	worldTransform_.at(0).translation_ = { 0.0f, 0.0f, 0.0f };
 	BaseCharacter::Update();
+	IsAttack_ = false;
 }
 
 void EnemyAttack::Update() {
@@ -155,30 +156,30 @@ void EnemyAttack::Draw(const ViewProjection& viewProjection) {
 			break;
 		case EnemyAttack::Behavior::kPressAttack:
 			models_[static_cast<int>(EnemyAttack::Parts::CIRCLE)]->Draw(
-			    worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
-			    viewProjection);
+				worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
+				viewProjection);
 			break;
 		case EnemyAttack::Behavior::kDashAttack:
 			models_[static_cast<int>(EnemyAttack::Parts::PLANE)]->Draw(
-			    worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::PLANE)],
-			    viewProjection);
+				worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::PLANE)],
+				viewProjection);
 			break;
 		case EnemyAttack::Behavior::kPunchAttack:
 			models_[static_cast<int>(EnemyAttack::Parts::CIRCLE)]->Draw(
-			    worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
-			    viewProjection);
+				worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
+				viewProjection);
 		case EnemyAttack::Behavior::kTornadoAttack:
 			models_[static_cast<int>(EnemyAttack::Parts::CIRCLE)]->Draw(
-			    worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
-			    viewProjection);
+				worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
+				viewProjection);
 			break;
 		case EnemyAttack::Behavior::kMeteoAttack:
 			models_[static_cast<int>(EnemyAttack::Parts::CIRCLE)]->Draw(
-			    worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
-			    viewProjection);
+				worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
+				viewProjection);
 			models_[static_cast<int>(EnemyAttack::Parts::METEO)]->Draw(
-			    worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::METEO)],
-			    viewProjection);
+				worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::METEO)],
+				viewProjection);
 			break;
 		}
 	}
@@ -193,33 +194,33 @@ void EnemyAttack::HitBoxInitialize() {
 
 	for (size_t i = 0; i < size; i++) {
 		// AABB
-		min_ = {-5.0f, -0.9f, -5.0f};
-		max_ = {5.0f, 1.0f, 5.0f};
+		min_ = { -5.0f, -0.9f, -5.0f };
+		max_ = { 5.0f, 1.0f, 5.0f };
 		// OBB
-		size_ = {4.0f, 1.0f, 4.0f};
+		size_ = { 4.0f, 1.0f, 4.0f };
 		// Sphere
 		radius_ = 1.2f;
 		// AABB
 		aabb_.at(i) = {
-		    .center_{worldTransform_.at(i).translation_},
-		    .min_{aabb_.at(i).center_ - worldTransform_.at(i).scale_},
-		    .max_{aabb_.at(i).center_ + worldTransform_.at(i).scale_},
+			.center_{worldTransform_.at(i).translation_},
+			.min_{aabb_.at(i).center_ - worldTransform_.at(i).scale_},
+			.max_{aabb_.at(i).center_ + worldTransform_.at(i).scale_},
 		};
 		// OBB
 		obb_.at(i) = {
-		    .center_{worldTransform_.at(i).translation_},
-		    .orientations_{
-		             {1.0f, 0.0f, 0.0f},
-		             {0.0f, 1.0f, 0.0f},
-		             {0.0f, 0.0f, 1.0f},
-		             },
-		    .size_{worldTransform_.at(i).scale_}
-        };
+			.center_{worldTransform_.at(i).translation_},
+			.orientations_{
+					 {1.0f, 0.0f, 0.0f},
+					 {0.0f, 1.0f, 0.0f},
+					 {0.0f, 0.0f, 1.0f},
+					 },
+			.size_{worldTransform_.at(i).scale_}
+		};
 		obb_.at(i) = OBBSetRotate(obb_.at(i), worldTransform_.at(i).rotation_);
 		// Sphere
 		sphere_ = {
-		    .center_{worldTransform_.at(i).translation_},
-		    .radius_{radius_},
+			.center_{worldTransform_.at(i).translation_},
+			.radius_{radius_},
 		};
 	}
 }
@@ -227,33 +228,33 @@ void EnemyAttack::HitBoxInitialize() {
 void EnemyAttack::HitBoxUpdate() {
 	aabb_.clear();
 	obb_.clear();
-	
+
 	for (size_t i = 0; i < worldTransform_.size(); i++) {
 		float size = (std::max)(
-		    (std::max)(worldTransform_.at(i).scale_.x, worldTransform_.at(i).scale_.y),
-		    worldTransform_.at(i).scale_.z);
+			(std::max)(worldTransform_.at(i).scale_.x, worldTransform_.at(i).scale_.y),
+			worldTransform_.at(i).scale_.z);
 		// AABB
 		AABB aabb;
 		aabb = {
-		    .center_{worldTransform_.at(i).translation_},
-		    .min_{aabb.center_ - size},
-		    .max_{aabb.center_ + size},
+			.center_{worldTransform_.at(i).translation_},
+			.min_{aabb.center_ - size},
+			.max_{aabb.center_ + size},
 		};
 		aabb.center_ = worldTransform_.at(i).translation_;
-		aabb.min_ = {aabb.center_ - size};
-		aabb.max_ = {aabb.center_ + size};
+		aabb.min_ = { aabb.center_ - size };
+		aabb.max_ = { aabb.center_ + size };
 		aabb_.emplace_back(aabb);
 		// OBB
 		OBB obb;
 		obb = {
-		    .center_{worldTransform_.at(i).translation_},
-		    .orientations_{
-		             {1.0f, 0.0f, 0.0f},
-		             {0.0f, 1.0f, 0.0f},
-		             {0.0f, 0.0f, 1.0f},
-		             },
-		    .size_{worldTransform_.at(i).scale_}
-        };
+			.center_{worldTransform_.at(i).translation_},
+			.orientations_{
+					 {1.0f, 0.0f, 0.0f},
+					 {0.0f, 1.0f, 0.0f},
+					 {0.0f, 0.0f, 1.0f},
+					 },
+			.size_{worldTransform_.at(i).scale_}
+		};
 		obb = OBBSetRotate(obb, worldTransform_.at(i).rotation_);
 		obb_.emplace_back(obb);
 	}
@@ -276,9 +277,10 @@ void EnemyAttack::OnCollision(const OBB& obb, uint32_t type) {
 		break;
 	case EnemyAttack::Behavior::kPressAttack:
 		if (press_->GetAttack()) {
+			IsAttack_ = true;
 			for (size_t i = 0; i < worldTransform_.size(); i++) {
 				if (IsCollision(
-				        OBB(*player_->GetOBB(0)), Sphere(GetOBB(i)->center_, GetOBB(i)->size_.z))) {
+					OBB(*player_->GetOBB(0)), Sphere(GetOBB(i)->center_, GetOBB(i)->size_.z))) {
 					PlayerHP::SetAdd(70);
 					press_->SetHit(true);
 				}
@@ -297,12 +299,14 @@ void EnemyAttack::OnCollision(const OBB& obb, uint32_t type) {
 		break;
 	case EnemyAttack::Behavior::kPunchAttack:
 		if (punch_->GetAttack()) {
+			IsAttack_ = true;
 			PlayerHP::SetAdd(30);
 			punch_->SetHit(true);
 		}
 		break;
 	case EnemyAttack::Behavior::kTornadoAttack:
 		if (tornade_->GetAttack()) {
+			IsAttack_ = true;
 			// 連続ヒット
 			PlayerHP::SetAdd(7);
 			// tornade_->SetHit(true);
@@ -310,9 +314,10 @@ void EnemyAttack::OnCollision(const OBB& obb, uint32_t type) {
 		break;
 	case EnemyAttack::Behavior::kMeteoAttack:
 		if (meteo_->GetAttack()) {
-		PlayerHP::SetAdd(5);
-		//meteo_->SetHit(true);
+			IsAttack_ = true;
+			PlayerHP::SetAdd(5);
+			//meteo_->SetHit(true);
 		}
-	break;
+		break;
 	}
 }

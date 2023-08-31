@@ -41,6 +41,7 @@ public:
 	void SetPlayerEnemy(Player* player, Enemy* enemy) { player_ = player, enemy_ = enemy; }
 	void SetBehavior(const Behavior& behavior) { behaviorRequest_ = behavior; }
 	void HitBoxDraw(const ViewProjection& viewProjection) override;
+	bool GetAttack() { return IsAttack_; }
 private:
 	void HitBoxInitialize() override;
 	void HitBoxUpdate() override;
@@ -60,4 +61,6 @@ private:
 	// ふるまい
 	Behavior behavior_ = Behavior::kRoot;
 	std::optional<Behavior> behaviorRequest_ = std::nullopt;
+
+	bool IsAttack_;
 };

@@ -199,9 +199,14 @@ bool Input::GetJoystickState(int32_t stickNo, XINPUT_STATE& out) const {
 			out = devJoysticks_[stickNo].state_.xInput_;
 			return true;
 		}
+		else {
+			// ジョイスティックが接続されていない場合
+			return false;
+		}
 	}
 	return false;
 }
+
 
 bool Input::GetJoystickStatePrevious(int32_t stickNo, XINPUT_STATE& out) const {
 	if (stickNo >= 0 && stickNo < static_cast<int32_t>(devJoysticks_.size())) {

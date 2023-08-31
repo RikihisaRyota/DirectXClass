@@ -109,6 +109,7 @@ void GameScene::Initialize() {
 	// プレイヤー初期化
 	player_->SetPlayerAttack(playerAttack_.get());
 	player_->SetGround(ground_.get());
+	player_->SetEnemyAttack(enemyAttack_.get());
 	uint32_t chage_Handle = TextureManager::Load("resources/chageAttack.png");
 	uint32_t triple_Handle = TextureManager::Load("resources/tripleAttack.png");
 	uint32_t dash_Handle = TextureManager::Load("resources/dash.png");
@@ -154,14 +155,14 @@ void GameScene::Update() {
 		audio_->SoundPlayLoopEnd(ingame_SoundHandle_);
 		SceneManager::SetState(SceneManager::State::GAMECLEAR);
 	}
-	// プレイヤーの更新
-	playerAttack_->Update();
-	playerHP_->Update();
-	player_->Update();
 	// 敵の更新
 	enemyAttack_->Update();
 	enemyHP_->Update();
 	enemy_->Update();
+	// プレイヤーの更新
+	playerAttack_->Update();
+	playerHP_->Update();
+	player_->Update();
 
 	collisionManager.Update(player_.get(), playerAttack_.get(), enemy_.get(), enemyAttack_.get());
 
