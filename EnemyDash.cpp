@@ -9,6 +9,7 @@
 void EnemyDash::Initialize() { 
 	t_ = 0.0f;
 	kTarget_Speed_ = 0.02f;
+	kStay_Speed_ = 0.02f;
 	kDash_Speed_ = 0.01f;
 	
 	target_ = GetPlayer()->GetWorldTransform();
@@ -64,13 +65,14 @@ void EnemyDash::Update() {
 	case EnemyDash::State::kTarget:
 		TargetUpdate();
 		break;
+	case EnemyDash::State::kStay:
+		StayUpdate();
+		break;
 	case EnemyDash::State::kAttack:
 		DrapUpdate();
 		break;
 	}
-	ImGui::Begin("Dash");
-	ImGui::Text("T:%f", t_);
-	ImGui::End();
+	
 }
 
 void EnemyDash::RootUpdate() { 
@@ -82,6 +84,15 @@ void EnemyDash::TargetUpdate() {
 	
 	Vector3 rotate = LenpShortAngle(kTarget_Start_Rotate_, kTarget_End_Rotate_, t_);
 	GetEnemy()->EnemyRotate(rotate);
+	if (t_ >= 1.0f) {
+		state_ = State::kStay;
+		t_ = 0.0f;
+	}
+}
+
+void EnemyDash::StayUpdate() {
+	t_ += kStay_Speed_;
+
 	if (t_ >= 1.0f) {
 		state_ = State::kAttack;
 		t_ = 0.0f;

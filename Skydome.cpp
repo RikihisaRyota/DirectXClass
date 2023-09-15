@@ -16,9 +16,9 @@ void Skydome::Initialize(std::unique_ptr<Model> model) {
 }
 
 void Skydome::Update() {
-	ImGui::Begin("skydome");
+	/*ImGui::Begin("skydome");
 	ImGui::SliderFloat("scale", &scale_, 0.0f, 100.0f);
-	ImGui::End();
+	ImGui::End();*/
 	worldTransform_.scale_ = {scale_, scale_ ,scale_};
 	worldTransform_.UpdateMatrix();
 }

@@ -19,9 +19,9 @@ void Ground::Initialize(std::unique_ptr<Model> model) {
 }
 
 void Ground::Update() {
-	ImGui::Begin("ground");
+	/*ImGui::Begin("ground");
 	ImGui::SliderFloat("scale", &scale_, 0.0f, 100.0f);
-	ImGui::End();
+	ImGui::End();*/
 	worldTransform_.scale_ = {scale_, scale_, scale_};
 
 	worldTransform_.UpdateMatrix();

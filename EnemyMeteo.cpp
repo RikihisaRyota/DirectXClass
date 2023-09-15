@@ -58,12 +58,6 @@ void EnemyMeteo::Update() {
 		AttackUpdate();
 		break;
 	}
-	ImGui::Begin("meteo");
-	for (size_t i = 0; i < target_Count; i++) {
-		Vector3 transform = GetEnemyAttack()->GetWorldTransform(i).translation_;
-		ImGui::Text("%d:transform:%f,%f,%f",i, transform.x, transform.y, transform.x);
-	}
-	ImGui::End();
 }
 
 void EnemyMeteo::RootUpdate() { SetWorking(false); }

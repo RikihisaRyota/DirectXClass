@@ -17,7 +17,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// ゲームウィンドウの作成
 	WinApp* win = nullptr;
 	win = WinApp::GetInstance();
-	win->CreateGameWindow(L"DirectXClass");
+	win->CreateGameWindow(L"ボスバスターズ");
 
 	// DirectXの初期化処理
 	DirectXCommon* dxCommon = nullptr;

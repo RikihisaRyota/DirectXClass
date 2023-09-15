@@ -71,9 +71,7 @@ void EnemyPunch::Update() {
 		AttackUpdate();
 		break;
 	}
-	ImGui::Begin("enemy_attack ");
-	ImGui::Text("t_:%f", t_);
-	ImGui::End();
+	
 }
 
 void EnemyPunch::RootUpdate() { 

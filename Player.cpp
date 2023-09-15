@@ -275,23 +275,14 @@ void Player::OnCollision(const OBB& obb, uint32_t type) {
 
 		// 当たり判定が成功したので押し戻し処理を行う
 		float overlapX = obb_.at(0).size_.x + obb.size_.x - std::abs(distance.x);
-		float overlapY = obb_.at(0).size_.y + obb.size_.y - std::abs(distance.y);
 		float overlapZ = obb_.at(0).size_.z + obb.size_.z - std::abs(distance.z);
 
-		if (overlapX < overlapY && overlapX < overlapZ) {
+		if (overlapX < overlapZ) {
 			if (distance.x < 0.0f) {
 				obb_.at(0).center_ += Vector3{overlapX, 0, 0};
 			}
 			else {
 				obb_.at(0).center_ += Vector3{-overlapX, 0, 0};
-			}
-		}
-		else if (overlapY < overlapX && overlapY < overlapZ) {
-			if (distance.y < 0.0f) {
-				obb_.at(0).center_ += Vector3{0, overlapY, 0};
-			}
-			else {
-				obb_.at(0).center_ += Vector3{0, -overlapY, 0};
 			}
 		}
 		else {

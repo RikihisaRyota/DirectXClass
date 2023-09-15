@@ -117,7 +117,7 @@ void TitleScene::Update() {
 	audio_->SoundPlayLoopStart(title_SoundHandle_);
 #pragma region カメラ関連
 	// 追従カメラの更新
-	followCamera_->Update();
+	//followCamera_->Update();
 	viewProjection_.SetViewProjection(followCamera_->GetViewProjection());
 	viewProjection_.TransferMatrix();
 #pragma endregion

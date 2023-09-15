@@ -12,6 +12,8 @@ public:
 	void Draw();
 	static void SetAdd(int32_t add) { add_HP_ = add; }
 	bool GetAlive() { return IsAlive_; }
+	int32_t GetHP() { return now_HP_;	}
+	uint32_t GetMaxHP() { return kMax_HP_;	}
 private:
 	float Conversion(int32_t num);
 

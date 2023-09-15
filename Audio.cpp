@@ -62,6 +62,13 @@ void Audio::SoundPlayLoopEnd(size_t soundHandle) {
 }
 
 size_t Audio::SoundLoadWave(const char* filename) {
+	// 既存の要素を検索し、かぶるファイル名が存在するか確認
+	for (size_t i = 0; i < soundHandle_.size(); ++i) {
+		if (soundHandle_.at(i).filename == filename) {
+			// 既存の要素が見つかった場合、その要素のインデックスを返す
+			return i;
+		}
+	}
 #pragma region ファイルオープン
 	// ファイル入出ストリームのインスタンス
 	std::ifstream file;
@@ -158,6 +165,8 @@ size_t Audio::SoundLoadWave(const char* filename) {
 	result = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
 	assert(SUCCEEDED(result));
 	soundData.pSourceVoice = pSourceVoice;
+	// 名前の登録
+	soundData.filename = filename;
 #pragma endregion
 	soundHandle_.emplace_back(soundData);
 

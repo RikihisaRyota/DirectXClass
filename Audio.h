@@ -34,6 +34,8 @@ public:
 		uint32_t bufferSize;
 		// 音声再生用の SourceVoice
 		IXAudio2SourceVoice* pSourceVoice;
+		// 名前
+		std::string filename;
 	};
 public:
 	static Audio* GetInstance();

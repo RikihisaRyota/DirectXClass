@@ -76,15 +76,16 @@ void GameScene::Initialize() {
 
 	// 敵攻撃モデル
 	enemyAttackModel[static_cast<int>(EnemyAttack::Parts::CIRCLE)].reset(
-		Model::Create("enemy_Attack_Circle", true, true));
+		Model::Create("enemy_Attack_Circle", true));
 	enemyAttackModel[static_cast<int>(EnemyAttack::Parts::PLANE)].reset(
-		Model::Create("enemy_Attack_Plane", true, true));
+		Model::Create("enemy_Attack_Plane", true));
 	enemyAttackModel[static_cast<int>(EnemyAttack::Parts::METEO)].reset(
-		Model::Create("enemy_Meteo", true,true));
+		Model::Create("enemy_Meteo", true));
 	// 敵初期化
 	enemy_->Initialize(std::move(enemyModel));
 	enemy_->SetPlayer(player_.get());
 	enemy_->SetEnemyAttack(enemyAttack_.get());
+	enemy_->SetEnemyHP(enemyHP_.get());
 	// 敵攻撃初期化
 	enemyAttack_->SetPlayerEnemy(player_.get(), enemy_.get());
 	enemyAttack_->Initialize(std::move(enemyAttackModel));
@@ -103,9 +104,9 @@ void GameScene::Initialize() {
 	playerModel[static_cast<int>(Player::Parts::ARML)].reset(Model::Create("armL", true));
 	playerModel[static_cast<int>(Player::Parts::ARMR)].reset(Model::Create("armR", true));
 	playerModel[static_cast<int>(Player::Parts::WEAPON)].reset(
-		Model::Create("player_Weapon", true,true));
+		Model::Create("player_Weapon", true));
 	playerAttackModel[static_cast<int>(PlayerAttack::Parts::WEAPON)].reset(
-		Model::Create("player_Weapon", true,true));
+		Model::Create("player_Weapon", true));
 	// プレイヤー初期化
 	player_->SetPlayerAttack(playerAttack_.get());
 	player_->SetGround(ground_.get());
@@ -238,14 +239,14 @@ void GameScene::Draw() {
 	// パーティクル
 	playerAttack_->ParticleDraw(viewProjection_);
 	//////////////Debug//////////////////
-	player_->HitBoxDraw(viewProjection_);
+	/*player_->HitBoxDraw(viewProjection_);
 	if (player_->GetBehavior() == Player::Behavior::kAttack) {
 		playerAttack_->HitBoxDraw(viewProjection_);
 	}
 	enemy_->HitBoxDraw(viewProjection_);
 	if (enemy_->GetBehavior() == Enemy::Behavior::kAttack) {
 		enemyAttack_->HitBoxDraw(viewProjection_);
-	}
+	}*/
 
 
 	PrimitiveDrawer::GetInstance()->PrimitiveDrawer::Draw();

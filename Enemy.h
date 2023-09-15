@@ -2,7 +2,8 @@
 #include <optional>
 #include "BaseCharacter.h"
 
-class EnemyAttack;
+#include "EnemyAttack.h"
+class EnemyHP;
 class Player;
 class Enemy : public BaseCharacter, public Collider {
 public:
@@ -43,6 +44,7 @@ public:
 	void EnemyRotate(const Vector3& vector);
 	float GetFloorDistance() { return kFloor_Distance_; }
 	void SetPlayer(Player* player) { player_ = player; }
+	void SetEnemyHP(EnemyHP* enemyHP) { enemyHP_ = enemyHP; }
 private:
 	void HitBoxInitialize() override;
 	void RootInitialize();
@@ -77,8 +79,10 @@ private:
 	const float kMove_Speed_ = 0.5f;
 
 	const float kDistance_ = 5.0f;
+	const float kDash_Distance_ = 10.0f;
 private:
 	Player* player_;
+	EnemyHP* enemyHP_;
 	// 向き
 	Vector3 interRotate_;
 	// さいしゅうてきに向きたい方向
@@ -94,4 +98,19 @@ private:
 	EnemyAttack* enemyAttack_;
 	/////////
 	float angle_ = 0.0f;
+
+	bool dash_Attack_;
+
+	bool triple_Attack_;
+	EnemyAttack::Behavior triple_Attack_State_;
+	uint32_t triple_count_ = 0;
+	uint32_t triple_count_Max = 3;
+
+	bool meteo_Attack_;
+	uint32_t meteo_count_ = 1;
+	uint32_t meteo_count_Max = 4;
+
+	bool Isbreak_;
+	uint32_t break_count_ = 0;
+	uint32_t break_count_Max = 30;
 };

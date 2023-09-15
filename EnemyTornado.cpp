@@ -9,7 +9,7 @@
 void EnemyTornado::Initialize() {
 	t_ = 0.0f;
 	kTarget_Speed_ = 0.05f;
-	kStay_Speed_ = 0.05f;
+	kStay_Speed_ = 0.01f;
 	kAttack_Speed_ = 0.05f;
 	origin_ = GetEnemy()->GetWorldTransform();
 	target_ = origin_;

@@ -62,10 +62,10 @@ void GameOver::Update() {
 		audio_->SoundPlayLoopEnd(gameover_SoundHandle_);
 	}
 	
-	ImGui::Begin("gameover");
+	/*ImGui::Begin("gameover");
 	ImGui::SliderFloat2("over_scale_", &over_scale_.x, 0.0f, 1280.0f);
 	ImGui::SliderFloat2("pless_b_scale_", &pless_b_scale_.x, 0.0f, 1280.0f);
-	ImGui::End();
+	ImGui::End();*/
 	over_Sprite_->SetSize(over_scale_);
 }
 

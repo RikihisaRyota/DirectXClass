@@ -5,6 +5,7 @@
 #include "Input.h"
 #include "MyMath.h"
 #include "EnemyAttack.h"
+#include "EnemyHP.h"
 #include "Player.h"
 
 #include "RandomNumberGenerator.h"
@@ -23,6 +24,17 @@ void Enemy::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	interRotate_ = worldTransform_.at(0).rotation_;
 	moveRatate_ = 0.0f;
 	motionRatate_ = 0.0f;
+
+	dash_Attack_ = false;
+
+	triple_Attack_ = false;
+	triple_count_ = 0;
+
+	meteo_Attack_ = false;
+	meteo_count_ = 1;
+
+	Isbreak_ = false;
+	break_count_ = 0;
 	// 転送
 	BaseCharacter::Update();
 #pragma region 当たり判定
@@ -48,6 +60,14 @@ void Enemy::Update() {
 		behaviorRequest_ = Behavior::kAttack;
 		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
 	}
+	if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_4)) {
+		behaviorRequest_ = Behavior::kAttack;
+		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kTornadoAttack);
+	}
+	if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_5)) {
+		behaviorRequest_ = Behavior::kAttack;
+		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kMeteoAttack);
+	}
 	if (behaviorRequest_) {
 		// ふるまいを変更
 		behavior_ = behaviorRequest_.value();
@@ -67,7 +87,7 @@ void Enemy::Update() {
 	switch (behavior_) {
 	case Enemy::Behavior::kRoot:
 	default:
-		//RootUpdate();
+		RootUpdate();
 		break;
 	case Enemy::Behavior::kAttack:
 		enemyAttack_->Update();
@@ -76,20 +96,20 @@ void Enemy::Update() {
 	// 転送
 	BaseCharacter::Update();
 	HitBoxUpdate();
-//#ifdef DEBUG
-	ImGui::Begin("Enemy");
+#ifdef DEBUG
+	/*ImGui::Begin("Enemy");
 	ImGui::Text(
-	    "translation_ x:%f,y:%f,z:%f", worldTransform_.at(0).translation_.x,
-	    worldTransform_.at(0).translation_.y, worldTransform_.at(0).translation_.z);
+		"translation_ x:%f,y:%f,z:%f", worldTransform_.at(0).translation_.x,
+		worldTransform_.at(0).translation_.y, worldTransform_.at(0).translation_.z);
 	ImGui::Text(
-	    "rotate_ x:%f,y:%f,z:%f", worldTransform_.at(0).rotation_.x,
-	    worldTransform_.at(0).rotation_.y,
-	    worldTransform_.at(0).rotation_.z);
+		"rotate_ x:%f,y:%f,z:%f", worldTransform_.at(0).rotation_.x,
+		worldTransform_.at(0).rotation_.y,
+		worldTransform_.at(0).rotation_.z);
 	ImGui::Text("vector_x:%f,y:%f,z:%f", vector_.x, vector_.y, vector_.z);
 	ImGui::Text("velocity_:%f,y:%f,z:%f", velocity_.x, velocity_.y, velocity_.z);
 	ImGui::Text("acceleration_:%f,y:%f,z:%f", acceleration_.x, acceleration_.y, acceleration_.z);
-	ImGui::End();
-//#endif // DEBUG
+	ImGui::End();*/
+#endif // DEBUG
 }
 
 void Enemy::Draw(const ViewProjection& viewProjection) {
@@ -99,7 +119,7 @@ void Enemy::Draw(const ViewProjection& viewProjection) {
 }
 
 void Enemy::EnemyRotate(const Vector3& vector1) {
-	Vector3 vector =vector1;
+	Vector3 vector = vector1;
 	if (vector != Vector3(0.0f, 0.0f, 0.0f)) {
 		vector.Normalize();
 	}
@@ -115,33 +135,33 @@ void Enemy::EnemyRotate(const Vector3& vector1) {
 
 void Enemy::HitBoxInitialize() {
 	// AABB
-	min_ = {-5.0f, -5.0f, -5.0f};
-	max_ = {5.0f, 5.0f, 5.0f};
+	min_ = { -5.0f, -5.0f, -5.0f };
+	max_ = { 5.0f, 5.0f, 5.0f };
 	// OBB
-	size_ = {2.5f, 5.0f, 2.5f};
+	size_ = { 2.5f, 5.0f, 2.5f };
 	// Sphere
 	radius_ = 1.2f;
 	// AABB
 	aabb_.at(0) = {
-	    .center_{worldTransform_.at(0).translation_},
-	    .min_{aabb_.at(0).center_ + min_},
-	    .max_{aabb_.at(0).center_ + max_},
+		.center_{worldTransform_.at(0).translation_},
+		.min_{aabb_.at(0).center_ + min_},
+		.max_{aabb_.at(0).center_ + max_},
 	};
 	// OBB
 	obb_.at(0) = {
-	    .center_{worldTransform_.at(0).translation_},
-	    .orientations_{
-	             {1.0f, 0.0f, 0.0f},
-	             {0.0f, 1.0f, 0.0f},
-	             {0.0f, 0.0f, 1.0f},
-	             },
-	    .size_{size_}
-    };
+		.center_{worldTransform_.at(0).translation_},
+		.orientations_{
+				 {1.0f, 0.0f, 0.0f},
+				 {0.0f, 1.0f, 0.0f},
+				 {0.0f, 0.0f, 1.0f},
+				 },
+		.size_{size_}
+	};
 	obb_.at(0) = OBBSetRotate(obb_.at(0), worldTransform_.at(0).rotation_);
 	// Sphere
 	sphere_ = {
-	    .center_{worldTransform_.at(0).translation_},
-	    .radius_{radius_},
+		.center_{worldTransform_.at(0).translation_},
+		.radius_{radius_},
 	};
 }
 
@@ -159,76 +179,113 @@ void Enemy::RootInitialize() {
 }
 
 void Enemy::RootUpdate() {
-	/*int i = rnd.NextUIntRange(0, 2);
-	if (i == 0) {
-		behaviorRequest_ = Behavior::kAttack;
-		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
-	} else if (i == 1) {
-		behaviorRequest_ = Behavior::kAttack;
-		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kDashAttack);
-	} else {
-		behaviorRequest_ = Behavior::kAttack;
-		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
-	}*/
-	
-	if (Input::GetInstance()->TriggerKey(DIK_1)) {
-		behaviorRequest_ = Behavior::kAttack;
-		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
-	}
-	if (Input::GetInstance()->TriggerKey(DIK_2)) {
-		behaviorRequest_ = Behavior::kAttack;
-		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kDashAttack);
-	} 
-	if (Input::GetInstance()->TriggerKey(DIK_3)) {
-		behaviorRequest_ = Behavior::kAttack;
-		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
-	}
-	if (Input::GetInstance()->TriggerKey(DIK_4)) {
-		behaviorRequest_ = Behavior::kAttack;
-		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kTornadoAttack);
-	}
-	if (Input::GetInstance()->TriggerKey(DIK_5)) {
-		behaviorRequest_ = Behavior::kAttack;
-		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kMeteoAttack);
-	}
-	if (std::fabs(Length(worldTransform_.at(0).translation_ - player_->GetWorldTransform().translation_))< kDistance_) {
+	if (!dash_Attack_ &&
+		std::fabs(Length(worldTransform_.at(0).translation_ - player_->GetWorldTransform().translation_)) < kDash_Distance_ &&
+		std::fabs(Length(worldTransform_.at(0).translation_ - player_->GetWorldTransform().translation_)) > kDistance_) {
 		RandomNumberGenerator rnd;
-		int type = rnd.NextUIntRange(0,static_cast<int>(EnemyAttack::Behavior::kCount) - 1);
-		switch (type) {
-		case static_cast<int>(EnemyAttack::Behavior::kPressAttack):
-			behaviorRequest_ = Behavior::kAttack;
-			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
-			break;
-		case static_cast<int>(EnemyAttack::Behavior::kDashAttack):
+		int type = rnd.NextUIntRange(1, 500);
+		// 1/5の確率で三回攻撃
+		if (type % 5 == 0) {
 			behaviorRequest_ = Behavior::kAttack;
 			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kDashAttack);
-			break;
-		case static_cast<int>(EnemyAttack::Behavior::kPunchAttack):
-			behaviorRequest_ = Behavior::kAttack;
-			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
-			break;
-		case static_cast<int>(EnemyAttack::Behavior::kTornadoAttack):
-			behaviorRequest_ = Behavior::kAttack;
-			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kTornadoAttack);
-			break;
-		case static_cast<int>(EnemyAttack::Behavior::kMeteoAttack):
-			behaviorRequest_ = Behavior::kAttack;
-			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kMeteoAttack);
-			break;
 		}
+		dash_Attack_ = true;
 	}
-	else {
-		// 移動
-		Move();
-		// 動き
-		Motion();
-	}
+	else
+		if (std::fabs(Length(worldTransform_.at(0).translation_ - player_->GetWorldTransform().translation_)) < kDistance_) {
+			dash_Attack_ = false;
+			if (static_cast<uint32_t>(enemyHP_->GetHP()) <= enemyHP_->GetMaxHP() * (meteo_count_Max - meteo_count_) / meteo_count_Max) {
+				meteo_Attack_ = true;
+				meteo_count_++;
+			}
+			if (meteo_Attack_) {
+				behaviorRequest_ = Behavior::kAttack;
+				enemyAttack_->SetBehavior(EnemyAttack::Behavior::kMeteoAttack);
+				meteo_Attack_ = false;
+			}
+			else if (triple_Attack_) {
+				triple_count_++;
+				switch (triple_Attack_State_) {
+				case EnemyAttack::Behavior::kPressAttack:
+					behaviorRequest_ = Behavior::kAttack;
+					enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
+					break;
+				case EnemyAttack::Behavior::kPunchAttack:
+					behaviorRequest_ = Behavior::kAttack;
+					enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
+					break;
+				case EnemyAttack::Behavior::kTornadoAttack:
+					behaviorRequest_ = Behavior::kAttack;
+					enemyAttack_->SetBehavior(EnemyAttack::Behavior::kTornadoAttack);
+					break;
+				}
+				if (triple_count_ >= triple_count_Max) {
+					triple_count_ = 0;
+					triple_Attack_ = false;
+					Isbreak_ = true;
+					break_count_ = break_count_Max;
+				}
+			}
+			else {
+				if (!Isbreak_) {
+					RandomNumberGenerator rnd;
+					int type = rnd.NextUIntRange(1, 500);
+					// 1/5の確率で三回攻撃
+					if (type % 4 == 0) {
+						triple_Attack_ = true;
+						int typ = rnd.NextUIntRange(1, 500);
+						if (typ % 3 == 2) {
+							triple_Attack_State_ = EnemyAttack::Behavior::kPressAttack;
+						}
+						else if (typ % 3 == 1) {
+							triple_Attack_State_ = EnemyAttack::Behavior::kPunchAttack;
+						}
+						else {
+							triple_Attack_State_ = EnemyAttack::Behavior::kTornadoAttack;
+						}
+					}
+					else {
+						int typ = rnd.NextUIntRange(1, 500);
+						if (typ % 3 == 2) {
+							behaviorRequest_ = Behavior::kAttack;
+							enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
+						}
+						else if (typ % 3 == 1) {
+							behaviorRequest_ = Behavior::kAttack;
+							enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
+						}
+						else {
+							behaviorRequest_ = Behavior::kAttack;
+							enemyAttack_->SetBehavior(EnemyAttack::Behavior::kTornadoAttack);
+						}
+						Isbreak_ = true;
+						break_count_ = break_count_Max;
+					}
+				}
+				else {
+					EnemyRotate(player_->GetWorldTransform().translation_ - worldTransform_.at(0).translation_);
+					break_count_--;
+					if (break_count_ <= 0) {
+						Isbreak_ = false;
+						break_count_ = break_count_Max;
+					}
+				}
+
+			}
+
+		}
+		else {
+			// 移動
+			Move();
+			// 動き
+			Motion();
+		}
 }
 bool move = false;
 void Enemy::Move() {
-	vector_ = {0.0f, 0.0f, 0.0f};
-	
-	Vector3 end = player_->GetWorldTransform().translation_- worldTransform_.at(0).translation_;
+	vector_ = { 0.0f, 0.0f, 0.0f };
+
+	Vector3 end = player_->GetWorldTransform().translation_ - worldTransform_.at(0).translation_;
 	end.y = 0.0f;
 	if (end != Vector3(0.0f, 0.0f, 0.0f)) {
 		end.Normalize();
@@ -252,7 +309,7 @@ void Enemy::Motion() {
 }
 
 void Enemy::Base() {
-	EnemyRotate(vector_); 
+	EnemyRotate(vector_);
 }
 
 void Enemy::Body() {}
@@ -260,25 +317,25 @@ void Enemy::Body() {}
 void Enemy::HitBoxUpdate() {
 	// AABB
 	aabb_.at(0) = {
-	    .center_{worldTransform_.at(0).translation_},
-	    .min_{aabb_.at(0).center_ + min_},
-	    .max_{aabb_.at(0).center_ + max_},
+		.center_{worldTransform_.at(0).translation_},
+		.min_{aabb_.at(0).center_ + min_},
+		.max_{aabb_.at(0).center_ + max_},
 	};
 	// OBB
 	obb_.at(0) = {
-	    .center_{worldTransform_.at(0).translation_},
-	    .orientations_{
-	             {1.0f, 0.0f, 0.0f},
-	             {0.0f, 1.0f, 0.0f},
-	             {0.0f, 0.0f, 1.0f},
-	             },
-	    .size_{size_}
-    };
+		.center_{worldTransform_.at(0).translation_},
+		.orientations_{
+				 {1.0f, 0.0f, 0.0f},
+				 {0.0f, 1.0f, 0.0f},
+				 {0.0f, 0.0f, 1.0f},
+				 },
+		.size_{size_}
+	};
 	obb_.at(0) = OBBSetRotate(obb_.at(0), worldTransform_.at(0).rotation_);
 	// Sphere
 	sphere_ = {
-	    .center_{worldTransform_.at(0).translation_},
-	    .radius_{radius_},
+		.center_{worldTransform_.at(0).translation_},
+		.radius_{radius_},
 	};
 }
 

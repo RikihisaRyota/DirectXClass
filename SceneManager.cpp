@@ -2,6 +2,7 @@
 
 #include "DirectXCommon.h"
 #include "MyMath.h"
+#include "TextureManager.h"
 
 std::optional<SceneManager::State> SceneManager::stateRequest_ = std::nullopt;
 SceneManager::State SceneManager::state_ = SceneManager::State::TITLE;
@@ -45,8 +46,6 @@ void SceneManager::Initialize() {
 	default:
 		break;
 	}
-	
-	
 }
 
 void SceneManager::Update() {

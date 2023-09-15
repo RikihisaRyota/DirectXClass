@@ -176,14 +176,18 @@ void PlayerAttack::ChageAttackUpdate() {
 			charge_T_ += charge_Speed_;
 			worldTransforms_Parts_.at(0)[static_cast<int>(Parts::WEAPON)].rotation_.x =
 				Lerp(slash_Attack_Start_, slashMin_, Clamp(charge_T_, 0.0f, 1.0f));
-			WorldTransform worldtramsform =
+			WorldTransform worldtramsform_armL =
 				player_->GetWorldTransforms_Parts(static_cast<int>(Player::Parts::ARML));
-			worldtramsform.rotation_.x =
+			WorldTransform worldtramsform_armR =
+				player_->GetWorldTransforms_Parts(static_cast<int>(Player::Parts::ARMR));
+			worldtramsform_armL.rotation_.x =
+				Lerp(slash_ArmAngle_Start_, slash_Attack_Min_, Clamp(charge_T_, 0.0f, 1.0f));
+			worldtramsform_armR.rotation_.x =
 				Lerp(slash_ArmAngle_Start_, slash_Attack_Min_, Clamp(charge_T_, 0.0f, 1.0f));
 			player_->SetWorldtransforms_Parts(
-				worldtramsform, static_cast<int>(Player::Parts::ARML));
+				worldtramsform_armL, static_cast<int>(Player::Parts::ARML));
 			player_->SetWorldtransforms_Parts(
-				worldtramsform, static_cast<int>(Player::Parts::ARMR));
+				worldtramsform_armR, static_cast<int>(Player::Parts::ARMR));
 		}
 		else {
 			// チャージ終わり
@@ -204,12 +208,15 @@ void PlayerAttack::ChageAttackUpdate() {
 		slash_T_ += slash_Speed_;
 		float rotate = Lerp(slash_Attack_Start_, slashMax_, Clamp(slash_T_, 0.0f, 1.0f));
 		worldTransforms_Parts_.at(0)[static_cast<int>(Parts::WEAPON)].rotation_.x = rotate;
-		WorldTransform worldtramsform =
+		WorldTransform worldtramsform_armL =
 			player_->GetWorldTransforms_Parts(static_cast<int>(Player::Parts::ARML));
+		WorldTransform worldtramsform_armR =
+			player_->GetWorldTransforms_Parts(static_cast<int>(Player::Parts::ARMR));
 		rotate = Lerp(slash_ArmAngle_Start_, slash_Attack_Max_, Clamp(slash_T_, 0.0f, 1.0f));
-		worldtramsform.rotation_.x = rotate;
-		player_->SetWorldtransforms_Parts(worldtramsform, static_cast<int>(Player::Parts::ARML));
-		player_->SetWorldtransforms_Parts(worldtramsform, static_cast<int>(Player::Parts::ARMR));
+		worldtramsform_armL.rotation_.x = rotate;
+		worldtramsform_armR.rotation_.x = rotate;
+		player_->SetWorldtransforms_Parts(worldtramsform_armL, static_cast<int>(Player::Parts::ARML));
+		player_->SetWorldtransforms_Parts(worldtramsform_armR, static_cast<int>(Player::Parts::ARMR));
 		if (worldTransforms_Parts_.at(0)[static_cast<int>(Parts::WEAPON)].rotation_.x >=
 			slashMax_ - 0.00005f) {
 			charge_T_ = 0.0f;
@@ -576,7 +583,6 @@ void PlayerAttack::HitParticleUpdate() {
 	for (auto it = hit_Particles_.begin(); it != hit_Particles_.end();) {
 		auto& particle = *it;
 		particle->time_--;
-
 		if (particle->time_ < 0) {
 			particle->IsAlive_ = false;
 			delete particle->plate_;
@@ -584,6 +590,10 @@ void PlayerAttack::HitParticleUpdate() {
 			break;
 		}
 		else {
+			cMaterial material;
+			float t = Clamp(static_cast<float>(static_cast<float>(particle->time_)/ 8.0f), 0.0f, 1.0f);
+			material.color_ = Vector4(0.9f, 0.5f, 20.0f / 255.0f, Lerp(0.4f,0.0f, t));
+			particle->plate_->SetMaterial(material);
 			++it; // 次の要素に進める
 		}
 	}
@@ -666,7 +676,7 @@ void PlayerAttack::OnCollision(const OBB& obb, uint32_t type) {
 		break;
 	case PlayerAttack::Behavior::kChargeAttack:
 		if (!hitFlag_) {
-			EnemyHP::SetAdd(static_cast<uint32_t>(30 * (charge_T_ + 1.0f)));
+			EnemyHP::SetAdd(static_cast<uint32_t>(45 * (charge_T_ + 1.0f)));
 			hitFlag_ = true;
 			HitParticleCreate(enemy_->GetWorldTransform().translation_);
 			Audio::GetInstance()->SoundPlayWave(chage_SoundHandle_);
@@ -678,7 +688,7 @@ void PlayerAttack::OnCollision(const OBB& obb, uint32_t type) {
 		switch (tripleAttack_Behavior_) {
 		case PlayerAttack::TripleAttack::kFirst:
 			if (!hitFlag_) {
-				EnemyHP::SetAdd(5);
+				EnemyHP::SetAdd(15);
 				hitFlag_ = true;
 				HitParticleCreate(enemy_->GetWorldTransform().translation_);
 				Audio::GetInstance()->SoundPlayWave(first_SoundHandle_);
@@ -686,7 +696,7 @@ void PlayerAttack::OnCollision(const OBB& obb, uint32_t type) {
 			break;
 		case PlayerAttack::TripleAttack::kSecond:
 			if (!hitFlag_) {
-				EnemyHP::SetAdd(10);
+				EnemyHP::SetAdd(20);
 				hitFlag_ = true;
 				HitParticleCreate(enemy_->GetWorldTransform().translation_);
 				Audio::GetInstance()->SoundPlayWave(first_SoundHandle_);
@@ -694,7 +704,7 @@ void PlayerAttack::OnCollision(const OBB& obb, uint32_t type) {
 			break;
 		case PlayerAttack::TripleAttack::kThird:
 			if (!hitFlag_) {
-				EnemyHP::SetAdd(15);
+				EnemyHP::SetAdd(40);
 				hitFlag_ = true;
 				HitParticleCreate(enemy_->GetWorldTransform().translation_);
 				Audio::GetInstance()->SoundPlayWave(third_SoundHandle_);

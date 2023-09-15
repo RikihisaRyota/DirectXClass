@@ -58,7 +58,7 @@ public: // 静的メンバ関数
 
 public: // 静的メンバ変数
 	// デスクリプターの数
-	static const size_t kNumDescriptors = 256;
+	static const size_t kNumDescriptors = 4096;
 
 public: // メンバ関数
 

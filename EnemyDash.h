@@ -8,6 +8,7 @@ public:
 	enum class State {
 		kRoot,
 		kTarget,
+		kStay,
 		kAttack,
 	};
 
@@ -18,6 +19,7 @@ public:
 private:
 	void RootUpdate();
 	void TargetUpdate();
+	void StayUpdate();
 	void DrapUpdate();
 
 private:
@@ -32,4 +34,7 @@ private:
 	// どこまで追跡するか
 	float target_Distance_;
 	State state_;
+#pragma region ステイ
+	float kStay_Speed_;
+#pragma endregion
 };

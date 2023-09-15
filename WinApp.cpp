@@ -56,7 +56,7 @@ void WinApp::CreateGameWindow(const wchar_t* title, UINT windowStyle, int32_t cl
 
 	hwnd_ = CreateWindow(
 		wc_.lpszClassName,		//利用するクラス名
-		L"CG2",					//タイトルバーの文字(なんでもよい)
+		title,					//タイトルバーの文字(なんでもよい)
 		WS_OVERLAPPEDWINDOW,	//よく見るウィンドウスタイル
 		CW_USEDEFAULT,			//表示X座標(Windowsに任せる)
 		CW_USEDEFAULT,			//表示Y座標(WindowsOSに任せる)

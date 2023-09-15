@@ -281,7 +281,7 @@ void EnemyAttack::OnCollision(const OBB& obb, uint32_t type) {
 			for (size_t i = 0; i < worldTransform_.size(); i++) {
 				if (IsCollision(
 					OBB(*player_->GetOBB(0)), Sphere(GetOBB(i)->center_, GetOBB(i)->size_.z))) {
-					PlayerHP::SetAdd(70);
+					PlayerHP::SetAdd(75);
 					press_->SetHit(true);
 				}
 			}
@@ -291,7 +291,7 @@ void EnemyAttack::OnCollision(const OBB& obb, uint32_t type) {
 		if (dash_->GetAttack()) {
 			for (size_t i = 0; i < worldTransform_.size(); i++) {
 				if (IsCollision(*player_->GetOBB(0), *enemy_->GetOBB(i))) {
-					PlayerHP::SetAdd(40);
+					PlayerHP::SetAdd(55);
 					dash_->SetHit(true);
 				}
 			}
@@ -300,7 +300,7 @@ void EnemyAttack::OnCollision(const OBB& obb, uint32_t type) {
 	case EnemyAttack::Behavior::kPunchAttack:
 		if (punch_->GetAttack()) {
 			IsAttack_ = true;
-			PlayerHP::SetAdd(30);
+			PlayerHP::SetAdd(45);
 			punch_->SetHit(true);
 		}
 		break;
@@ -308,15 +308,15 @@ void EnemyAttack::OnCollision(const OBB& obb, uint32_t type) {
 		if (tornade_->GetAttack()) {
 			IsAttack_ = true;
 			// 連続ヒット
-			PlayerHP::SetAdd(7);
+			PlayerHP::SetAdd(15);
 			// tornade_->SetHit(true);
 		}
 		break;
 	case EnemyAttack::Behavior::kMeteoAttack:
 		if (meteo_->GetAttack()) {
 			IsAttack_ = true;
-			PlayerHP::SetAdd(5);
-			//meteo_->SetHit(true);
+			PlayerHP::SetAdd(85);
+			meteo_->SetHit(true);
 		}
 		break;
 	}
