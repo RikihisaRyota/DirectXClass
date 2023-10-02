@@ -33,13 +33,19 @@ void GameScene::Initialize() {
 
 	sprite_.reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
 
+
+	// Compute
+	compute_ = std::make_unique<Compute>();
+	compute_->Initialize();
 	// 音声再生
-	audio = new Audio;
+	audio = new Audio();
 	audio->Initialize();
 	soundHandle_ = audio->SoundLoadWave("resources/mokugyo.wav");
 }
 
 void GameScene::Update() {
+	// Compute
+	compute_->Update(dxCommon_->GetCommandList());
 	// 音声テスト
 	//audio->SoundPlayWave(soundHandle_);
 	// デバックカメラ
@@ -1057,7 +1063,8 @@ void GameScene::Draw() {
 	Plane::PreDraw(commandList);
 
 	
-
+	// Compute
+	compute_->Draw(commandList);
 
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる

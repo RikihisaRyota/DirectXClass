@@ -10,6 +10,7 @@ using namespace Microsoft::WRL;
 // 静的メンバ変数の実体化
 DirectXCommon* TextureManager::device_ = nullptr;
 ComPtr<ID3D12DescriptorHeap> TextureManager::srvDescriptorHeap_;
+uint32_t TextureManager::kNumDescriptorsCount = 0;
 
 TextureManager* TextureManager::GetInstance() {
 	static TextureManager instance;
@@ -45,27 +46,30 @@ void TextureManager::UnLoadInternal() {
 
 uint32_t TextureManager::LoadInternal(const std::string& filePath) {
 	// どこが空いているか探す
+	uint32_t number = 0;
 	for (uint32_t i = static_cast<int>(TextureHandle::COUNT); i < kNumDescriptors; i++) {
+		if (textures_[i].name == filePath) {
+			return i;
+		}
 		if (!useTable_[i]) {
-			kNumDescriptorsCount = i;
 
 			useTable_[i] = true;
 
 			// TextureデータをCPUにロード
 			DirectX::ScratchImage mipImage = LoadTexture(filePath);
 
-			textures_[kNumDescriptorsCount].name = filePath;
+			textures_[i].name = filePath;
 
 			const DirectX::TexMetadata& metadata = mipImage.GetMetadata();
 
 			// TextureResourceの設定
-			textures_[kNumDescriptorsCount].resource = CreateTextureResourec(metadata);
+			textures_[i].resource = CreateTextureResourec(metadata);
 
 			// TextureResourceをTextureデータに転送
-			UploadTextureData(textures_[kNumDescriptorsCount].resource.Get(), mipImage);
+			UploadTextureData(textures_[i].resource.Get(), mipImage);
 
 			// SRVの作成
-			CreateShaderResourceView(metadata, textures_[kNumDescriptorsCount].resource.Get());
+			CreateShaderResourceView(metadata, textures_[i].resource.Get(),i);
 
 			// 解放
 			mipImage.Release();
@@ -73,7 +77,7 @@ uint32_t TextureManager::LoadInternal(const std::string& filePath) {
 			break;
 		}
 	}
-	return kNumDescriptorsCount;
+	return number;
 }
 
 DirectX::ScratchImage TextureManager::LoadTexture(const std::string& filePath) {
@@ -145,7 +149,7 @@ void TextureManager::UploadTextureData(ID3D12Resource* texture, const DirectX::S
 	}
 }
 
-void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResourec) {
+void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResourec,uint32_t num) {
 	// metaDataを基にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = metadata.format;
@@ -154,11 +158,13 @@ void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metada
 	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
 
 	// SRVを作成するDescriptorHeapの場所を決める
-	textures_[kNumDescriptorsCount].cpuDescHandleSRV = GetCPUDescriptorHandle(srvDescriptorHeap_.Get(), descriptorHandleIncrementSize, kNumDescriptorsCount);
-	textures_[kNumDescriptorsCount].gpuDescHandleSRV = GetGPUDescriptorHandle(srvDescriptorHeap_.Get(), descriptorHandleIncrementSize, kNumDescriptorsCount);
+	textures_[num].cpuDescHandleSRV = GetCPUDescriptorHandle(srvDescriptorHeap_.Get(), descriptorHandleIncrementSize, num);
+	textures_[num].gpuDescHandleSRV = GetGPUDescriptorHandle(srvDescriptorHeap_.Get(), descriptorHandleIncrementSize, num);
 
 	// SRVの生成
-	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[kNumDescriptorsCount].cpuDescHandleSRV);
+	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[num].cpuDescHandleSRV);
+	
+	kNumDescriptorsCount++;
 }
 
 void TextureManager::CreateShaderResourceView(ID3D12Resource* textureResourec) {
@@ -216,25 +222,24 @@ void TextureManager::Initialize(DirectXCommon* device) {
 	filePath[0] = ("resources/white1x1.png");
 	filePath[1] = ("resources/toon.png");
 	for (uint32_t i = 0; i < InitialTexture; i++) {
-		kNumDescriptorsCount = i;
 
 		useTable_[i] = true;
 
 		// TextureデータをCPUにロード
 		DirectX::ScratchImage mipImage = LoadTexture(filePath[i]);
 
-		textures_[kNumDescriptorsCount].name = filePath[i];
+		textures_[i].name = filePath[i];
 
 		const DirectX::TexMetadata& metadata = mipImage.GetMetadata();
 
 		// TextureResourceの設定
-		textures_[kNumDescriptorsCount].resource = CreateTextureResourec(metadata);
+		textures_[i].resource = CreateTextureResourec(metadata);
 
 		// TextureResourceをTextureデータに転送
-		UploadTextureData(textures_[kNumDescriptorsCount].resource.Get(), mipImage);
+		UploadTextureData(textures_[i].resource.Get(), mipImage);
 
 		// SRVの作成
-		CreateShaderResourceView(metadata, textures_[kNumDescriptorsCount].resource.Get());
+		CreateShaderResourceView(metadata, textures_[i].resource.Get(),i);
 
 		// 解放
 		mipImage.Release();

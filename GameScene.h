@@ -17,6 +17,8 @@
 #include "Sphere.h"
 #include "Sprite.h"
 
+
+#include "Compute.h"
 class DirectXCommon;
 /// <summary>
 /// ゲームシーン
@@ -141,6 +143,8 @@ private: // メンバ変数
 	std::vector<std::vector<std::unique_ptr<cMaterial>>> suzanneMaterial_;
 	std::vector<std::vector<std::unique_ptr<UVtranslation>>> suzanneUVtranslation_;
 
+	// compute
+	std::unique_ptr<Compute> compute_;
 	// 音声再生
 	Audio* audio;
 

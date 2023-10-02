@@ -180,6 +180,12 @@
     <ClCompile Include="SpriteGraphicsPipline.cpp">
       <Filter>ソース ファイル\graphicsPipeline</Filter>
     </ClCompile>
+    <ClCompile Include="Compute.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DXCCompiler.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinApp.h">
@@ -311,6 +317,12 @@
     <ClInclude Include="BasicGraphicsPipline.h">
       <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
     </ClInclude>
+    <ClInclude Include="Compute.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DXCCompiler.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -347,6 +359,9 @@
     </FxCompile>
     <FxCompile Include="Line.VS.hlsl">
       <Filter>リソース ファイル\Line</Filter>
+    </FxCompile>
+    <FxCompile Include="ComputeShader.hlsl">
+      <Filter>リソース ファイル</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

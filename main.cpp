@@ -1,5 +1,6 @@
 #include "WinApp.h"
 #include "DirectXCommon.h"
+#include "DXCCompiler.h"
 #include "GameScene.h"
 #include "ImGuiManager.h"
 #include "TextureManager.h"
@@ -21,6 +22,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DirectXCommon* dxCommon = nullptr;
 	dxCommon = DirectXCommon::GetInstance();
 	dxCommon->Initialize(win);
+
+	// DXCCompiler
+	DXCCompiler::Initialize();
 
 	// 入力の初期化
 	Input* input = nullptr;
@@ -69,6 +73,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// Line
 	Line::SetDevice(dxCommon->GetDevice());
 	Line::GetInstance()->Initialize();
+
+	// Compute
+	Compute::SetDevice(dxCommon->GetDevice());
 
 	// ImGuiの初期化
 	ImGuiManager* imguiManager = ImGuiManager::GetInstance();

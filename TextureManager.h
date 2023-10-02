@@ -94,7 +94,7 @@ public: // メンバ関数
 	/// srvの生成
 	/// </summary>
 	/// <param name="metadata">metadata</param>
-	void CreateShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* texture);
+	void CreateShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* texture,uint32_t num = kNumDescriptorsCount);
 	void CreateShaderResourceView(ID3D12Resource* textureResourec);
 	/// <summary>
 	/// デスクリプタテーブルをセット
@@ -159,5 +159,5 @@ private: // メンバ変数
 	std::array<Texture, kNumDescriptors> textures_;
 	std::array<bool, kNumDescriptors> useTable_;
 	// カウント
-	uint32_t kNumDescriptorsCount = 0u;
+	static uint32_t kNumDescriptorsCount;
 };
