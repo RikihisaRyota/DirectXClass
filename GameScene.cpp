@@ -28,8 +28,8 @@ void GameScene::Initialize() {
 	viewProjection_.Initialize();
 	Line::GetInstance()->SetViewProjection(&viewProjection_);
 
-	block_ = std::make_unique<Block>(Model::Create("block"));
-
+	/*block_ = std::make_unique<Block>(Model::Create("block"));
+	block_->Initialize();*/
 	// 音声再生
 	audio = new Audio;
 	audio->Initialize();

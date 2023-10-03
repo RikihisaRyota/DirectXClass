@@ -66,7 +66,7 @@ private: // メンバ変数
 	/// ゲーム用
 	/// </summary>
 	ViewProjection viewProjection_;
-	std::unique_ptr<Block> block_;
+	//std::unique_ptr<Block> block_;
 
 	// 音声再生
 	Audio* audio;
