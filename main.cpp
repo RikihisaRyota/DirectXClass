@@ -33,16 +33,16 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// スプライト静的初期化
 	Sprite::StaticInitialize(dxCommon->GetDevice(),WinApp::kWindowWidth,WinApp::kWindowHeight);
 
-	// BasicGraphicsPiplineの静的初期化
+	// BasicGraphicsPipelineの静的初期化
 	BasicGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
-	// ToonGraphicsPiplineの静的初期化
+	// ToonGraphicsPipelineの静的初期化
 	ToonGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
-	// LineGraphicsPiplineの静的初期化
+	// LineGraphicsPipelineの静的初期化
 	LineGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
-	// SpriteGraphicsPiplineの静的初期化
+	// SpriteGraphicsPipelineの静的初期化
 	//SpriteGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
 	// Spriteの静的初期化
@@ -100,16 +100,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		imguiManager->End();
 		// テクスチャマネージャーの描画準備
 		TextureManager::GetInstance()->PreDraw();
-		//// SRV->RTV
-		//pera->PreDraw();
-		//// ゲームシーンの描画
-		//gameScene->Draw2();
-		//// RTV->SRV
-		//pera->PostDraw();
 		// 描画開始
 		dxCommon->PreDraw();
-		// LineのPreDraw
-		
 		// ゲームシーンの描画
 		gameScene->Draw();
 		// ImGui描画
