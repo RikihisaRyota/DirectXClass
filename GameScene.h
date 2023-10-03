@@ -142,7 +142,13 @@ private: // メンバ変数
 	std::vector<std::vector<std::unique_ptr<UVtranslation>>> suzanneUVtranslation_;
 
 	// 音声再生
-	Audio* audio;
+	Audio* audio_;
 
-	Audio::SoundData soundHandle_;
+	size_t SESoundHandle_;
+
+	size_t titleLoopSoundHandle_;
+	size_t titleLoopPlayHandle_;
+	size_t inGameLoopSoundHandle_;
+	size_t inGameLoopPlayHandle_;
+	bool isTitle_;
 };

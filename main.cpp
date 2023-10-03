@@ -42,10 +42,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// LineGraphicsPipelineの静的初期化
 	LineGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
-	// SpriteGraphicsPipelineの静的初期化
-	//SpriteGraphicsPipline::SetDevice(dxCommon->GetDevice());
-
-	// Spriteの静的初期化
+	// Planeの静的初期化
 	Plane::SetDevice(dxCommon->GetDevice());
 
 	// OBJの静的初期化
@@ -74,15 +71,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	ImGuiManager* imguiManager = ImGuiManager::GetInstance();
 	imguiManager->Initialize(win, dxCommon);
 
+	// Audio
+	Audio* audio = Audio::GetInstance();
+	audio->Initialize();
+
 	// ゲームシーンの初期化
 	GameScene* gameScene = nullptr;
 	gameScene = new GameScene();
 	gameScene->Initialize();
 
-	// Pera
-	Pera* pera = nullptr;
-	pera = new Pera();
-	pera->Initialize(dxCommon, dxCommon->GetBackBuff(), dxCommon->GetRTVDescriptorHeap());
 
 	// メインループ
 	while (true) {
@@ -94,7 +91,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		imguiManager->Begin();
 		// 入力関連の毎フレーム処理
 		input->Update();
-		//// ゲームシーンの毎フレーム処理
+		// 音声アップデート
+		audio->Update();
+		// ゲームシーンの毎フレーム処理
 		gameScene->Update();
 		// ImGui受付終了
 		imguiManager->End();
@@ -109,11 +108,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		// 描画終わり
 		dxCommon->PostDraw();
 	}
-	SafeDelete(pera);
 
 	// ゲームシーン解放
 	gameScene->Release();
 	SafeDelete(gameScene);
+
+	// スプライト
+	Sprite::Release();
 
 	// ImGui解放
 	imguiManager->Finalize();
@@ -133,9 +134,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// リリースリークチェック
 	IDXGIDebug1* debug;
 	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
-		debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
 		debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
 		debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
+		debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
 		debug->Release();
 	}
 	return 0;

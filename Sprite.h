@@ -70,6 +70,10 @@ public: // 静的メンバ関数
 		uint32_t textureHandle, Vector2 position, Vector4 color = { 1, 1, 1, 1 },
 		Vector2 anchorpoint = { 0.0f, 0.0f }, bool isFlipX = false, bool isFlipY = false);
 
+	/// <summary>
+	/// リリース
+	/// </summary>
+	static void Release();
 private: // 静的メンバ変数
 	// 頂点数
 	static const int kVertNum = 4;
@@ -221,18 +225,4 @@ private: // メンバ関数
 	/// 頂点データ転送
 	/// </summary>
 	void TransferVertices();
-
-	/// <summary>
-	/// CompileShader関数
-	/// </summary>
-	static IDxcBlob* CompileShader(
-		//ConpilerするShaderファイルへのパス
-		const std::wstring& filePath,
-		//Compilerに使用するProfile
-		const wchar_t* profile,
-		//初期化で生成したのもを3つ
-		IDxcUtils* dxcUtils,
-		IDxcCompiler3* dxcCompiler,
-		IDxcIncludeHandler* includeHandler
-	);
 };

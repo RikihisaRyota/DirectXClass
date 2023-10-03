@@ -229,6 +229,11 @@ Sprite* Sprite::Create(
 	return sprite;
 }
 
+void Sprite::Release() {
+	sRootSignature.Reset();
+	sPipelineState.Reset();
+}
+
 Sprite::Sprite() {}
 
 Sprite::Sprite(

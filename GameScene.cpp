@@ -1,4 +1,5 @@
 #include "GameScene.h"
+
 #include "DirectXCommon.h"
 #include "Matrix4x4.h"
 #include "TextureManager.h"
@@ -33,15 +34,34 @@ void GameScene::Initialize() {
 
 	sprite_.reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
 
-	// 音声再生
-	audio = new Audio;
-	audio->Initialize();
-	soundHandle_ = audio->SoundLoadWave("resources/mokugyo.wav");
+	// 音テスト
+	audio_ = Audio::GetInstance();
+	SESoundHandle_ = audio_->SoundLoadWave("Resources/Audio/pick.wav");
+	titleLoopSoundHandle_ = audio_->SoundLoadWave("Resources/Audio/titleBGM.wav");
+	titleLoopPlayHandle_ = -1;
+	inGameLoopSoundHandle_ = audio_->SoundLoadWave("Resources/Audio/ingameBGM.wav");
+	inGameLoopPlayHandle_ = -1;
+	isTitle_ = true;
 }
 
 void GameScene::Update() {
 	// 音声テスト
-	//audio->SoundPlayWave(soundHandle_);
+	if (input_->TriggerKey(DIK_SPACE)) {
+		audio_->SoundPlayWave(SESoundHandle_);
+		if (isTitle_) {
+			audio_->SoundPlayLoopEnd(inGameLoopPlayHandle_);
+			inGameLoopPlayHandle_ = -1;
+			titleLoopPlayHandle_ = audio_->SoundPlayLoopStart(titleLoopSoundHandle_);
+			isTitle_ = false;
+		}
+		else {
+			audio_->SoundPlayLoopEnd(titleLoopPlayHandle_);
+			titleLoopPlayHandle_ = -1;
+			inGameLoopPlayHandle_ = audio_->SoundPlayLoopStart(inGameLoopSoundHandle_);
+			isTitle_ = true;
+		}
+
+	}
 	// デバックカメラ
 	debugCamera_->Update(&viewProjection_);
 
