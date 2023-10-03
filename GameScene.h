@@ -141,6 +141,13 @@ private: // メンバ変数
 	std::vector<std::vector<std::unique_ptr<cMaterial>>> suzanneMaterial_;
 	std::vector<std::vector<std::unique_ptr<UVtranslation>>> suzanneUVtranslation_;
 
+	// fence
+	std::vector<std::unique_ptr<Model>> fence_;
+	std::vector<std::unique_ptr<WorldTransform>> fenceWorldTransform_;
+	std::vector<uint32_t> fenceUseTexture_;
+	std::vector<uint32_t> fenceUseToon_;
+	std::vector<std::vector<std::unique_ptr<cMaterial>>> fenceMaterial_;
+	std::vector<std::vector<std::unique_ptr<UVtranslation>>> fenceUVtranslation_;
 	// 音声再生
 	Audio* audio_;
 

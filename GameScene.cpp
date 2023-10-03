@@ -67,15 +67,15 @@ void GameScene::Update() {
 
 
 	ImGui::Begin("Sprite:");
-		Vector2 position = sprite_->GetPosition();
-		ImGui::SliderFloat2("position", &position.x, -10.0f, 10.0f);
-		sprite_->SetPosition(position);
-		Vector4 color = sprite_->GetColor();
-		ImGui::SliderFloat4("color", &color.x, -1.0f, 1.0f);
-		sprite_->SetColor(color);
-		Vector2 size = sprite_->GetSize();
-		ImGui::SliderFloat2("size", &size.x, -5.0f, 5.0f);
-		sprite_->SetSize(size);
+	Vector2 position = sprite_->GetPosition();
+	ImGui::SliderFloat2("position", &position.x, -10.0f, 10.0f);
+	sprite_->SetPosition(position);
+	Vector4 color = sprite_->GetColor();
+	ImGui::SliderFloat4("color", &color.x, -1.0f, 1.0f);
+	sprite_->SetColor(color);
+	Vector2 size = sprite_->GetSize();
+	ImGui::SliderFloat2("size", &size.x, -5.0f, 5.0f);
+	sprite_->SetSize(size);
 	ImGui::End();
 
 #pragma region ライト
@@ -122,11 +122,17 @@ void GameScene::Update() {
 		}
 	}
 
+	for (auto& smaterial : fence_) {
+		for (size_t ssize = 0; ssize < smaterial->GetModelSize(); ssize++) {
+			smaterial->GetMaterial(ssize)->SetDirectionalLight(*directionalLight_);
+		}
+	}
+
 #pragma endregion
 	ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_MenuBar);
 #pragma region コンボ
 	// ドロップダウンメニューの表示
-	static const char* items[] = { "cube", "sphere", "obj", "plane","teapot","bunny","multiMesh","multiMaterial","suzanne" };
+	static const char* items[] = { "cube", "sphere", "obj", "plane","teapot","bunny","multiMesh","multiMaterial","suzanne","fence"};
 	static int currentItem = 0;
 	if (ImGui::BeginCombo("Model", items[currentItem])) {
 		for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
@@ -341,6 +347,36 @@ void GameScene::Update() {
 			suzanneMaterial_.emplace_back(std::move(materials));
 			break;
 		}
+		case 9: // "fence"が選択された場合
+		{
+			fence_.emplace_back(std::unique_ptr<Model>(Model::Create("fence", 0)));
+			fenceWorldTransform_.emplace_back(new WorldTransform);
+			fenceWorldTransform_.back()->Initialize();
+			fenceUseTexture_.emplace_back(0);
+			fenceUseToon_.emplace_back(0);
+
+			size_t modelSize = fence_.back()->GetModelSize();
+
+			std::vector<std::unique_ptr<UVtranslation>> uvTranslations;
+			uvTranslations.reserve(modelSize);
+			for (size_t i = 0; i < modelSize; i++) {
+				uvTranslations.emplace_back(new UVtranslation);
+				uvTranslations.back()->scale_ = Vector3(1.0f, 1.0f, 1.0f);
+				uvTranslations.back()->rotate_ = Vector3(0.0f, 0.0f, 0.0f);
+				uvTranslations.back()->translate_ = Vector3(0.0f, 0.0f, 0.0f);
+			}
+			fenceUVtranslation_.emplace_back(std::move(uvTranslations));
+
+			std::vector<std::unique_ptr<cMaterial>> materials;
+			materials.reserve(modelSize);
+			for (size_t i = 0; i < modelSize; i++) {
+				materials.emplace_back(new cMaterial);
+				materials.back()->color_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+				materials.back()->enableLightint_ = 1;
+			}
+			fenceMaterial_.emplace_back(std::move(materials));
+			break;
+		}
 		}
 	}
 #pragma endregion
@@ -418,7 +454,7 @@ void GameScene::Update() {
 					--i;
 				}
 #pragma endregion
-			ImGui::TreePop();
+				ImGui::TreePop();
 			}
 		}
 	}
@@ -496,7 +532,7 @@ void GameScene::Update() {
 					--i;
 				}
 #pragma endregion
-			ImGui::TreePop();
+				ImGui::TreePop();
 			}
 		}
 	}
@@ -537,7 +573,7 @@ void GameScene::Update() {
 				}
 #pragma endregion
 #pragma region material
-				if (sphereUseTexture_[i] && ImGui::TreeNode(("Sphere_MATERIAL_" + std::to_string(i)).c_str()))  {
+				if (sphereUseTexture_[i] && ImGui::TreeNode(("Sphere_MATERIAL_" + std::to_string(i)).c_str())) {
 					ImVec4 color = ImVec4(material->color_.x, material->color_.y, material->color_.z, 0.0f); // 初期値は赤色
 					ImGui::ColorEdit3(("Color_" + std::to_string(i)).c_str(), (float*)&color, ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_AlphaBar);
 					material->color_.x = color.x, material->color_.y = color.y, material->color_.z = color.z;
@@ -574,7 +610,7 @@ void GameScene::Update() {
 					--i;
 				}
 #pragma endregion
-			ImGui::TreePop();
+				ImGui::TreePop();
 			}
 		}
 	}
@@ -652,7 +688,7 @@ void GameScene::Update() {
 					--i;
 				}
 #pragma endregion
-			ImGui::TreePop();
+				ImGui::TreePop();
 			}
 		}
 	}
@@ -730,7 +766,7 @@ void GameScene::Update() {
 					--i;
 				}
 #pragma endregion
-			ImGui::TreePop();
+				ImGui::TreePop();
 			}
 		}
 	}
@@ -808,7 +844,7 @@ void GameScene::Update() {
 					--i;
 				}
 #pragma endregion
-			ImGui::TreePop();
+				ImGui::TreePop();
 			}
 		}
 	}
@@ -886,7 +922,7 @@ void GameScene::Update() {
 					--i;
 				}
 #pragma endregion
-			ImGui::TreePop();
+				ImGui::TreePop();
 			}
 		}
 	}
@@ -896,7 +932,7 @@ void GameScene::Update() {
 			auto& worldTransform = multiMaterialWorldTransform_[i];
 			auto& material = multiMaterialMaterial_[i];
 			auto& uvTranslate = multiMaterialUVtranslation_[i];
-			if (ImGui::TreeNode(("MultiMaterial_" + std::to_string(i)).c_str()))  {
+			if (ImGui::TreeNode(("MultiMaterial_" + std::to_string(i)).c_str())) {
 #pragma region worldtransform
 				ImGui::SliderFloat3(("scale_" + std::to_string(i)).c_str(), &worldTransform->scale_.x, -5.0f, 5.0f);
 				ImGui::SliderFloat3(("rotate_" + std::to_string(i)).c_str(), &worldTransform->rotation_.x, -5.0f, 5.0f);
@@ -968,7 +1004,7 @@ void GameScene::Update() {
 					--i;
 				}
 #pragma endregion
-			ImGui::TreePop();
+				ImGui::TreePop();
 			}
 		}
 	}
@@ -1047,6 +1083,81 @@ void GameScene::Update() {
 			}
 		}
 	}
+	if (!fence_.empty()) {
+		bool flag = false;
+		for (size_t i = 0; i < fence_.size(); ++i) {
+			auto& worldTransform = fenceWorldTransform_[i];
+			auto& material = fenceMaterial_[i];
+			auto& uvTranslate = fenceUVtranslation_[i];
+			if (ImGui::TreeNode(("Fence_" + std::to_string(i)).c_str())) {
+#pragma region worldtransform
+				ImGui::SliderFloat3(("scale_" + std::to_string(i)).c_str(), &worldTransform->scale_.x, -5.0f, 5.0f);
+				ImGui::SliderFloat3(("rotate_" + std::to_string(i)).c_str(), &worldTransform->rotation_.x, -5.0f, 5.0f);
+				ImGui::SliderFloat3(("translate_" + std::to_string(i)).c_str(), &worldTransform->translation_.x, -5.0f, 5.0f);
+				worldTransform->UpdateMatrix();
+#pragma endregion
+#pragma region USEToon
+				if (fenceUseToon_[i] == 0) {
+					flag = false;
+				}
+				else {
+					flag = true;
+				}
+				if (ImGui::Checkbox(("UseToon_" + std::to_string(i)).c_str(), &flag)) {
+					fenceUseToon_[i] ^= true;
+					fence_[i]->SetToon(fenceUseToon_[i]);
+				}
+#pragma endregion
+#pragma region USETexture
+				if (fenceUseTexture_[i] == 0) {
+					flag = false;
+				}
+				else {
+					flag = true;
+				}
+				if (ImGui::Checkbox(("UseLiting_" + std::to_string(i)).c_str(), &flag)) {
+					fenceUseTexture_[i] ^= true;
+				}
+#pragma endregion
+#pragma region material
+				const size_t modelSize = fence_[i]->GetModelSize();
+				for (size_t mmi = 0; mmi < modelSize; ++mmi) {
+					if (fenceUseTexture_[i] && ImGui::TreeNode(("Suzanne_Lighting_" + std::to_string(mmi)).c_str())) {
+						const auto& material = fence_[i]->GetMaterial(mmi)->GetMaterial();
+						// ドロップダウンメニューの表示
+						const char* fence_Liting[] = { "None", "HalhLambert", "Lambert" };
+						int fence_CurrentLiting = material->enableLightint_;
+						if (ImGui::BeginCombo(("Lighting_" + std::to_string(mmi)).c_str(), fence_Liting[fence_CurrentLiting])) {
+							for (int i = 0; i < IM_ARRAYSIZE(fence_Liting); i++) {
+								bool isSelected = (fence_CurrentLiting == i);
+								if (ImGui::Selectable(fence_Liting[i], isSelected)) {
+									fence_CurrentLiting = i;
+								}
+							}
+							ImGui::EndCombo();
+						}
+						material->enableLightint_ = fence_CurrentLiting;
+						fence_[i]->GetMaterial(mmi)->SetMaterial(*material);
+						ImGui::TreePop();
+					}
+				}
+#pragma endregion
+#pragma region Delete
+				if (ImGui::Button("Delete")) {
+					fence_.erase(fence_.begin() + i);
+					fenceWorldTransform_.erase(fenceWorldTransform_.begin() + i);
+					fenceMaterial_.erase(fenceMaterial_.begin() + i);
+					fenceUVtranslation_.erase(fenceUVtranslation_.begin() + i);
+					fenceUseTexture_.erase(fenceUseTexture_.begin() + i);
+					fenceUseToon_.erase(fenceUseToon_.begin() + i);
+					// 削除した要素の後ろの要素が前にずれるため、インデックスを調整する
+					--i;
+				}
+#pragma endregion
+				ImGui::TreePop();
+			}
+		}
+	}
 	ImGui::End();
 }
 
@@ -1062,7 +1173,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに背景スプライトの描画処理を追加できる
 	/// </summary>
-	
+
 	// スプライト描画後処理
 	Sprite::PostDraw();
 	dxCommon_->ClearDepthBuffer();
@@ -1076,7 +1187,7 @@ void GameScene::Draw() {
 	Line::PreDraw(commandList);
 	Plane::PreDraw(commandList);
 
-	
+
 
 
 	/// <summary>
@@ -1170,6 +1281,16 @@ void GameScene::Draw() {
 			}
 			else {
 				suzanne_[i]->Draw(*suzanneWorldTransform_[i], viewProjection_);
+			}
+		}
+	}
+	if (!fence_.empty()) {
+		for (auto i = 0; i < fence_.size(); ++i) {
+			if (fenceUseTexture_[i] == 0) {
+				fence_[i]->Draw(*fenceWorldTransform_[i], viewProjection_, 10);
+			}
+			else {
+				fence_[i]->Draw(*fenceWorldTransform_[i], viewProjection_);
 			}
 		}
 	}
