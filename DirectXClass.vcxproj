@@ -93,6 +93,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Audio.cpp" />
     <ClCompile Include="BasicGraphicsPipline.cpp" />
     <ClCompile Include="BillParticle.cpp" />
+    <ClCompile Include="Block.cpp" />
     <ClCompile Include="ConvertString.cpp" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="DebugCamera.cpp" />
@@ -117,6 +118,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="OBJ.cpp" />
     <ClCompile Include="Pera.cpp" />
     <ClCompile Include="PeraGraphicsPipeline.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="Sprite.cpp" />
@@ -132,6 +134,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Audio.h" />
     <ClInclude Include="BasicGraphicsPipline.h" />
     <ClInclude Include="BillParticle.h" />
+    <ClInclude Include="Block.h" />
     <ClInclude Include="ConvertString.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="DebugCamera.h" />
@@ -158,6 +161,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="OBJ.h" />
     <ClInclude Include="Pera.h" />
     <ClInclude Include="PeraGraphicsPipeline.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="SafeDelete.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Plane.h" />
