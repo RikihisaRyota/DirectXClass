@@ -79,11 +79,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	gameScene = new GameScene();
 	gameScene->Initialize();
 
-	// Pera
-	Pera* pera = nullptr;
-	pera = new Pera();
-	pera->Initialize(dxCommon, dxCommon->GetBackBuff(), dxCommon->GetRTVDescriptorHeap());
-
 	// メインループ
 	while (true) {
 		// メッセージ処理
@@ -109,7 +104,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		// 描画終わり
 		dxCommon->PostDraw();
 	}
-	SafeDelete(pera);
 
 	// ゲームシーン解放
 	gameScene->Release();
