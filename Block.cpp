@@ -5,8 +5,8 @@
 
 void Block::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	BaseCharacter::Initialize(std::move(model));
-	worldTransform_.at(0).translation_.y = 0.0f;
-	worldTransform_.at(0).scale_ = {20.0f,20.0f,20.0f};
+	worldTransform_.at(0).translation_.y =-10.0f;
+	worldTransform_.at(0).scale_ = {10.0f,10.0f,10.0f};
 
 	BaseCharacter::Update();
 
@@ -37,7 +37,7 @@ void Block::HitBoxInitialize(uint32_t collisionMask) {
 	min_ = { -worldTransform_.at(0).scale_ };
 	max_ = { worldTransform_.at(0).scale_ };
 	// OBB
-	size_ = worldTransform_.at(0).scale_*0.5f;
+	size_ = worldTransform_.at(0).scale_;
 	// Sphere
 	radius_ = 1.2f;
 	// AABB
@@ -48,9 +48,7 @@ void Block::HitBoxInitialize(uint32_t collisionMask) {
 	};
 	// OBB
 	obb_.at(0) = {
-		.center_{
-				 worldTransform_.at(0).translation_.x, worldTransform_.at(0).translation_.y + 3.0f,
-				 worldTransform_.at(0).translation_.z},
+		.center_{ worldTransform_.at(0).translation_},
 		.orientations_{
 				 {1.0f, 0.0f, 0.0f},
 				 {0.0f, 1.0f, 0.0f},

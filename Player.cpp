@@ -240,6 +240,7 @@ void Player::OnCollision(const OBB& obb, uint32_t type) {
 			}
 		}
 		worldTransform_.at(0).translation_ = obb_.at(0).center_;
+		worldTransform_.at(0).translation_ = obb_.at(0).center_;
 		acceleration_.y = 0.0f;
 		isJump = false;
 		// 転送
