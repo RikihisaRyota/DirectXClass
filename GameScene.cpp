@@ -20,9 +20,12 @@ void GameScene::Initialize() {
 #pragma region 生成
 	player_ = std::make_unique<Player>();
 	cube_ = std::make_unique<Cube>();
+	sprite_ = std::make_unique<Sprite>();
 #pragma endregion
 	cube_.reset(Cube::Create());
 	cubeWorldTransform_.Initialize();
+	sprite_.reset(Sprite::Create(0, { 0.0f,0.0f }));
+	sprite_->SetSize({ 500.0f,500.0f });
 	// プレイヤー
 	std::vector<std::unique_ptr<Model>> playerModel(static_cast<int>(Player::Parts::COUNT));
 	// プレイヤーモデル
@@ -83,9 +86,6 @@ void GameScene::Draw() {
 	OBJ::PostDraw();
 	Cube::PostDraw();
 #pragma endregion
-
-
-
 #pragma region 前景スプライト描画
 	// 前景スプライト描画前処理
 	Sprite::PreDraw(commandList);
@@ -94,7 +94,7 @@ void GameScene::Draw() {
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
 	Sprite::SetBlendState(Sprite::BlendState::kNormal);
-	
+	//sprite_->Draw();
 	// スプライト描画後処理
 	Sprite::PostDraw();
 

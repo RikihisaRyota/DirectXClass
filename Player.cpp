@@ -15,6 +15,7 @@ void Player::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	//SetGlobalVariables();
 	//GetGlobalVariables();
 	worldTransform_.at(0).translation_.y = kGroundDistanse;
+	worldTransform_.at(0).scale_={4.0f,4.0f,4.0f};
 	BaseCharacter::Update();
 	destinationAngle_ = { 0.0f, 0.0f, 1.0f };
 	// 転送

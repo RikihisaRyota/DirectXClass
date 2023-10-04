@@ -63,6 +63,7 @@ private: // メンバ変数
 	
 	std::unique_ptr<Player> player_;
 	std::unique_ptr<Cube> cube_;
+	std::unique_ptr<Sprite> sprite_;
 	WorldTransform cubeWorldTransform_;
 
 };
