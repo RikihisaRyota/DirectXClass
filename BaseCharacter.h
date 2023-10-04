@@ -12,12 +12,17 @@ public:
 	/// 初期化
 	/// </summary>
 	/// <param name="models">モデルデータの配列</param>
-	virtual void Initialize(std::vector<std::unique_ptr<Model>> model);
+	virtual void Initialize(std::vector<std::unique_ptr<Model>> model) = 0;
 
 	/// <summary>
 	/// 更新
 	/// </summary>
 	virtual void Update();
+
+	/// <summary>
+	/// 描画
+	/// </summary>
+	virtual void Draw(const ViewProjection& viewProjection) = 0;
 
 public:
 	/// <summary>

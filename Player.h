@@ -5,7 +5,6 @@
 
 #include "Collider.h"
 #include "BaseCharacter.h"
-#include "Ground.h"
 #include "Model.h"
 #include "Sprite.h"
 #include "WorldTransform.h"
@@ -51,8 +50,8 @@ public: // メンバ関数
 	/// <summary>
 	/// 描画
 	/// </summary>
-	void Draw(const ViewProjection& viewProjection);
-	void HitBoxInitialize() override;
+	void Draw(const ViewProjection& viewProjection)override;
+	void HitBoxInitialize(uint32_t collisionMask) override;
 	void HitBoxDraw(const ViewProjection& viewProjection) override;
 	/// <summary>
 	/// プレイヤーの体の回転
@@ -166,8 +165,6 @@ public: // ゲッター,セッター
 	Behavior GetBehavior() const { return behavior_; }
 
 	Vector3 GetPlayerRotate() const { return interRotate_; }
-
-	void SetGround(Ground* ground) { ground_ = ground; }
 private: // 定数系
 	// 地面から距離
 	const float kGroundDistanse = 1.0f;
@@ -214,10 +211,4 @@ private: // メンバ変数
 	// ふるまい
 	Behavior behavior_ = Behavior::kRoot;
 	std::optional<Behavior> behaviorRequest_ = std::nullopt;
-
-	Ground* ground_;
-
-	/*Vector2 chage_Position_;
-	Vector2 triple_Position_;
-	Vector2 dash_Position_;*/
 };

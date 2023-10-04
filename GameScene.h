@@ -6,7 +6,7 @@
 #include "Cube.h"
 #include "DebugCamera.h"
 #include "Input.h"
-#include "LineRenderer.h"
+#include "PrimitiveDrawer.h"
 #include "Model.h"
 #include "OBJ.h"
 #include "SafeDelete.h"
@@ -14,6 +14,8 @@
 #include "SphereRenderer.h"
 #include "Sprite.h"
 
+#include "Block.h"
+#include "CollisionManager.h"
 #include "Player.h"
 
 class DirectXCommon;
@@ -61,9 +63,8 @@ private: // メンバ変数
 	/// </summary>
 	ViewProjection viewProjection_;
 	
+	std::unique_ptr<Block> block_;
+	std::unique_ptr<CollisionManager> collisionManager_;
 	std::unique_ptr<Player> player_;
-	std::unique_ptr<Cube> cube_;
-	std::unique_ptr<Sprite> sprite_;
-	WorldTransform cubeWorldTransform_;
 
 };

@@ -43,7 +43,6 @@ void PrimitiveDrawer::Release() {
 }
 
 void PrimitiveDrawer::Reset() {
-	sDevice->Release();
 	cmdList_.Reset();
 	lineGraphicsPipline_.reset();
 	vertBuff_.Reset();
@@ -63,10 +62,10 @@ void PrimitiveDrawer::SetDraw(const Vector3& v1, const Vector3& v2, const Vector
 
 void PrimitiveDrawer::Draw() {
 	GetInstance()->BasicDraw();
+	darwCount = 0;
 }
 
 void PrimitiveDrawer::Initialize() {
-	
 	darwCount = 0;
 
 	lineGraphicsPipline_ = std::make_unique<LineGraphicsPipline>();

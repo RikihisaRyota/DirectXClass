@@ -21,7 +21,7 @@ struct ViewProjection
 	// X,Y,Z軸回りのローカル回転角
 	Vector3 rotation_ = { 0.0f, 0.0f, 0.0f };
 	// ローカル座標
-	Vector3 translation_ = { 0.0f, 0.0f, -10.0f };
+	Vector3 translation_ = { 0.0f, 5.0f, -30.0f };
 #pragma endregion ビュー行列の設定
 
 #pragma region 射影行列の設定

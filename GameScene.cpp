@@ -18,14 +18,10 @@ void GameScene::Initialize() {
 	// カメラの初期化
 	viewProjection_.Initialize();
 #pragma region 生成
+	block_ = std::make_unique<Block>();
+	collisionManager_ = std::make_unique<CollisionManager>();
 	player_ = std::make_unique<Player>();
-	cube_ = std::make_unique<Cube>();
-	sprite_ = std::make_unique<Sprite>();
 #pragma endregion
-	cube_.reset(Cube::Create());
-	cubeWorldTransform_.Initialize();
-	sprite_.reset(Sprite::Create(0, { 0.0f,0.0f }));
-	sprite_->SetSize({ 500.0f,500.0f });
 	// プレイヤー
 	std::vector<std::unique_ptr<Model>> playerModel(static_cast<int>(Player::Parts::COUNT));
 	// プレイヤーモデル
@@ -35,9 +31,15 @@ void GameScene::Initialize() {
 	playerModel[static_cast<int>(Player::Parts::ARMR)].reset(Model::Create("armR", true));
 	playerModel[static_cast<int>(Player::Parts::WEAPON)].reset(Model::Create("player_Weapon", true));
 	// プレイヤー初期化
-	//player_->SetGround(ground_.get());
 	player_->SetViewProjection(&viewProjection_);
 	player_->Initialize(std::move(playerModel));
+
+	// ブロック
+	std::vector<std::unique_ptr<Model>> blockModel(1);
+	// ブロックモデル
+	blockModel[0].reset(Model::Create("block", true));
+	// ブロック初期化
+	block_->Initialize(std::move(blockModel));
 }
 
 void GameScene::Update() {
@@ -45,6 +47,8 @@ void GameScene::Update() {
 	debugCamera_->Update(&viewProjection_);
 	// プレイヤー
 	player_->Update();
+	// コリジョンマネージャー
+	collisionManager_->Update(player_.get(),block_.get());
 }
 
 void GameScene::Draw() {
@@ -70,17 +74,17 @@ void GameScene::Draw() {
 	SphereRenderer::PreDraw(commandList);
 	OBJ::PreDraw(commandList);
 	Model::PreDraw(commandList);
-	LineRenderer::PreDraw(commandList);
+	PrimitiveDrawer::PreDraw(commandList);
 	PlaneRenderer::PreDraw(commandList);
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	player_->Draw(viewProjection_);
-	cube_->Draw(cubeWorldTransform_,viewProjection_);
-	LineRenderer::GetInstance()->LineRenderer::Draw();
+	block_->Draw(viewProjection_);
+	PrimitiveDrawer::GetInstance()->PrimitiveDrawer::Draw();
 	// 3Dオブジェクト描画後処理
 	PlaneRenderer::PostDraw();
-	LineRenderer::PostDraw();
+	PrimitiveDrawer::PostDraw();
 	Model::PostDraw();
 	SphereRenderer::PostDraw();
 	OBJ::PostDraw();

@@ -15,6 +15,8 @@ const uint32_t kCollisionAttributeEnemy = 0b1 << 1;
 const uint32_t kCollisionAttributeEnemyAttack = 0b1 << 2;
 // プレイヤーの攻撃属性
 const uint32_t kCollisionAttributePlayerAttack = 0b1 << 3;
+// ブロック
+const uint32_t kCollisionAttributeBlock = 0b1 << 4;
 
 struct Vector3;
 /// <summary>
@@ -26,6 +28,7 @@ public:
 		PlayerToEnemy,
 		PlayerToEnemyAttack,
 		EnemyToPlayerAttack,
+		PlayerToBlock,
 	};
 
 	// 衝突時に呼ばれる関数
@@ -46,7 +49,7 @@ public:
 	virtual void SetCollisionMask(uint32_t collisionMask) { collisionMask_ = collisionMask; }
 
 	// HitBoxDraw
-	virtual void HitBoxInitialize() = 0;
+	virtual void HitBoxInitialize(uint32_t collisionMask) = 0;
 	virtual void HitBoxUpdate() = 0;
 	virtual void HitBoxDraw(const ViewProjection& viewProjection) = 0;
 

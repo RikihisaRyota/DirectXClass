@@ -14,8 +14,7 @@ void Player::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	BaseCharacter::Initialize(std::move(model));
 	//SetGlobalVariables();
 	//GetGlobalVariables();
-	worldTransform_.at(0).translation_.y = kGroundDistanse;
-	worldTransform_.at(0).scale_={4.0f,4.0f,4.0f};
+	worldTransform_.at(0).translation_.y = 10.0f;
 	BaseCharacter::Update();
 	destinationAngle_ = { 0.0f, 0.0f, 1.0f };
 	// 転送
@@ -32,12 +31,7 @@ void Player::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	// 浮遊アニメーションの初期化
 	InitializeFloatGimmick();
 #pragma region 当たり判定
-	// 衝突属性を設定
-	SetCollisionAttribute(kCollisionAttributePlayer);
-	// 衝突対象を自分以外に設定
-	SetCollisionMask(~kCollisionAttributePlayer);
-
-	HitBoxInitialize();
+	HitBoxInitialize(kCollisionAttributePlayer);
 #pragma endregion
 }
 
@@ -67,7 +61,7 @@ void Player::Update() {
 		BehaviorDashUpdate();
 		break;
 	}
-	ChackTranslation();
+	//ChackTranslation();
 	HitBoxUpdate();
 
 	// 転送
@@ -168,7 +162,9 @@ void Player::GetGlobalVariables() {
 }
 
 void Player::OnCollision(const OBB& obb, uint32_t type) {
-	if (type == static_cast<uint32_t>(Collider::Type::PlayerToEnemy)) {
+	switch (type) {
+	case static_cast<uint32_t>(Collider::Type::PlayerToEnemy):
+	{
 		// OBB同士が衝突していると仮定して、重なり領域を計算する
 		// ここでは、OBB同士の各軸方向での重なりの幅を計算し、最小値を取得する
 		Vector3 distance = obb.center_ - obb_.at(0).center_;
@@ -206,7 +202,53 @@ void Player::OnCollision(const OBB& obb, uint32_t type) {
 		// 転送
 		BaseCharacter::Update();
 		HitBoxUpdate();
+		break;
 	}
+	case static_cast<uint32_t>(Collider::Type::PlayerToBlock):
+	{
+		// OBB同士が衝突していると仮定して、重なり領域を計算する
+		// ここでは、OBB同士の各軸方向での重なりの幅を計算し、最小値を取得する
+		Vector3 distance = obb.center_ - obb_.at(0).center_;
+
+		// 当たり判定が成功したので押し戻し処理を行う
+		float overlapX = obb_.at(0).size_.x + obb.size_.x - std::abs(distance.x);
+		float overlapY = obb_.at(0).size_.y + obb.size_.y - std::abs(distance.y);
+		float overlapZ = obb_.at(0).size_.z + obb.size_.z - std::abs(distance.z);
+
+		if (overlapX < overlapY && overlapX < overlapZ) {
+			if (distance.x < 0.0f) {
+				obb_.at(0).center_ += Vector3{ overlapX, 0, 0 };
+			}
+			else {
+				obb_.at(0).center_ += Vector3{ -overlapX, 0, 0 };
+			}
+		}
+		else if (overlapY < overlapX && overlapY < overlapZ) {
+			if (distance.y < 0.0f) {
+				obb_.at(0).center_ += Vector3{ 0, overlapY, 0 };
+			}
+			else {
+				obb_.at(0).center_ += Vector3{ 0, -overlapY, 0 };
+			}
+		}
+		else {
+			if (distance.z < 0.0f) {
+				obb_.at(0).center_ += Vector3{ 0, 0, overlapZ };
+			}
+			else {
+				obb_.at(0).center_ += Vector3{ 0, 0, -overlapZ };
+			}
+		}
+		worldTransform_.at(0).translation_ = obb_.at(0).center_;
+		acceleration_.y = 0.0f;
+		isJump = false;
+		// 転送
+		BaseCharacter::Update();
+		HitBoxUpdate();
+		break;
+	}
+	}
+
 }
 
 void Player::Draw(const ViewProjection& viewProjection) {
@@ -218,9 +260,14 @@ void Player::Draw(const ViewProjection& viewProjection) {
 		worldTransforms_Parts_.at(0)[static_cast<int>(Parts::ARML)], viewProjection);
 	models_[static_cast<int>(Parts::ARMR)]->Draw(
 		worldTransforms_Parts_.at(0)[static_cast<int>(Parts::ARMR)], viewProjection);
+	HitBoxDraw(viewProjection);
 }
 
-void Player::HitBoxInitialize() {
+void Player::HitBoxInitialize(uint32_t collisionMask) {
+	// 衝突属性を設定
+	SetCollisionAttribute(collisionMask);
+	// 衝突対象を自分以外に設定
+	SetCollisionMask(~collisionMask);
 	// AABB
 	min_ = { -1.0f, -0.9f, -1.0f };
 	max_ = { 1.0f, 1.0f, 1.0f };
@@ -313,9 +360,9 @@ void Player::GamePadInput() {
 	}*/
 	// ダッシュ開始
 	if ((!IsDash_) &&
-		(Input::GetInstance()->TriggerKey(DIK_LSHIFT) ||
+		(Input::GetInstance()->TriggerKey(DIK_LSHIFT) /*||
 			(Input::GetInstance()->GetJoystickState(0, joyState) &&
-				(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_X)))) {
+				(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_X))*/)) {
 		behaviorRequest_ = Behavior::kDash;
 	}
 	// ジャンプ
@@ -328,26 +375,26 @@ void Player::Move() {
 	// 移動量
 	vector_ = { 0.0f, 0.0f, 0.0f };
 #pragma region ゲームパット
-	// ゲームパットの状態を得る変数
-	XINPUT_STATE joyState{};
-	// ゲームパットの状況取得
-	// 入力がなかったら何もしない
-	if (Input::GetInstance()->GetJoystickState(0, joyState)) {
-		const float kMargin = 0.7f;
-		// 移動量
-		Vector3 move = {
-			static_cast<float>(joyState.Gamepad.sThumbLX),
-			0.0f,
-			static_cast<float>(joyState.Gamepad.sThumbLY),
-		};
-		if (move.Length() > kMargin) {
-			vector_ = {
-				static_cast<float>(joyState.Gamepad.sThumbLX),
-				0.0f,
-				static_cast<float>(joyState.Gamepad.sThumbLY),
-			};
-		}
-	}
+	//// ゲームパットの状態を得る変数
+	//XINPUT_STATE joyState{};
+	//// ゲームパットの状況取得
+	//// 入力がなかったら何もしない
+	//if (Input::GetInstance()->GetJoystickState(0, joyState)) {
+	//	const float kMargin = 0.7f;
+	//	// 移動量
+	//	Vector3 move = {
+	//		static_cast<float>(joyState.Gamepad.sThumbLX),
+	//		0.0f,
+	//		static_cast<float>(joyState.Gamepad.sThumbLY),
+	//	};
+	//	if (move.Length() > kMargin) {
+	//		vector_ = {
+	//			static_cast<float>(joyState.Gamepad.sThumbLX),
+	//			0.0f,
+	//			static_cast<float>(joyState.Gamepad.sThumbLY),
+	//		};
+	//	}
+	//}
 #pragma endregion
 #pragma region キーボード
 	if (Input::GetInstance()->PushKey(DIK_W)) {
@@ -394,25 +441,22 @@ void Player::Jump() {
 	}
 }
 void Player::Gravity() {
+	const float kGravity = -0.1f;
 	velocity_ = vector_ * kSpeed;
-	velocity_ += acceleration_;
+	if (acceleration_.y >= -0.5f) {
+		acceleration_.y += kGravity;
+	}
+	velocity_+= acceleration_;
 	worldTransform_.at(0).translation_ += velocity_;
 
 	if (std::fabs(velocity_.x) <= 0.001 && std::fabs(velocity_.z) <= 0.001) {
 		velocity_.x = 0.0f;
 		velocity_.z = 0.0f;
 	}
-	if (worldTransform_.at(0).translation_.y > kGroundDistanse) {
-		acceleration_.y -= kGravity;
-	}
-	else {
-		acceleration_.y = 0.0f;
-		worldTransform_.at(0).translation_.y = kGroundDistanse;
-		isJump = false;
-	}
+
 }
 void Player::ChackTranslation() {
-	if (worldTransform_.at(0).translation_.x - worldTransform_.at(0).scale_.x <=
+	/*if (worldTransform_.at(0).translation_.x - worldTransform_.at(0).scale_.x <=
 		-ground_->GetEdge()) {
 		worldTransform_.at(0).translation_.x = -ground_->GetEdge() + worldTransform_.at(0).scale_.x;
 	}
@@ -429,7 +473,7 @@ void Player::ChackTranslation() {
 		worldTransform_.at(0).translation_.z + worldTransform_.at(0).scale_.z >=
 		ground_->GetEdge()) {
 		worldTransform_.at(0).translation_.z = ground_->GetEdge() - worldTransform_.at(0).scale_.z;
-	}
+	}*/
 
 }
 void Player::PlayerRotate() {

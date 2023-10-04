@@ -3,6 +3,7 @@
 #include "GameScene.h"
 #include "ImGuiManager.h"
 #include "TextureManager.h"
+#include "PrimitiveDrawer.h"
 
 #include <dxgidebug.h>
 #include <cassert>
@@ -62,10 +63,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// Model
 	Model::SetDevice(dxCommon->GetDevice());
-
 	// Line
-	LineRenderer::SetDevice(dxCommon->GetDevice());
-	LineRenderer::GetInstance()->Initialize();
+	PrimitiveDrawer::SetDevice(dxCommon->GetDevice());
+	PrimitiveDrawer::GetInstance()->Initialize();
 
 	// ImGuiの初期化
 	ImGuiManager* imguiManager = ImGuiManager::GetInstance();
@@ -116,11 +116,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// スプライト
 	Sprite::Release();
 
+	// 
+	PrimitiveDrawer::Release();
+
 	// ImGui解放
 	imguiManager->Finalize();
-
-	// Line解放
-	LineRenderer::Release();
 
 	// テクスチャマネージャーの解放
 	TextureManager::Release();

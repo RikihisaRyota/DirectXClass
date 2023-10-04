@@ -4,16 +4,16 @@
 
 #include "Collider.h"
 
-//#include "Enemy.h"
+#include "Block.h"
 #include "Player.h"
 
 class CollisionManager {
 public:
-	void Update(Player* player/*, Enemy* enemy,*/);
+	void Update(Player* player, Block* block);
 
 private:
 	// メンバ関数
-	void CheckAllCollisions(Player* player/* Enemy* enemy, */);
+	void CheckAllCollisions(Player* player, Block* block);
 	/// <summary>
 	/// コライダー2つの衝突判定と応答
 	/// </summary>

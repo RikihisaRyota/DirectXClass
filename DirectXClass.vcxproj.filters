@@ -174,9 +174,6 @@
     <ClCompile Include="LineGraphicsPipline.cpp">
       <Filter>ソース ファイル\graphicsPipeline</Filter>
     </ClCompile>
-    <ClCompile Include="LineRenderer.cpp">
-      <Filter>ソース ファイル\Figure</Filter>
-    </ClCompile>
     <ClCompile Include="Sprite.cpp">
       <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
@@ -210,11 +207,14 @@
     <ClCompile Include="Input.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="PrimitiveDrawer.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Draw.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Block.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="PrimitiveDrawer.cpp">
+      <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -335,9 +335,6 @@
     <ClInclude Include="LineGraphicsPipline.h">
       <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
     </ClInclude>
-    <ClInclude Include="LineRenderer.h">
-      <Filter>ヘッダー ファイル\Figure</Filter>
-    </ClInclude>
     <ClInclude Include="Sprite.h">
       <Filter>ヘッダー ファイル\Figure</Filter>
     </ClInclude>
@@ -392,8 +389,11 @@
     <ClInclude Include="Draw.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="PrimitiveDrawer.h">
+    <ClInclude Include="Block.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="PrimitiveDrawer.h">
+      <Filter>ヘッダー ファイル\Figure</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
