@@ -1,29 +1,29 @@
-#include "Line.h"
+#include "LineRenderer.h"
 
 #include "TextureManager.h"
 
 using namespace Microsoft::WRL;
 
 // 静的メンバ変数の実体化
-ID3D12Device* Line::sDevice = nullptr;
-Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> Line::cmdList_;
-UINT Line::darwCount = 0;
-std::vector<Line::Vertex> Line::vertices_;
-std::vector<uint16_t> Line::indices_;
+ID3D12Device* LineRenderer::sDevice = nullptr;
+Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> LineRenderer::cmdList_;
+UINT LineRenderer::darwCount = 0;
+std::vector<LineRenderer::Vertex> LineRenderer::vertices_;
+std::vector<uint16_t> LineRenderer::indices_;
 
-Line* Line::GetInstance() {
-	static Line instans;
+LineRenderer* LineRenderer::GetInstance() {
+	static LineRenderer instans;
 	return &instans;
 }
 
-void Line::SetDevice(ID3D12Device* device) {
+void LineRenderer::SetDevice(ID3D12Device* device) {
 	// nullptrチェック
 	assert(device);
 
 	sDevice = device;
 }
 
-void Line::PreDraw(ID3D12GraphicsCommandList* cmdList) {
+void LineRenderer::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
 	assert(cmdList_ == nullptr);
 	// コマンドリストをセット
@@ -33,16 +33,16 @@ void Line::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	vertices_.clear();
 	indices_.clear();
 }
-void Line::PostDraw() {
+void LineRenderer::PostDraw() {
 	// コマンドリストの解除
 	cmdList_ = nullptr;
 }
 
-void Line::Release() {
+void LineRenderer::Release() {
 	GetInstance()->Reset();
 }
 
-void Line::Reset() {
+void LineRenderer::Reset() {
 	sDevice->Release();
 	cmdList_.Reset();
 	lineGraphicsPipline_.reset();
@@ -50,7 +50,7 @@ void Line::Reset() {
 	idxBuff_.Reset();
 }
 
-void Line::SetDraw(const Vector3& v1, const Vector3& v2, const Vector4& color) {
+void LineRenderer::SetDraw(const Vector3& v1, const Vector3& v2, const Vector4& color) {
 	HRESULT result = S_FALSE;
 	vertices_.emplace_back(Vertex({ v1.x,v1.y,v1.z,1.0f }, { color }));
 	indices_.emplace_back(darwCount);
@@ -61,11 +61,11 @@ void Line::SetDraw(const Vector3& v1, const Vector3& v2, const Vector4& color) {
 	SetMappingIndex();
 }
 
-void Line::Draw() {
+void LineRenderer::Draw() {
 	GetInstance()->BasicDraw();
 }
 
-void Line::Initialize() {
+void LineRenderer::Initialize() {
 	
 	darwCount = 0;
 
@@ -78,7 +78,7 @@ void Line::Initialize() {
 	CreateIndexBuffer();
 }
 
-void Line::CreateVertexBuffer() {
+void LineRenderer::CreateVertexBuffer() {
 #pragma region 頂点バッファ
 	// 頂点データのサイズ
 	UINT sizeVB = static_cast<UINT>(sizeof(Vertex) * vertices_.size());
@@ -92,7 +92,7 @@ void Line::CreateVertexBuffer() {
 #pragma endregion 頂点バッファ
 }
 
-void Line::SetMappingVertex() {
+void LineRenderer::SetMappingVertex() {
 	HRESULT result = S_FALSE;
 	// 頂点バッファへのデータ転送
 	{
@@ -105,7 +105,7 @@ void Line::SetMappingVertex() {
 	}
 }
 
-void Line::CreateIndexBuffer() {
+void LineRenderer::CreateIndexBuffer() {
 #pragma region インデックスバッファ
 	// インデックスデータのサイズ
 	UINT sizeIB = static_cast<UINT>(sizeof(uint16_t) * indices_.size());
@@ -119,7 +119,7 @@ void Line::CreateIndexBuffer() {
 #pragma endregion インデックスバッファ
 }
 
-void Line::SetMappingIndex() {
+void LineRenderer::SetMappingIndex() {
 	HRESULT result = S_FALSE;
 	uint16_t* indexMap = nullptr;
 	result = idxBuff_->Map(0, nullptr, reinterpret_cast<void**>(&indexMap));
@@ -129,7 +129,7 @@ void Line::SetMappingIndex() {
 	}
 }
 
-void Line::BasicDraw() {
+void LineRenderer::BasicDraw() {
 	if (!indices_.empty()) {
 	// ルートシグネチャの設定
 	cmdList_->SetGraphicsRootSignature(lineGraphicsPipline_->GetRootSignature());
@@ -154,7 +154,7 @@ void Line::BasicDraw() {
 	}
 }
 
-ComPtr<ID3D12Resource> Line::CreateBuffer(UINT size) {
+ComPtr<ID3D12Resource> LineRenderer::CreateBuffer(UINT size) {
 	HRESULT result = S_FALSE;
 	// ヒーププロパティ
 	CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);

@@ -45,22 +45,22 @@ void GameScene::Draw() {
 #pragma region 3Dオブジェクト描画
 	// 3Dオブジェクト描画前処理
 	Cube::PreDraw(commandList);
-	Sphere::PreDraw(commandList);
+	SphereRenderer::PreDraw(commandList);
 	OBJ::PreDraw(commandList);
 	Model::PreDraw(commandList);
-	Line::PreDraw(commandList);
-	Plane::PreDraw(commandList);
+	LineRenderer::PreDraw(commandList);
+	PlaneRenderer::PreDraw(commandList);
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	
 
-	Line::GetInstance()->Line::Draw();
+	LineRenderer::GetInstance()->LineRenderer::Draw();
 	// 3Dオブジェクト描画後処理
-	Plane::PostDraw();
-	Line::PostDraw();
+	PlaneRenderer::PostDraw();
+	LineRenderer::PostDraw();
 	Model::PostDraw();
-	Sphere::PostDraw();
+	SphereRenderer::PostDraw();
 	OBJ::PostDraw();
 	Cube::PostDraw();
 #pragma endregion

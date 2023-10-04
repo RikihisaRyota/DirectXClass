@@ -1,34 +1,34 @@
-#include "Plane.h"
+#include "PlaneRenderer.h"
 
 #include "TextureManager.h"
 
 using namespace Microsoft::WRL;
 
 // 静的メンバ変数の実体化
-ID3D12Device* Plane::sDevice = nullptr;
-Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> Plane::cmdList_;
+ID3D12Device* PlaneRenderer::sDevice = nullptr;
+Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> PlaneRenderer::cmdList_;
 
-void Plane::SetDevice(ID3D12Device* device) {
+void PlaneRenderer::SetDevice(ID3D12Device* device) {
 	// nullptrチェック
 	assert(device);
 
 	sDevice = device;
 }
 
-void Plane::PreDraw(ID3D12GraphicsCommandList* cmdList) {
+void PlaneRenderer::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
 	assert(cmdList_ == nullptr);
 	// コマンドリストをセット
 	cmdList_ = cmdList;
 }
-void Plane::PostDraw() {
+void PlaneRenderer::PostDraw() {
 	// コマンドリストの解除
 	cmdList_ = nullptr;
 }
 
-Plane* Plane::Create(uint32_t IsLighting, bool IsToon) {
-	// Planeのインスタンスを生成
-	Plane* sptite = new Plane();
+PlaneRenderer* PlaneRenderer::Create(uint32_t IsLighting, bool IsToon) {
+	// PlaneRendererのインスタンスを生成
+	PlaneRenderer* sptite = new PlaneRenderer();
 	assert(sptite);
 	// パイプライン初期化
 	sptite->basicGraphicsPipline_ = std::make_unique<BasicGraphicsPipline>();
@@ -45,32 +45,32 @@ Plane* Plane::Create(uint32_t IsLighting, bool IsToon) {
 	return sptite;
 }
 
-void Plane::Draw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
+void PlaneRenderer::Draw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
 	if (IsToon_) {
 		ToonDraw(worldTransform, viewProjection, textureHadle);
 	}
 	BasicDraw(worldTransform, viewProjection, textureHadle);
 }
 
-void Plane::SetToon(uint32_t IsToon) {
+void PlaneRenderer::SetToon(uint32_t IsToon) {
 	IsToon_ = IsToon;
 }
 
-void Plane::SetDirectionalLight(const cDirectionalLight& DirectionalLight) {
+void PlaneRenderer::SetDirectionalLight(const cDirectionalLight& DirectionalLight) {
 	directionalLight_->color_ = DirectionalLight.color_;
 	directionalLight_->direction_ = Normalize(DirectionalLight.direction_);
 	directionalLight_->intensiy_ = DirectionalLight.intensiy_;
 	directionalLight_->sharpness_ = DirectionalLight.sharpness_;
 }
 
-void Plane::SetMaterial(const cMaterial& material) {
+void PlaneRenderer::SetMaterial(const cMaterial& material) {
 	material_->color_ = material.color_;
 	material_->enableLightint_ = material.enableLightint_;
 	material_->uvTransform_ = material.uvTransform_;
 }
 
 
-void Plane::Initialize() {
+void PlaneRenderer::Initialize() {
 	HRESULT result = S_FALSE;
 
 	vertices_ = {
@@ -140,7 +140,7 @@ void Plane::Initialize() {
 #pragma endregion
 }
 
-void Plane::BasicDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
+void PlaneRenderer::BasicDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
 	// ルートシグネチャの設定
 	cmdList_->SetGraphicsRootSignature(basicGraphicsPipline_->GetRootSignature());
 
@@ -175,7 +175,7 @@ void Plane::BasicDraw(const WorldTransform& worldTransform, const ViewProjection
 	cmdList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
 }
 
-void Plane::ToonDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
+void PlaneRenderer::ToonDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
 	// ルートシグネチャの設定
 	cmdList_->SetGraphicsRootSignature(toonGraphicsPipline_->GetRootSignature());
 
@@ -211,7 +211,7 @@ void Plane::ToonDraw(const WorldTransform& worldTransform, const ViewProjection&
 	cmdList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
 }
 
-ComPtr<ID3D12Resource> Plane::CreateBuffer(UINT size) {
+ComPtr<ID3D12Resource> PlaneRenderer::CreateBuffer(UINT size) {
 	HRESULT result = S_FALSE;
 	// ヒーププロパティ
 	CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);

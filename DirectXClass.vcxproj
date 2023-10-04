@@ -52,7 +52,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\imgui;$(ProjectDir)external\nlohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -75,7 +75,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\imgui;$(ProjectDir)external\nlohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -94,10 +94,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="BaseCharacter.cpp" />
     <ClCompile Include="BasicGraphicsPipline.cpp" />
     <ClCompile Include="BillParticle.cpp" />
+    <ClCompile Include="Collider.cpp" />
+    <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="ConvertString.cpp" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="DebugCamera.cpp" />
     <ClCompile Include="DirectXCommon.cpp" />
+    <ClCompile Include="Draw.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
     <ClCompile Include="externals\imgui\imgui_draw.cpp" />
@@ -106,21 +110,24 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="GameScene.cpp" />
+    <ClCompile Include="GlobalVariables.cpp" />
+    <ClCompile Include="Ground.cpp" />
     <ClCompile Include="ImGuiManager.cpp" />
     <ClCompile Include="Input.cpp" />
-    <ClCompile Include="Line.cpp" />
+    <ClCompile Include="LineRenderer.cpp" />
     <ClCompile Include="LineGraphicsPipline.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Matrix4x4.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="MyMath.cpp" />
     <ClCompile Include="OBJ.cpp" />
     <ClCompile Include="Pera.cpp" />
     <ClCompile Include="PeraGraphicsPipeline.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Sphere.cpp" />
-    <ClCompile Include="Plane.cpp" />
+    <ClCompile Include="SphereRenderer.cpp" />
+    <ClCompile Include="PlaneRenderer.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="SpriteGraphicsPipline.cpp" />
     <ClCompile Include="TextureManager.cpp" />
@@ -131,15 +138,20 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="WorldTransform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABB.h" />
     <ClInclude Include="Audio.h" />
     <ClInclude Include="BaseCharacter.h" />
     <ClInclude Include="BasicGraphicsPipline.h" />
     <ClInclude Include="BillParticle.h" />
+    <ClInclude Include="Collider.h" />
+    <ClInclude Include="Collision.h" />
+    <ClInclude Include="CollisionManager.h" />
     <ClInclude Include="ConvertString.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="DebugCamera.h" />
     <ClInclude Include="cDirectionalLight.h" />
     <ClInclude Include="DirectXCommon.h" />
+    <ClInclude Include="Draw.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
@@ -149,26 +161,34 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="GameScene.h" />
+    <ClInclude Include="GlobalVarriables.h" />
+    <ClInclude Include="Ground.h" />
     <ClInclude Include="ImGuiManager.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="cMaterial.h" />
     <ClInclude Include="Line.h" />
+    <ClInclude Include="LineRenderer.h" />
     <ClInclude Include="LineGraphicsPipline.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Matrix4x4.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="MyMath.h" />
+    <ClInclude Include="OBB.h" />
     <ClInclude Include="OBJ.h" />
     <ClInclude Include="Pera.h" />
     <ClInclude Include="PeraGraphicsPipeline.h" />
+    <ClInclude Include="Plane.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="SafeDelete.h" />
     <ClInclude Include="Sphere.h" />
-    <ClInclude Include="Plane.h" />
+    <ClInclude Include="SphereRenderer.h" />
+    <ClInclude Include="PlaneRenderer.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="SpriteGraphicsPipline.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="ToonGraphicsPipline.h" />
+    <ClInclude Include="Triangle.h" />
     <ClInclude Include="Vector2.h" />
     <ClInclude Include="Vector3.h" />
     <ClInclude Include="Vector4.h" />

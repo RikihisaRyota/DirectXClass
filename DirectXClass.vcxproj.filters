@@ -67,6 +67,12 @@
     <Filter Include="リソース ファイル\Line">
       <UniqueIdentifier>{93d34cd8-70fe-41ec-8bbe-2eedf3313df3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\player">
+      <UniqueIdentifier>{ccf04faf-09ea-4b50-9951-3ef4a6d7b426}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\player">
+      <UniqueIdentifier>{f11b5df5-ad3a-4e5e-a4e5-6def27cc7201}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -144,10 +150,10 @@
     <ClCompile Include="OBJ.cpp">
       <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
-    <ClCompile Include="Sphere.cpp">
+    <ClCompile Include="SphereRenderer.cpp">
       <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
-    <ClCompile Include="Plane.cpp">
+    <ClCompile Include="PlaneRenderer.cpp">
       <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
     <ClCompile Include="PeraGraphicsPipeline.cpp">
@@ -171,7 +177,7 @@
     <ClCompile Include="LineGraphicsPipline.cpp">
       <Filter>ソース ファイル\graphicsPipeline</Filter>
     </ClCompile>
-    <ClCompile Include="Line.cpp">
+    <ClCompile Include="LineRenderer.cpp">
       <Filter>ソース ファイル\Figure</Filter>
     </ClCompile>
     <ClCompile Include="Sprite.cpp">
@@ -180,10 +186,31 @@
     <ClCompile Include="SpriteGraphicsPipline.cpp">
       <Filter>ソース ファイル\graphicsPipeline</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
+    <ClCompile Include="BaseCharacter.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="BaseCharacter.cpp">
+    <ClCompile Include="Player.cpp">
+      <Filter>ソース ファイル\player</Filter>
+    </ClCompile>
+    <ClCompile Include="MyMath.cpp">
+      <Filter>ソース ファイル\math</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalVariables.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Ground.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Collider.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Draw.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -278,10 +305,10 @@
     <ClInclude Include="OBJ.h">
       <Filter>ヘッダー ファイル\Figure</Filter>
     </ClInclude>
-    <ClInclude Include="Sphere.h">
+    <ClInclude Include="SphereRenderer.h">
       <Filter>ヘッダー ファイル\Figure</Filter>
     </ClInclude>
-    <ClInclude Include="Plane.h">
+    <ClInclude Include="PlaneRenderer.h">
       <Filter>ヘッダー ファイル\Figure</Filter>
     </ClInclude>
     <ClInclude Include="PeraGraphicsPipeline.h">
@@ -305,7 +332,7 @@
     <ClInclude Include="LineGraphicsPipline.h">
       <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
     </ClInclude>
-    <ClInclude Include="Line.h">
+    <ClInclude Include="LineRenderer.h">
       <Filter>ヘッダー ファイル\Figure</Filter>
     </ClInclude>
     <ClInclude Include="Sprite.h">
@@ -317,10 +344,49 @@
     <ClInclude Include="BasicGraphicsPipline.h">
       <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
+    <ClInclude Include="BaseCharacter.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="BaseCharacter.h">
+    <ClInclude Include="Player.h">
+      <Filter>ヘッダー ファイル\player</Filter>
+    </ClInclude>
+    <ClInclude Include="MyMath.h">
+      <Filter>ヘッダー ファイル\math</Filter>
+    </ClInclude>
+    <ClInclude Include="OBB.h">
+      <Filter>ヘッダー ファイル\math</Filter>
+    </ClInclude>
+    <ClInclude Include="AABB.h">
+      <Filter>ヘッダー ファイル\math</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalVarriables.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Ground.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Collider.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Draw.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Triangle.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Line.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphere.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Plane.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

@@ -43,7 +43,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	LineGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
 	// Planeの静的初期化
-	Plane::SetDevice(dxCommon->GetDevice());
+	PlaneRenderer::SetDevice(dxCommon->GetDevice());
 
 	// OBJの静的初期化
 	OBJ::SetDevice(dxCommon->GetDevice());
@@ -52,7 +52,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Cube::SetDevice(dxCommon->GetDevice());
 
 	// Sphereのデバイスセット
-	Sphere::SetDevice(dxCommon->GetDevice());
+	SphereRenderer::SetDevice(dxCommon->GetDevice());
 
 	// Material
 	Material::SetDevice(dxCommon->GetDevice());
@@ -64,8 +64,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Model::SetDevice(dxCommon->GetDevice());
 
 	// Line
-	Line::SetDevice(dxCommon->GetDevice());
-	Line::GetInstance()->Initialize();
+	LineRenderer::SetDevice(dxCommon->GetDevice());
+	LineRenderer::GetInstance()->Initialize();
 
 	// ImGuiの初期化
 	ImGuiManager* imguiManager = ImGuiManager::GetInstance();
@@ -120,7 +120,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	imguiManager->Finalize();
 
 	// Line解放
-	Line::Release();
+	LineRenderer::Release();
 
 	// テクスチャマネージャーの解放
 	TextureManager::Release();

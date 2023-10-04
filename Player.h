@@ -3,28 +3,17 @@
 #include <memory>
 #include <optional>
 
+#include "Collider.h"
 #include "BaseCharacter.h"
 #include "Ground.h"
 #include "Model.h"
 #include "Sprite.h"
 #include "WorldTransform.h"
 #include "ViewProjection.h"
-#include "input/Input.h"
+#include "input.h"
 
 class Player : public BaseCharacter, public Collider {
 public:
-	// ててて
-	Vector2 test_pos_ = { 1075.0f, 564.0f };
-	float distance_X = 61.0f;
-	float distance_Y = 30.0f;
-	float test_Scale_ = 61.0f;
-
-	Vector2 test_buttan_pos_ = { 1094.0f, 616.0f };
-	float distance_buttan_X = 13.0f;
-	float distance_buttan_Y = 12.0f;
-	float test_buttan_Scale_ = 24.0f;
-
-	void SetSpritePos();
 	// 体のパーツ
 	enum class Parts {
 		HEAD,
@@ -63,18 +52,12 @@ public: // メンバ関数
 	/// 描画
 	/// </summary>
 	void Draw(const ViewProjection& viewProjection);
-	void DrawUI();
 	void HitBoxInitialize() override;
 	void HitBoxDraw(const ViewProjection& viewProjection) override;
 	/// <summary>
 	/// プレイヤーの体の回転
 	/// </summary>
 	void PlayerRotate(const Vector3& vector);
-
-	void SetSprite(
-		uint32_t chageTextureHandle, uint32_t tripleTextureHandle, uint32_t dashTextureHandle,
-		uint32_t whiteTextureHandle,
-		uint32_t y_buttan_TextureHandle, uint32_t b_buttan_TextureHandle, uint32_t x_buttan_TextureHandle);
 
 	void BehaviorInitialize();
 
@@ -151,14 +134,6 @@ private: // メンバ関数
 	/// </summary>
 	void BehaviorRootUpdate();
 	/// <summary>
-	/// 攻撃行動初期化
-	/// </summary>
-	void BehaviorAttackInitialize();
-	/// <summary>
-	/// 攻撃行動更新
-	/// </summary>
-	void BehaviorAttackUpdate();
-	/// <summary>
 	/// ダッシュ行動初期化
 	/// </summary>
 	void BehaviorDashInitialize();
@@ -172,9 +147,6 @@ private: // メンバ関数
 	void GetGlobalVariables();
 	// 衝突を検出したら呼び出されるコールバック関数
 	void OnCollision(const OBB& obb, uint32_t type) override;
-
-
-	void SpriteUpdate();
 
 public: // ゲッター,セッター
 	/// <summary>
@@ -190,8 +162,7 @@ public: // ゲッター,セッター
 	void SetBehavior(const Behavior& behavior) {
 		behavior_ = behavior;
 	}
-	void SetPlayerAttack(PlayerAttack* playerAttack) { playerAttack_ = playerAttack; }
-
+	
 	Behavior GetBehavior() const { return behavior_; }
 
 	Vector3 GetPlayerRotate() const { return interRotate_; }
@@ -244,31 +215,9 @@ private: // メンバ変数
 	Behavior behavior_ = Behavior::kRoot;
 	std::optional<Behavior> behaviorRequest_ = std::nullopt;
 
-	PlayerAttack* playerAttack_;
 	Ground* ground_;
 
 	Vector2 chage_Position_;
 	Vector2 triple_Position_;
 	Vector2 dash_Position_;
-
-	Vector2 y_Position_;
-	Vector2 b_Position_;
-	Vector2 x_Position_;
-
-	std::unique_ptr<Sprite> chage_Sprite_;
-	std::unique_ptr<Sprite> chage_Back_Sprite_;
-	std::unique_ptr<Sprite> chage_Back_Black_Sprite_;
-	std::unique_ptr<Sprite> triple_Sprite_;
-	std::unique_ptr<Sprite> triple_Back_Sprite_;
-	std::unique_ptr<Sprite> triple_Back_Black_Sprite_;
-	std::unique_ptr<Sprite> dash_Sprite_;
-	std::unique_ptr<Sprite> dash_Back_Sprite_;
-	std::unique_ptr<Sprite> dash_Back_Black_Sprite_;
-
-	std::unique_ptr<Sprite> center_Back_Sprite_;
-
-
-	std::unique_ptr<Sprite> x_Buttan_Sprite_;
-	std::unique_ptr<Sprite> b_Buttan_Sprite_;
-	std::unique_ptr<Sprite> y_Buttan_Sprite_;
 };

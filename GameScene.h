@@ -6,15 +6,12 @@
 #include "Cube.h"
 #include "DebugCamera.h"
 #include "Input.h"
-#include "Line.h"
+#include "LineRenderer.h"
 #include "Model.h"
 #include "OBJ.h"
-
-#include "Pera.h"
-
 #include "SafeDelete.h"
-#include "Plane.h"
-#include "Sphere.h"
+#include "PlaneRenderer.h"
+#include "SphereRenderer.h"
 #include "Sprite.h"
 
 class DirectXCommon;
