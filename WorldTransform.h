@@ -22,6 +22,8 @@ struct WorldTransform {
 	Vector3 translation_ = { 0.0f,0.0f,0.0f };
 	// matWorld
 	Matrix4x4 matWorld_/* = MakeIdentity4x4()*/;
+	// 親となるワールド変換へのポインタ
+	const WorldTransform* parent_ = nullptr;
 
 	/// <summary>
 	/// 初期化
