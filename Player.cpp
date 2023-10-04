@@ -260,7 +260,6 @@ void Player::Draw(const ViewProjection& viewProjection) {
 		worldTransforms_Parts_.at(0)[static_cast<int>(Parts::ARML)], viewProjection);
 	models_[static_cast<int>(Parts::ARMR)]->Draw(
 		worldTransforms_Parts_.at(0)[static_cast<int>(Parts::ARMR)], viewProjection);
-	HitBoxDraw(viewProjection);
 }
 
 void Player::HitBoxInitialize(uint32_t collisionMask) {

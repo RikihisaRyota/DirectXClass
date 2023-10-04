@@ -62,7 +62,6 @@ void PrimitiveDrawer::SetDraw(const Vector3& v1, const Vector3& v2, const Vector
 
 void PrimitiveDrawer::Draw() {
 	GetInstance()->BasicDraw();
-	darwCount = 0;
 }
 
 void PrimitiveDrawer::Initialize() {

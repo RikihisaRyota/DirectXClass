@@ -16,8 +16,7 @@ void Block::Initialize(std::vector<std::unique_ptr<Model>> model) {
 void Block::Update() {}
 
 void Block::Draw(const ViewProjection& viewProjection) {
-	//models_.at(0)->Draw(worldTransform_.at(0),viewProjection);
-	HitBoxDraw(viewProjection);
+	models_.at(0)->Draw(worldTransform_.at(0),viewProjection);
 }
 
 void Block::OnCollision(const OBB& obb, uint32_t type) {
