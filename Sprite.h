@@ -17,6 +17,23 @@
 /// スプライト
 /// </summary>
 class Sprite {
+public:
+	enum BlendState {
+		// ブレンド無し
+		kNone,
+		// 通常αブレンド
+		kNormal,
+		// 加算
+		kAdd,
+		// 減算
+		kSub,
+		// 乗算
+		kMul,
+		// スクリーン
+		kScreen,
+
+		kNumBlendModes,
+	};
 public: // サブクラス
 	/// <summary>
 	/// 頂点データ構造体
@@ -70,6 +87,7 @@ public: // 静的メンバ関数
 		uint32_t textureHandle, Vector2 position, Vector4 color = { 1, 1, 1, 1 },
 		Vector2 anchorpoint = { 0.0f, 0.0f }, bool isFlipX = false, bool isFlipY = false);
 
+	static void SetBlendState(const BlendState& blendState) {blendState_ = blendState;}
 	/// <summary>
 	/// リリース
 	/// </summary>
@@ -86,7 +104,7 @@ private: // 静的メンバ変数
 	// ルートシグネチャ
 	static Microsoft::WRL::ComPtr<ID3D12RootSignature> sRootSignature;
 	// パイプラインステートオブジェクト
-	static Microsoft::WRL::ComPtr<ID3D12PipelineState> sPipelineState;
+	static Microsoft::WRL::ComPtr<ID3D12PipelineState> sPipelineState[BlendState::kNumBlendModes];
 	// 射影行列
 	static Matrix4x4 sMatProjection;
 
@@ -178,13 +196,14 @@ public: // メンバ関数
 	/// <param name="texBase">テクスチャ左上座標</param>
 	/// <param name="texSize">テクスチャサイズ</param>
 	void SetTextureRect(const Vector2& texBase, const Vector2& texSize);
-
+	
 	/// <summary>
 	/// 描画
 	/// </summary>
 	void Draw();
 
 private: // メンバ変数
+	static BlendState blendState_;
 	// 頂点バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertBuff_;
 	// 定数バッファ

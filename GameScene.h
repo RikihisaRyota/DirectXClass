@@ -69,7 +69,8 @@ private: // メンバ変数
 		Vector3 rotate_;
 		Vector3 translate_;
 	};
-	std::unique_ptr<Sprite> sprite_;
+	
+	std::unique_ptr<Sprite> sprite_[2];
 
 	/// <summary>
 	/// ゲーム用

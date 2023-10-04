@@ -32,7 +32,8 @@ void GameScene::Initialize() {
 	viewProjection_.Initialize();
 	Line::GetInstance()->SetViewProjection(&viewProjection_);
 
-	sprite_.reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
+	sprite_[0].reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
+	sprite_[1].reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
 
 	// 音テスト
 	audio_ = Audio::GetInstance();
@@ -67,15 +68,15 @@ void GameScene::Update() {
 
 
 	ImGui::Begin("Sprite:");
-	Vector2 position = sprite_->GetPosition();
-	ImGui::SliderFloat2("position", &position.x, -10.0f, 10.0f);
-	sprite_->SetPosition(position);
-	Vector4 color = sprite_->GetColor();
+	Vector2 position = sprite_[0]->GetPosition();
+	ImGui::SliderFloat2("position", &position.x, 0.0f, 1280.0f);
+	sprite_[0]->SetPosition(position);
+	Vector4 color = sprite_[0]->GetColor();
 	ImGui::SliderFloat4("color", &color.x, -1.0f, 1.0f);
-	sprite_->SetColor(color);
-	Vector2 size = sprite_->GetSize();
+	sprite_[0]->SetColor(color);
+	Vector2 size = sprite_[0]->GetSize();
 	ImGui::SliderFloat2("size", &size.x, -5.0f, 5.0f);
-	sprite_->SetSize(size);
+	sprite_[0]->SetSize(size);
 	ImGui::End();
 
 #pragma region ライト
@@ -1313,7 +1314,10 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
-	sprite_->Draw();
+	Sprite::SetBlendState(Sprite::BlendState::kNormal);
+	for (size_t i = 0; i < 2; i++) {
+		sprite_[i]->Draw();
+	}
 
 	// スプライト描画後処理
 	Sprite::PostDraw();
