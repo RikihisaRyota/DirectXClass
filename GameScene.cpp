@@ -13,16 +13,35 @@ void GameScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 	// デバックカメラ
 	debugCamera_ = new DebugCamera();
-
 	// 入力
-	input_ = Input::GetInstans();
+	input_ = Input::GetInstance();
 	// カメラの初期化
 	viewProjection_.Initialize();
+#pragma region 生成
+	player_ = std::make_unique<Player>();
+	cube_ = std::make_unique<Cube>();
+#pragma endregion
+	cube_.reset(Cube::Create());
+	cubeWorldTransform_.Initialize();
+	// プレイヤー
+	std::vector<std::unique_ptr<Model>> playerModel(static_cast<int>(Player::Parts::COUNT));
+	// プレイヤーモデル
+	playerModel[static_cast<int>(Player::Parts::HEAD)].reset(Model::Create("head", true));
+	playerModel[static_cast<int>(Player::Parts::BODY)].reset(Model::Create("body", true));
+	playerModel[static_cast<int>(Player::Parts::ARML)].reset(Model::Create("armL", true));
+	playerModel[static_cast<int>(Player::Parts::ARMR)].reset(Model::Create("armR", true));
+	playerModel[static_cast<int>(Player::Parts::WEAPON)].reset(Model::Create("player_Weapon", true));
+	// プレイヤー初期化
+	//player_->SetGround(ground_.get());
+	player_->SetViewProjection(&viewProjection_);
+	player_->Initialize(std::move(playerModel));
 }
 
 void GameScene::Update() {
 	// デバックカメラ
 	debugCamera_->Update(&viewProjection_);
+	// プレイヤー
+	player_->Update();
 }
 
 void GameScene::Draw() {
@@ -53,8 +72,8 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	
-
+	player_->Draw(viewProjection_);
+	cube_->Draw(cubeWorldTransform_,viewProjection_);
 	LineRenderer::GetInstance()->LineRenderer::Draw();
 	// 3Dオブジェクト描画後処理
 	PlaneRenderer::PostDraw();

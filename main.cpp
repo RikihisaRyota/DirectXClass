@@ -24,7 +24,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// 入力の初期化
 	Input* input = nullptr;
-	input = Input::GetInstans();
+	input = Input::GetInstance();
 	input->Initialize();
 
 	// テクスチャマネージャの初期化

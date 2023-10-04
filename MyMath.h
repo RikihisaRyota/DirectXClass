@@ -16,6 +16,8 @@ const double PI = 3.14159265359;
 // ベクトル変換
 Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m);
 
+Matrix4x4 NotTransform(const Matrix4x4& matrix);
+
 Vector3 Lerp(const Vector3& start, const Vector3& end, float t);
 float Lerp(float start, float end, float t);
 
@@ -61,18 +63,34 @@ Matrix4x4 MakeRotateXMatrix(float radian);
 Matrix4x4 MakeRotateYMatrix(float radian);
 // 3,Z軸回転行列
 Matrix4x4 MakeRotateZMatrix(float radian);
+//4,全部
+Matrix4x4 MakeRotateXYZMatrix(const Vector3& rotation);
 
 // 3次元アフィン変換
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
-
-// 1,透視投影行列
+//1,透視投影行列
 Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip);
-// 2,正射影行列
-Matrix4x4 MakeOrthographicMatrix(
-    float left, float top, float right, float bottom, float nearClip, float farClip);
-// 3,ビューポート変換行列
-Matrix4x4 MakeViewportMatrix(
-    float left, float top, float width, float height, float minDepth, float maxDepth);
+//2,正射影行列
+Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
+//3,ビューポート変換行列
+Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
+// ビュー行列
+Matrix4x4 MakeViewMatrix(const Vector3& rotation, const Vector3& translation);
+// LookAtLH
+Matrix4x4 MakeLookAtLH(const Vector3& target, const Vector3& eye, const Vector3& up);
+
+// Billbord
+Matrix4x4 MakeBillboard(const Vector3& target, const Vector3& eye, const Vector3& up);
+Matrix4x4 MakeBillboardXAxsizLook(const Vector3& target, const Vector3& eye, const Vector3& up);
+Matrix4x4 MakeBillboardYAxsizLook(const Vector3& target, const Vector3& eye, const Vector3& up);
+Matrix4x4 MakeBillboardZAxsizLook(const Vector3& target, const Vector3& eye, const Vector3& up);
+
+//1,X軸
+Vector3 GetXAxis(const Matrix4x4& mat);
+//2,Y軸
+Vector3 GetYAxis(const Matrix4x4& mat);
+//3,Z軸
+Vector3 GetZAxis(const Matrix4x4& mat);
 // スクリーン変換行列
 Matrix4x4 MakeViewProjectMatrixMatrix(const ViewProjection& viewProjection);
 
@@ -141,7 +159,7 @@ OBB OBBSetRotate(const OBB& Obb, const Vector3& rotate, const Vector3& rotate1);
 // OBBの平行移動
 Matrix4x4 OBBMakeWorldMatrix(const OBB& obb);
 
-Matrix4x4 SetRotate(const Vector3 (&array)[3]);
+Matrix4x4 SetRotate(const Vector3(&array)[3]);
 
 // 曲線
 // 二次ベジエ
@@ -159,7 +177,7 @@ Vector3 CubicBezier(
 // Vector3 Lerp(const Vector3& start, const Vector3& end, float t);
 template<class T> T Lerp(const T& start, const T& end, float t);
 template<class T> inline T Lerp(const T& start, const T& end, float t) {
-	return start + (end - start) * t;
+    return start + (end - start) * t;
 }
 
 // CatmullRom

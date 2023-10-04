@@ -1,65 +1,97 @@
 #pragma once
-#include <assert.h>
 #include <cmath>
 
-struct Vector3 {
+/// <summary>
+/// 3次元ベクトル
+/// </summary>
+struct Vector3 final {
 	float x;
 	float y;
 	float z;
 
-	Vector3& operator+=(const Vector3& a) {
-		this->x += a.x;
-		this->y += a.y;
-		this->z += a.z;
-		return *this;
-	}
+	// ベクトルの長さを計算する関数
+	float Length() const { return std::sqrt(x * x + y * y + z * z); }
 
-	Vector3& operator-=(const Vector3& a) {
-		this->x -= a.x;
-		this->y -= a.y;
-		this->z -= a.z;
-		return *this;
-	}
-
-	Vector3& operator*=(float a) {
-		this->x *= a;
-		this->y *= a;
-		this->z *= a;
-		return *this;
-	}
-
-	Vector3 operator+(const Vector3& a) const {
-		return Vector3(this->x + a.x, this->y + a.y, this->z + a.z);
-	}
-
-	Vector3 operator-(const Vector3& a) const {
-		return Vector3(this->x - a.x, this->y - a.y, this->z - a.z);
-	}
-
-	Vector3 operator*(const Vector3& a) const {
-		return Vector3(this->x * a.x, this->y * a.y, this->z * a.z);
-	}
-
-	Vector3 operator*(const float a) const {
-		return Vector3(this->x * a, this->y * a, this->z * a);
-	}
-
-	Vector3 operator+(const float a) const {
-		return Vector3(this->x + a, this->y + a, this->z + a);
-	}
+	// ベクトルの正規化を行う関数
 	void Normalize() {
-		float length = sqrt(x * x + y * y + z * z);
-		assert(length != 0.0f);
+		float length = Length();
 		x /= length;
 		y /= length;
 		z /= length;
 	}
+	// 加算演算子のオーバーロード
+	Vector3 operator+(const Vector3& other) const {
+		return { x + other.x, y + other.y, z + other.z };
+	}
+	// 加算演算子のオーバーロード
+	Vector3 operator+(float other) const {
+		return { x + other, y + other, z + other };
+	}
 
-	float length(Vector3 v) { return sqrt(v.x * v.x + v.y * v.y + v.z * v.z); }
+	// 減算演算子のオーバーロード
+	Vector3 operator-(const Vector3& other) const {
+		return { x - other.x, y - other.y, z - other.z };
+	}
+	// 減算演算子のオーバーロード
+	Vector3 operator-(float other) const {
+		return { x - other, y - other, z - other };
+	}
+
+	// 二項マイナス演算子のオーバーロード（引数なしの単項マイナス演算子ではない）
+	Vector3 operator-() const { return { -x, -y, -z }; }
+
+	// 積演算子のオーバーロード
+	Vector3 operator*(const Vector3& other) const {
+		return { x * other.x, y * other.y, z * other.z };
+	}
+
+	// スカラー乗算演算子のオーバーロード
+	Vector3 operator*(float scalar) const { return { x * scalar, y * scalar, z * scalar }; }
+
+	// スカラー除算演算子のオーバーロード
+	Vector3 operator/(float scalar) const { return { x / scalar, y / scalar, z / scalar }; }
+
+	// +=演算子のオーバーロード
+	Vector3& operator+=(const Vector3& other) {
+		x += other.x;
+		y += other.y;
+		z += other.z;
+		return *this;
+	}
+
+	// -=演算子のオーバーロード
+	Vector3& operator-=(const Vector3& other) {
+		x -= other.x;
+		y -= other.y;
+		z -= other.z;
+		return *this;
+	}
+
+	// *=演算子のオーバーロード
+	Vector3& operator*=(float scalar) {
+		x *= scalar;
+		y *= scalar;
+		z *= scalar;
+		return *this;
+	}
+
+	// /=演算子のオーバーロード
+	Vector3& operator/=(float scalar) {
+		x /= scalar;
+		y /= scalar;
+		z /= scalar;
+		return *this;
+	}
+
+	// !=演算子のオーバーロード
+	bool operator!=(const Vector3& other) const {
+		return !(x == other.x && y == other.y && z == other.z);
+	}
+
+	// ==演算子のオーバーロード
+	bool operator==(const Vector3& other) const {
+		return (x == other.x && y == other.y && z == other.z);
+	}
+
+	Vector3 operator-() { return Vector3(-x, -y, -z); }
 };
-// 正規化
-Vector3 Normalize(const Vector3& v);
-// 内積
-float Dot(const Vector3& a, const Vector3& b);
-//外積
-Vector3 Cross(const Vector3& v1, const Vector3& v2);

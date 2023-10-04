@@ -217,7 +217,7 @@ private: // メンバ変数
 
 	Ground* ground_;
 
-	Vector2 chage_Position_;
+	/*Vector2 chage_Position_;
 	Vector2 triple_Position_;
-	Vector2 dash_Position_;
+	Vector2 dash_Position_;*/
 };

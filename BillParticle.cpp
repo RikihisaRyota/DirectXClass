@@ -3,6 +3,7 @@
 #include <ctime>
 
 #include "ImGuiManager.h"
+#include "MyMath.h"
 BillParticle::BillParticle() {
 	Initilaize();
 }

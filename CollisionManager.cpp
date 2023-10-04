@@ -6,24 +6,15 @@
 #include "ImGuiManager.h"
 
 void CollisionManager::Update(
-    Player* player, PlayerAttack* playerAttack, Enemy* enemy, EnemyAttack* enemyAttack) {
+    Player* player) {
 	colliders_.clear();
-	CheckAllCollisions(player, playerAttack, enemy, enemyAttack);
+	CheckAllCollisions(player);
 }
 
 void CollisionManager::CheckAllCollisions(
-    Player* player, PlayerAttack* playerAttack, Enemy* enemy, EnemyAttack* enemyAttack) {
+    Player* player) {
 	// プレイヤーをリストに追加
 	colliders_.emplace_back(player);
-	if (player->GetBehavior() == Player::Behavior::kAttack) {
-		colliders_.emplace_back(playerAttack);
-	}
-	// 敵をリストに追加
-	colliders_.emplace_back(enemy);
-	if (enemy->GetBehavior() == Enemy::Behavior::kAttack) {
-		colliders_.emplace_back(enemyAttack);
-	}
-
 	// リスト内総当たり
 	std::list<Collider*>::iterator itrA = colliders_.begin();
 	for (; itrA != colliders_.end(); ++itrA) {

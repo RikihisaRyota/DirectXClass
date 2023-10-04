@@ -1,7 +1,7 @@
 #include "SphereRenderer.h"
 
 #include "TextureManager.h"
-
+#include "MyMath.h"
 using namespace Microsoft::WRL;
 
 // 静的メンバ変数の実体化

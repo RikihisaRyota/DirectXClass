@@ -1,5 +1,9 @@
 #include "Material.h"
 
+#include <assert.h>
+
+#include "MyMath.h"
+
 using namespace Microsoft::WRL;
 
 // 静的メンバ変数の実体化

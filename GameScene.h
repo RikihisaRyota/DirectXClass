@@ -14,6 +14,8 @@
 #include "SphereRenderer.h"
 #include "Sprite.h"
 
+#include "Player.h"
+
 class DirectXCommon;
 /// <summary>
 /// ゲームシーン
@@ -59,4 +61,8 @@ private: // メンバ変数
 	/// </summary>
 	ViewProjection viewProjection_;
 	
+	std::unique_ptr<Player> player_;
+	std::unique_ptr<Cube> cube_;
+	WorldTransform cubeWorldTransform_;
+
 };

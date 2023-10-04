@@ -14,12 +14,12 @@
 void DrawLine(
     const Vector3& v1, const Vector3& v2, const ViewProjection& viewProjection, Vector4 color) {
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection);
-	Vector3 ndcVertex_Start = Transform(v1, viewProjection.matView);
-	Vector3 screenVertices_Start = Transform(ndcVertex_Start, viewProjection.matProjection);
+	Vector3 ndcVertex_Start = Transform(v1, viewProjection.matView_);
+	Vector3 screenVertices_Start = Transform(ndcVertex_Start, viewProjection.matProjection_);
 
-	Vector3 ndcVertex_End = Transform(v2, viewProjection.matView);
-	Vector3 screenVertices_End = Transform(ndcVertex_End, viewProjection.matProjection);
-	PrimitiveDrawer::GetInstance()->DrawLine3d(v1, v2, color);
+	Vector3 ndcVertex_End = Transform(v2, viewProjection.matView_);
+	Vector3 screenVertices_End = Transform(ndcVertex_End, viewProjection.matProjection_);
+	PrimitiveDrawer::GetInstance()->SetDraw(v1, v2, color);
 }
 
 void DrawGrid(const ViewProjection& viewProjection) {

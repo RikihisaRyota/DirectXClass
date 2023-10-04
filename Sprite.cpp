@@ -1,8 +1,10 @@
 #include "Sprite.h"
-#include "TextureManager.h"
 #include <cassert>
 #include <d3dcompiler.h>
 #include <d3dx12.h>
+
+#include "TextureManager.h"
+#include "MyMath.h"
 
 #pragma comment(lib, "d3dcompiler.lib")
 
@@ -222,11 +224,6 @@ void Sprite::StaticInitialize(
 	gpipeline.BlendState.RenderTarget[0] = blenddesc;
 	result = sDevice->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&sPipelineState[BlendState::kScreen]));
 	assert(SUCCEEDED(result));
-	
-
-	
-	
-	
 
 	// 射影行列計算
 	sMatProjection = MakeOrthographicMatrix(

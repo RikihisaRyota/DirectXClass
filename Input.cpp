@@ -6,9 +6,12 @@
 #include "ImGuiManager.h"
 #include "WinApp.h"
 
-#pragma comment(lib, "dinput8.lib")
+// デバイス発見時に実行される
+BOOL CALLBACK DeviceFindCallBack(LPCDIDEVICEINSTANCE ipddi, LPVOID pvRef) {
+	return DIENUM_CONTINUE;
+}
 
-Input* Input::GetInstans() {
+Input* Input::GetInstance() {
 	static Input instans;
 	return &instans;
 }
@@ -18,7 +21,7 @@ void Input::Initialize() {
 #pragma region DirectInputオブジェクトの生成
 	// DirectInputオブジェクトの生成
 	result = DirectInput8Create(
-		WinApp::GetInstance()->GethInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&dInput_, nullptr);
+		WinApp::GetInstance()->GethInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, reinterpret_cast<void**>(dInput_.GetAddressOf()), nullptr);
 	assert(SUCCEEDED(result));
 #pragma endregion DirectInputオブジェクトの生成
 
@@ -51,12 +54,23 @@ void Input::Initialize() {
 		devMouse_->SetCooperativeLevel(WinApp::GetInstance()->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(result));
 #pragma endregion マウス設定
+#pragma region ジョイスティック
+	/*result = dInput_->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, this, DIEDFL_ATTACHEDONLY);
+	assert(SUCCEEDED(result));*/
+
+	// XInput 初期化
+	for (DWORD i = 0; i < XUSER_MAX_COUNT; ++i) {
+		Joystick joystick;
+		joystick.type_ = PadType::XInput;
+		joystick.device_ = nullptr; // XInput では DirectInput デバイスは使用しない
+		devJoysticks_.push_back(joystick);
+	}
+#pragma endregion
 }
 
 void Input::Update() {
 	devKeyboard_->Acquire(); // キーボード動作開始
 	devMouse_->Acquire(); // マウス動作開始
-
 	// 前回のキー入力を保存
 	keyPre_ = key_;
 
@@ -67,6 +81,37 @@ void Input::Update() {
 
 	// マウスの入力
 	devMouse_->GetDeviceState(sizeof(DIMOUSESTATE), &mouse_);
+
+	// ジョイスティックの状態を更新
+	for (DWORD i = 0; i < devJoysticks_.size(); ++i) {
+		if (devJoysticks_[i].type_ == PadType::DirectInput) {
+			devJoysticks_[i].device_->Acquire();
+			devJoysticks_[i].device_->GetDeviceState(sizeof(DIJOYSTATE2), &devJoysticks_[i].state_.directInput_);
+		}
+		else if (devJoysticks_[i].type_ == PadType::XInput) {
+			XINPUT_STATE xInputState;
+			ZeroMemory(&xInputState, sizeof(XINPUT_STATE));
+			DWORD result = XInputGetState(i, &xInputState);
+			if (result == ERROR_SUCCESS) {
+				devJoysticks_[i].state_.xInput_ = xInputState;
+				// Zero value if thumbsticks are within the dead zone
+				if ((devJoysticks_[i].state_.xInput_.Gamepad.sThumbLX <  XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE &&
+					devJoysticks_[i].state_.xInput_.Gamepad.sThumbLX  > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE) &&
+					(devJoysticks_[i].state_.xInput_.Gamepad.sThumbLY  <  XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE &&
+						devJoysticks_[i].state_.xInput_.Gamepad.sThumbLY  > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)) {
+					devJoysticks_[i].state_.xInput_.Gamepad.sThumbLX = 0;
+					devJoysticks_[i].state_.xInput_.Gamepad.sThumbLY = 0;
+				}
+				if ((devJoysticks_[i].state_.xInput_.Gamepad.sThumbRX <  XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE &&
+					devJoysticks_[i].state_.xInput_.Gamepad.sThumbRX  > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE) &&
+					(devJoysticks_[i].state_.xInput_.Gamepad.sThumbRY  <  XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE &&
+						devJoysticks_[i].state_.xInput_.Gamepad.sThumbRY  > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)) {
+					devJoysticks_[i].state_.xInput_.Gamepad.sThumbRX = 0;
+					devJoysticks_[i].state_.xInput_.Gamepad.sThumbRY = 0;
+				}
+			}
+		}
+	}
 }
 
 bool Input::PushKey(BYTE keyNumber) const {
@@ -131,3 +176,88 @@ int32_t Input::GetWheel() const {
 Vector2 Input::GetMouseMove() const {
 	return {(float)mouse_.lX,(float)mouse_.lY};
 }
+
+bool Input::GetJoystickState(int32_t stickNo, DIJOYSTATE2& out) const {
+	if (stickNo >= 0 && stickNo < static_cast<int32_t>(devJoysticks_.size())) {
+		out = devJoysticks_[stickNo].state_.directInput_;
+		return true;
+	}
+	return false;
+}
+
+bool Input::GetJoystickStatePrevious(int32_t stickNo, DIJOYSTATE2& out) const {
+	if (stickNo >= 0 && stickNo < static_cast<int32_t>(devJoysticks_.size())) {
+		out = devJoysticks_[stickNo].statePre_.directInput_;
+		return true;
+	}
+	return false;
+}
+
+bool Input::GetJoystickState(int32_t stickNo, XINPUT_STATE& out) const {
+	if (stickNo >= 0 && stickNo < static_cast<int32_t>(devJoysticks_.size())) {
+		if (devJoysticks_[stickNo].type_ == PadType::XInput) {
+			out = devJoysticks_[stickNo].state_.xInput_;
+			return true;
+		}
+		else {
+			// ジョイスティックが接続されていない場合
+			return false;
+		}
+	}
+	return false;
+}
+
+
+bool Input::GetJoystickStatePrevious(int32_t stickNo, XINPUT_STATE& out) const {
+	if (stickNo >= 0 && stickNo < static_cast<int32_t>(devJoysticks_.size())) {
+		if (devJoysticks_[stickNo].type_ == PadType::XInput) {
+			out = devJoysticks_[stickNo].statePre_.xInput_;
+			return true;
+		}
+	}
+	return false;
+}
+//BOOL CALLBACK Input::EnumJoystickObjectsCallback(const DIDEVICEOBJECTINSTANCE* instance, VOID* context) {
+//	IDirectInputDevice8* device = static_cast<IDirectInputDevice8*>(context);
+//
+//	DIPROPRANGE range;
+//	range.diph.dwSize = sizeof(DIPROPRANGE);
+//	range.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+//	range.diph.dwObj = instance->dwType;
+//	range.diph.dwHow = DIPH_BYID;
+//	range.lMin = -1000;
+//	range.lMax = 1000;
+//
+//	HRESULT result = device->SetProperty(DIPROP_RANGE, &range.diph);
+//	if (FAILED(result)) {
+//		return DIENUM_STOP;
+//	}
+//
+//	return DIENUM_CONTINUE;
+//}
+//
+//BOOL CALLBACK Input::EnumJoysticksCallback(const DIDEVICEINSTANCE* instance, VOID* context) {
+//
+//	Joystick joystick;
+//	joystick.type_ = PadType::DirectInput;
+//	joystick.device_ = nullptr;
+//	joystick.state_ = {};
+//	joystick.statePre_ = {};
+//
+//	HRESULT result = dInput_->CreateDevice(instance->guidInstance, &joystick.device_, nullptr);
+//	if (SUCCEEDED(result)) {
+//		result = joystick.device_->SetDataFormat(&c_dfDIJoystick);
+//		if (SUCCEEDED(result)) {
+//			result = joystick.device_->SetCooperativeLevel(WinApp::GetInstance()->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+//			if (SUCCEEDED(result)) {
+//				// オブジェクトの列挙と設定
+//				result = joystick.device_->EnumObjects(EnumJoystickObjectsCallback, joystick.device_.Get(), DIDFT_ALL);
+//				if (SUCCEEDED(result)) {
+//					devJoysticks_.push_back(joystick);
+//				}
+//			}
+//		}
+//	}
+//
+//	return DIENUM_CONTINUE;
+//}

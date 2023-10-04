@@ -4,18 +4,16 @@
 
 #include "Draw.h"
 #include "GlobalVarriables.h"
+#include "Input.h"
 #include "ImGuiManager.h"
 #include "MyMath.h"
 #include "TextureManager.h"
 
-// テスト
-#include "PrimitiveDrawer.h"
-
 void Player::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	// 基底クラス
 	BaseCharacter::Initialize(std::move(model));
-	// SetGlobalVariables();
-	GetGlobalVariables();
+	//SetGlobalVariables();
+	//GetGlobalVariables();
 	worldTransform_.at(0).translation_.y = kGroundDistanse;
 	BaseCharacter::Update();
 	destinationAngle_ = { 0.0f, 0.0f, 1.0f };
@@ -52,9 +50,6 @@ void Player::Update() {
 		default:
 			BehaviorRootInitialize();
 			break;
-		case Player::Behavior::kAttack:
-			BehaviorAttackInitialize();
-			break;
 		case Player::Behavior::kDash:
 			BehaviorDashInitialize();
 			break;
@@ -66,9 +61,6 @@ void Player::Update() {
 	case Player::Behavior::kRoot:
 	default:
 		BehaviorRootUpdate();
-		break;
-	case Player::Behavior::kAttack:
-		BehaviorAttackUpdate();
 		break;
 	case Player::Behavior::kDash:
 		BehaviorDashUpdate();
@@ -291,9 +283,6 @@ void Player::BehaviorInitialize() {
 		default:
 			BehaviorRootInitialize();
 			break;
-		case Player::Behavior::kAttack:
-			BehaviorAttackInitialize();
-			break;
 		case Player::Behavior::kDash:
 			BehaviorDashInitialize();
 			break;
@@ -309,7 +298,7 @@ void Player::GamePadInput() {
 	// プレイヤー移動
 	Move();
 	// 攻撃開始
-	if (Input::GetInstance()->TriggerKey(DIK_Q) ||
+	/*if (Input::GetInstance()->TriggerKey(DIK_Q) ||
 		(Input::GetInstance()->GetJoystickState(0, joyState) &&
 			(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_Y))) {
 		behaviorRequest_ = Behavior::kAttack;
@@ -320,7 +309,7 @@ void Player::GamePadInput() {
 			(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_B))) {
 		behaviorRequest_ = Behavior::kAttack;
 		playerAttack_->SetBehavior(PlayerAttack::Behavior::kTripleAttack);
-	}
+	}*/
 	// ダッシュ開始
 	if ((!IsDash_) &&
 		(Input::GetInstance()->TriggerKey(DIK_LSHIFT) ||

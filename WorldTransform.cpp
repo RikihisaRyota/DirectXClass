@@ -3,6 +3,8 @@
 #include <d3dx12.h>
 #include "DirectXCommon.h"
 
+#include "MyMath.h"
+
 void WorldTransform::Initialize()
 {
 	CreateConstBuffer();

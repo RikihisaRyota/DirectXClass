@@ -4,6 +4,8 @@
 #include <d3dx12.h>
 #include "DirectXCommon.h"
 
+#include "MyMath.h"
+
 void ViewProjection::Initialize() {
 	// 定数バッファの生成
 	CreateConstBuffer();

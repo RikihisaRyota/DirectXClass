@@ -13,7 +13,7 @@ public:
 
 private:
 	// メンバ関数
-	void CheckAllCollisions(Player* player, /* Enemy* enemy, */);
+	void CheckAllCollisions(Player* player/* Enemy* enemy, */);
 	/// <summary>
 	/// コライダー2つの衝突判定と応答
 	/// </summary>
