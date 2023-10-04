@@ -57,6 +57,11 @@ void WorldTransform::UpdateMatrix()
 	matWorld_ *= matRot;            // ワールド行列に回転を反映
 	matWorld_ *= matTrans;          // ワールド行列に平行移動を反映
 
+	// もし親があれば
+	if (parent_) {
+		matWorld_ = Mul(matWorld_, parent_->matWorld_);
+	}
+
 	// 定数バッファに転送する
 	TransferMatrix();
 }
