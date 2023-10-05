@@ -1,34 +1,35 @@
-#include "Cube.h"
+#include "CubeRenderer.h"
 
 #include "TextureManager.h"
+#include "MyMath.h"
 
 using namespace Microsoft::WRL;
 
 // 静的メンバ変数の実体化
-ID3D12Device* Cube::sDevice = nullptr;
-Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> Cube::cmdList_;
+ID3D12Device* CubeRenderer::sDevice = nullptr;
+Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> CubeRenderer::cmdList_;
 
-void Cube::SetDevice(ID3D12Device* device) {
+void CubeRenderer::SetDevice(ID3D12Device* device) {
 	// nullptrチェック
 	assert(device);
 
 	sDevice = device;
 }
 
-void Cube::PreDraw(ID3D12GraphicsCommandList* cmdList) {
+void CubeRenderer::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
 	assert(cmdList_ == nullptr);
 	// コマンドリストをセット
 	cmdList_ = cmdList;
 }
-void Cube::PostDraw() {
+void CubeRenderer::PostDraw() {
 	// コマンドリストの解除
 	cmdList_ = nullptr;
 }
 
-Cube* Cube::Create(uint32_t IsLighting, bool IsToon ) {
-	// Cubeのインスタンスを生成
-	Cube* cube = new Cube();
+CubeRenderer* CubeRenderer::Create(uint32_t IsLighting, bool IsToon ) {
+	// CubeRendererのインスタンスを生成
+	CubeRenderer* cube = new CubeRenderer();
 	assert(cube);
 	// パイプライン初期化
 	cube->basicGraphicsPipline_ = std::make_unique<BasicGraphicsPipline>();
@@ -45,69 +46,31 @@ Cube* Cube::Create(uint32_t IsLighting, bool IsToon ) {
 	return cube;
 }
 
-void Cube::Draw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
+void CubeRenderer::Draw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
 	if (IsToon_) {
 		ToonDraw(worldTransform, viewProjection, textureHadle);
 	}
 	BasicDraw(worldTransform, viewProjection, textureHadle);
 }
 
-void Cube::NotPeraDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
-	if (IsToon_) {
-		ToonDraw(worldTransform, viewProjection, textureHadle);
-	}
-	// ルートシグネチャの設定
-	cmdList_->SetGraphicsRootSignature(basicGraphicsPipline_->GetRootSignature());
-
-	// パイプラインステートの設定
-	cmdList_->SetPipelineState(basicGraphicsPipline_->GetPipelineStatee());
-
-	// プリミティブ形状を設定
-	cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	// 頂点バッファの設定
-	cmdList_->IASetVertexBuffers(0, 1, &vbView_);
-
-	// インデックスバッファの設定
-	cmdList_->IASetIndexBuffer(&ibView_);
-
-	// CBVをセット（ワールド行列）
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::WORLDTRANSFORM), worldTransform.constBuff_->GetGPUVirtualAddress());
-
-	// CBVをセット（ビュープロジェクション行列）
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::VIEWPROJECTION), viewProjection.constBuff_->GetGPUVirtualAddress());
-
-	// CBVをセット（Material）
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::MATERIAL), materialBuff_->GetGPUVirtualAddress());
-
-	// DirectionalLight用のCBufferの場所を設定
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::LIGHTING), directionalLightBuff_->GetGPUVirtualAddress());
-
-	// SRVをセット
-	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(cmdList_.Get(), static_cast<int>(BasicGraphicsPipline::ROOT_PARAMETER_TYP::TEXTURE), textureHadle);
-
-	// 描画コマンド
-	cmdList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
-}
-
-void Cube::SetToon(uint32_t IsToon) {
+void CubeRenderer::SetToon(uint32_t IsToon) {
 	IsToon_ = IsToon;
 }
 
-void Cube::SetDirectionalLight(const cDirectionalLight& DirectionalLight) {
+void CubeRenderer::SetDirectionalLight(const cDirectionalLight& DirectionalLight) {
 	directionalLight_->color_ = DirectionalLight.color_;
 	directionalLight_->direction_ = Normalize(DirectionalLight.direction_);
 	directionalLight_->intensiy_ = DirectionalLight.intensiy_;
 	directionalLight_->sharpness_ = DirectionalLight.sharpness_;
 }
 
-void Cube::SetMaterial(const cMaterial& material) {
+void CubeRenderer::SetMaterial(const cMaterial& material) {
 	material_->color_ = material.color_;
 	material_->enableLightint_ = material.enableLightint_;
 	material_->uvTransform_ = material.uvTransform_;
 }
 
-void Cube::Initialize() {
+void CubeRenderer::Initialize() {
 	HRESULT result = S_FALSE;
 
 	vertices_ = {
@@ -216,7 +179,7 @@ void Cube::Initialize() {
 #pragma endregion
 }
 
-void Cube::BasicDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
+void CubeRenderer::BasicDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
 	// ルートシグネチャの設定
 	cmdList_->SetGraphicsRootSignature(basicGraphicsPipline_->GetRootSignature());
 
@@ -251,7 +214,7 @@ void Cube::BasicDraw(const WorldTransform& worldTransform, const ViewProjection&
 	cmdList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
 }
 
-void Cube::ToonDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
+void CubeRenderer::ToonDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
 	// ルートシグネチャの設定
 	cmdList_->SetGraphicsRootSignature(toonGraphicsPipline_->GetRootSignature());
 
@@ -287,7 +250,7 @@ void Cube::ToonDraw(const WorldTransform& worldTransform, const ViewProjection& 
 	cmdList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
 }
 
-ComPtr<ID3D12Resource> Cube::CreateBuffer(UINT size) {
+ComPtr<ID3D12Resource> CubeRenderer::CreateBuffer(UINT size) {
 	HRESULT result = S_FALSE;
 	// ヒーププロパティ
 	CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);

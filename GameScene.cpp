@@ -1,7 +1,7 @@
 #include "GameScene.h"
 
 #include "DirectXCommon.h"
-#include "Matrix4x4.h"
+#include "MyMath.h"
 #include "TextureManager.h"
 #include "ImGuiManager.h"
 
@@ -30,7 +30,8 @@ void GameScene::Initialize() {
 
 	// カメラの初期化
 	viewProjection_.Initialize();
-	Line::GetInstance()->SetViewProjection(&viewProjection_);
+	// 線
+	PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection_);
 
 	sprite_[0].reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
 	sprite_[1].reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
@@ -150,7 +151,7 @@ void GameScene::Update() {
 		switch (currentItem) {
 		case 0: // "cube"が選択された場合
 		{
-			cube_.emplace_back(std::unique_ptr<Cube>(Cube::Create(0)));
+			cube_.emplace_back(std::unique_ptr<CubeRenderer>(CubeRenderer::Create(0)));
 			cubeWorldTransform_.emplace_back(std::make_unique<WorldTransform>());
 			cubeWorldTransform_.back()->Initialize();
 			cubeUseTexture_.emplace_back(0);
@@ -170,7 +171,7 @@ void GameScene::Update() {
 		}
 		case 1: // "sphere"が選択された場合
 		{
-			sphere_.emplace_back(std::unique_ptr<Sphere>(Sphere::Create(0)));
+			sphere_.emplace_back(std::unique_ptr<SphereRenderer>(SphereRenderer::Create(0)));
 			sphereWorldTransform_.emplace_back(std::make_unique<WorldTransform>());
 			sphereWorldTransform_.back()->Initialize();
 			sphereUseTexture_.emplace_back(0);
@@ -210,7 +211,7 @@ void GameScene::Update() {
 		}
 		case 3: // "sprite"が選択された場合
 		{
-			plane_.emplace_back(std::unique_ptr<Plane>(Plane::Create(0)));
+			plane_.emplace_back(std::unique_ptr<PlaneRenderer>(PlaneRenderer::Create(0)));
 			planeWorldTransform_.emplace_back(std::make_unique<WorldTransform>());
 			planeWorldTransform_.back()->Initialize();
 			planeUseTexture_.emplace_back(0);
@@ -1181,12 +1182,12 @@ void GameScene::Draw() {
 #pragma endregion
 #pragma region 3Dオブジェクト描画
 	// 3Dオブジェクト描画前処理
-	Cube::PreDraw(commandList);
-	Sphere::PreDraw(commandList);
+	CubeRenderer::PreDraw(commandList);
+	SphereRenderer::PreDraw(commandList);
 	OBJ::PreDraw(commandList);
 	Model::PreDraw(commandList);
-	Line::PreDraw(commandList);
-	Plane::PreDraw(commandList);
+	PrimitiveDrawer::PreDraw(commandList);
+	PlaneRenderer::PreDraw(commandList);
 
 
 
@@ -1295,14 +1296,14 @@ void GameScene::Draw() {
 			}
 		}
 	}
-	Line::GetInstance()->Line::Draw();
+	PrimitiveDrawer::GetInstance()->PrimitiveDrawer::Draw();
 	// 3Dオブジェクト描画後処理
-	Plane::PostDraw();
-	Line::PostDraw();
+	PlaneRenderer::PostDraw();
+	PrimitiveDrawer::PostDraw();
 	Model::PostDraw();
-	Sphere::PostDraw();
+	SphereRenderer::PostDraw();
 	OBJ::PostDraw();
-	Cube::PostDraw();
+	CubeRenderer::PostDraw();
 #pragma endregion
 
 

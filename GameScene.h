@@ -3,18 +3,18 @@
 #include <memory>
 
 #include "Audio.h"
-#include "Cube.h"
+#include "CubeRenderer.h"
 #include "DebugCamera.h"
 #include "Input.h"
-#include "Line.h"
+#include "PrimitiveDrawer.h"
 #include "Model.h"
 #include "OBJ.h"
 
 #include "Pera.h"
 
 #include "SafeDelete.h"
-#include "Plane.h"
-#include "Sphere.h"
+#include "PlaneRenderer.h"
+#include "SphereRenderer.h"
 #include "Sprite.h"
 
 class DirectXCommon;
@@ -105,21 +105,21 @@ private: // メンバ変数
 	std::vector< std::unique_ptr<cMaterial>>multiMeshMaterial_;
 	std::vector< std::unique_ptr<UVtranslation>> multiMeshUVtranslation_;
 	// cube
-	std::vector<std::unique_ptr<Cube>> cube_;
+	std::vector<std::unique_ptr<CubeRenderer>> cube_;
 	std::vector<std::unique_ptr<WorldTransform>> cubeWorldTransform_;
 	std::vector<uint32_t> cubeUseTexture_;
 	std::vector<uint32_t> cubeUseToon_;
 	std::vector< std::unique_ptr<cMaterial>> cubeMaterial_;
 	std::vector< std::unique_ptr<UVtranslation>> cubeUVtranslation_;
 	// sphere
-	std::vector<std::unique_ptr<Sphere>> sphere_;
+	std::vector<std::unique_ptr<SphereRenderer>> sphere_;
 	std::vector<std::unique_ptr<WorldTransform>> sphereWorldTransform_;
 	std::vector<uint32_t> sphereUseTexture_;
 	std::vector<uint32_t> sphereUseToon_;
 	std::vector< std::unique_ptr<cMaterial>> sphereMaterial_;
 	std::vector< std::unique_ptr<UVtranslation>> sphereUVtranslation_;
 	// plane
-	std::vector<std::unique_ptr<Plane>> plane_;
+	std::vector<std::unique_ptr<PlaneRenderer>> plane_;
 	std::vector<std::unique_ptr<WorldTransform>> planeWorldTransform_;
 	std::vector<uint32_t> planeUseTexture_;
 	std::vector<uint32_t> planeUseToon_;

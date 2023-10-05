@@ -3,6 +3,8 @@
 #include <ctime>
 
 #include "ImGuiManager.h"
+#include "MyMath.h"
+
 BillParticle::BillParticle() {
 	Initilaize();
 }
@@ -47,7 +49,7 @@ void BillParticle::Create() {
 			// フラグ
 			particle.IsAlive_ = true;
 			// Plane生成
-			particle.sprite_ = Plane::Create();
+			particle.sprite_ = PlaneRenderer::Create();
 			// 生成カウントリセット
 			createParticleCount = 0;
 			break;

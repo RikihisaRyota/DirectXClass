@@ -8,6 +8,7 @@
 
 #include "ConvertString.h"
 #include "TextureManager.h"
+#include "MyMath.h"
 
 using namespace DirectX;
 using namespace Microsoft::WRL;

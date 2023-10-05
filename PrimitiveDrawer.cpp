@@ -1,29 +1,29 @@
-#include "Line.h"
+#include "PrimitiveDrawer.h"
 
 #include "TextureManager.h"
 
 using namespace Microsoft::WRL;
 
 // 静的メンバ変数の実体化
-ID3D12Device* Line::sDevice = nullptr;
-Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> Line::cmdList_;
-UINT Line::darwCount = 0;
-std::vector<Line::Vertex> Line::vertices_;
-std::vector<uint16_t> Line::indices_;
+ID3D12Device* PrimitiveDrawer::sDevice = nullptr;
+Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> PrimitiveDrawer::cmdList_;
+UINT PrimitiveDrawer::darwCount = 0;
+std::vector<PrimitiveDrawer::Vertex> PrimitiveDrawer::vertices_;
+std::vector<uint16_t> PrimitiveDrawer::indices_;
 
-Line* Line::GetInstance() {
-	static Line instans;
+PrimitiveDrawer* PrimitiveDrawer::GetInstance() {
+	static PrimitiveDrawer instans;
 	return &instans;
 }
 
-void Line::SetDevice(ID3D12Device* device) {
+void PrimitiveDrawer::SetDevice(ID3D12Device* device) {
 	// nullptrチェック
 	assert(device);
 
 	sDevice = device;
 }
 
-void Line::PreDraw(ID3D12GraphicsCommandList* cmdList) {
+void PrimitiveDrawer::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
 	assert(cmdList_ == nullptr);
 	// コマンドリストをセット
@@ -33,24 +33,23 @@ void Line::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	vertices_.clear();
 	indices_.clear();
 }
-void Line::PostDraw() {
+void PrimitiveDrawer::PostDraw() {
 	// コマンドリストの解除
 	cmdList_ = nullptr;
 }
 
-void Line::Release() {
+void PrimitiveDrawer::Release() {
 	GetInstance()->Reset();
 }
 
-void Line::Reset() {
-	sDevice->Release();
+void PrimitiveDrawer::Reset() {
 	cmdList_.Reset();
 	lineGraphicsPipline_.reset();
 	vertBuff_.Reset();
 	idxBuff_.Reset();
 }
 
-void Line::SetDraw(const Vector3& v1, const Vector3& v2, const Vector4& color) {
+void PrimitiveDrawer::SetDraw(const Vector3& v1, const Vector3& v2, const Vector4& color) {
 	HRESULT result = S_FALSE;
 	vertices_.emplace_back(Vertex({ v1.x,v1.y,v1.z,1.0f }, { color }));
 	indices_.emplace_back(darwCount);
@@ -61,12 +60,12 @@ void Line::SetDraw(const Vector3& v1, const Vector3& v2, const Vector4& color) {
 	SetMappingIndex();
 }
 
-void Line::Draw() {
+void PrimitiveDrawer::Draw() {
 	GetInstance()->BasicDraw();
 }
 
-void Line::Initialize() {
-	
+void PrimitiveDrawer::Initialize() {
+
 	darwCount = 0;
 
 	lineGraphicsPipline_ = std::make_unique<LineGraphicsPipline>();
@@ -78,7 +77,7 @@ void Line::Initialize() {
 	CreateIndexBuffer();
 }
 
-void Line::CreateVertexBuffer() {
+void PrimitiveDrawer::CreateVertexBuffer() {
 #pragma region 頂点バッファ
 	// 頂点データのサイズ
 	UINT sizeVB = static_cast<UINT>(sizeof(Vertex) * vertices_.size());
@@ -92,7 +91,7 @@ void Line::CreateVertexBuffer() {
 #pragma endregion 頂点バッファ
 }
 
-void Line::SetMappingVertex() {
+void PrimitiveDrawer::SetMappingVertex() {
 	HRESULT result = S_FALSE;
 	// 頂点バッファへのデータ転送
 	{
@@ -105,7 +104,7 @@ void Line::SetMappingVertex() {
 	}
 }
 
-void Line::CreateIndexBuffer() {
+void PrimitiveDrawer::CreateIndexBuffer() {
 #pragma region インデックスバッファ
 	// インデックスデータのサイズ
 	UINT sizeIB = static_cast<UINT>(sizeof(uint16_t) * indices_.size());
@@ -119,7 +118,7 @@ void Line::CreateIndexBuffer() {
 #pragma endregion インデックスバッファ
 }
 
-void Line::SetMappingIndex() {
+void PrimitiveDrawer::SetMappingIndex() {
 	HRESULT result = S_FALSE;
 	uint16_t* indexMap = nullptr;
 	result = idxBuff_->Map(0, nullptr, reinterpret_cast<void**>(&indexMap));
@@ -129,32 +128,32 @@ void Line::SetMappingIndex() {
 	}
 }
 
-void Line::BasicDraw() {
+void PrimitiveDrawer::BasicDraw() {
 	if (!indices_.empty()) {
-	// ルートシグネチャの設定
-	cmdList_->SetGraphicsRootSignature(lineGraphicsPipline_->GetRootSignature());
+		// ルートシグネチャの設定
+		cmdList_->SetGraphicsRootSignature(lineGraphicsPipline_->GetRootSignature());
 
-	// パイプラインステートの設定
-	cmdList_->SetPipelineState(lineGraphicsPipline_->GetPipelineStatee());
+		// パイプラインステートの設定
+		cmdList_->SetPipelineState(lineGraphicsPipline_->GetPipelineStatee());
 
-	// プリミティブ形状を設定
-	cmdList_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-	
-	// 頂点バッファの設定
-	cmdList_->IASetVertexBuffers(0, 1, &vbView_);
+		// プリミティブ形状を設定
+		cmdList_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
-	// インデックスバッファの設定
-	cmdList_->IASetIndexBuffer(&ibView_);
+		// 頂点バッファの設定
+		cmdList_->IASetVertexBuffers(0, 1, &vbView_);
 
-	// CBVをセット（ビュープロジェクション行列）
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(LineGraphicsPipline::ROOT_PARAMETER_TYP::VIEWPROJECTION), viewProjection_->constBuff_->GetGPUVirtualAddress());
+		// インデックスバッファの設定
+		cmdList_->IASetIndexBuffer(&ibView_);
 
-	// 描画コマンド
-	cmdList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
+		// CBVをセット（ビュープロジェクション行列）
+		cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(LineGraphicsPipline::ROOT_PARAMETER_TYP::VIEWPROJECTION), viewProjection_->constBuff_->GetGPUVirtualAddress());
+
+		// 描画コマンド
+		cmdList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
 	}
 }
 
-ComPtr<ID3D12Resource> Line::CreateBuffer(UINT size) {
+ComPtr<ID3D12Resource> PrimitiveDrawer::CreateBuffer(UINT size) {
 	HRESULT result = S_FALSE;
 	// ヒーププロパティ
 	CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
