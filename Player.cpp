@@ -122,8 +122,8 @@ void Player::HitBoxUpdate() {
 	// AABB
 	aabb_.at(0) = {
 		.center_{worldTransform_.at(0).translation_},
-		.min_{aabb_.at(0).center_ + min_},
-		.max_{aabb_.at(0).center_ + max_},
+		.min_{worldTransform_.at(0).translation_ + min_},
+		.max_{worldTransform_.at(0).translation_ + max_},
 	};
 	// OBB
 	obb_.at(0) = {
@@ -206,7 +206,7 @@ void Player::OnCollision(const OBB& obb, uint32_t type) {
 	}
 	case static_cast<uint32_t>(Collider::Type::PlayerToBlock):
 	{
-		// OBB同士が衝突していると仮定して、重なり領域を計算する
+		// OBB同士が衝突していると仮定して、重なり領域を計算する-0.399999619
 		// ここでは、OBB同士の各軸方向での重なりの幅を計算し、最小値を取得する
 		Vector3 distance = obb.center_ - obb_.at(0).center_;
 
@@ -217,32 +217,32 @@ void Player::OnCollision(const OBB& obb, uint32_t type) {
 
 		if (overlapX < overlapY && overlapX < overlapZ) {
 			if (distance.x < 0.0f) {
-				obb_.at(0).center_ += Vector3{ overlapX, 0, 0 };
+				obb_.at(0).center_ += Vector3{ static_cast<float>(overlapX + 0.1f), 0, 0 };
 			}
 			else {
-				obb_.at(0).center_ += Vector3{ -overlapX, 0, 0 };
+				obb_.at(0).center_ += Vector3{ static_cast<float>(-overlapX - 0.1f), 0, 0 };
 			}
 		}
 		else if (overlapY < overlapX && overlapY < overlapZ) {
 			if (distance.y < 0.0f) {
-				obb_.at(0).center_ += Vector3{ 0, overlapY, 0 };
+				obb_.at(0).center_ += Vector3{ 0,static_cast<float>(overlapY) , 0 };
 			}
 			else {
-				obb_.at(0).center_ += Vector3{ 0, -overlapY, 0 };
+				obb_.at(0).center_ += Vector3{ 0, static_cast<float>(-overlapY), 0 };
 			}
+			acceleration_.y = 0.0f;
+			isJump = false;
 		}
 		else {
 			if (distance.z < 0.0f) {
-				obb_.at(0).center_ += Vector3{ 0, 0, overlapZ };
+				obb_.at(0).center_ += Vector3{ 0, 0, static_cast<float>(overlapZ + 0.1f) };
 			}
 			else {
-				obb_.at(0).center_ += Vector3{ 0, 0, -overlapZ };
+				obb_.at(0).center_ += Vector3{ 0, 0, static_cast<float>(-overlapZ - 0.1f)};
 			}
 		}
 		worldTransform_.at(0).translation_ = obb_.at(0).center_;
-		worldTransform_.at(0).translation_ = obb_.at(0).center_;
-		acceleration_.y = 0.0f;
-		isJump = false;
+		
 		// 転送
 		BaseCharacter::Update();
 		HitBoxUpdate();
@@ -269,7 +269,7 @@ void Player::HitBoxInitialize(uint32_t collisionMask) {
 	// 衝突対象を自分以外に設定
 	SetCollisionMask(~collisionMask);
 	// AABB
-	min_ = { -1.0f, -0.9f, -1.0f };
+	min_ = { -1.0f, -1.0f, -1.0f };
 	max_ = { 1.0f, 1.0f, 1.0f };
 	// OBB
 	size_ = { 0.5f, 1.0f, 0.5f };
@@ -441,10 +441,9 @@ void Player::Jump() {
 	}
 }
 void Player::Gravity() {
-	const float kGravity = -0.1f;
 	velocity_ = vector_ * kSpeed;
 	if (acceleration_.y >= -0.5f) {
-		acceleration_.y += kGravity;
+		acceleration_.y -= kGravity;
 	}
 	velocity_+= acceleration_;
 	worldTransform_.at(0).translation_ += velocity_;

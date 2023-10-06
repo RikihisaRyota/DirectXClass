@@ -183,7 +183,7 @@ private: // 定数系
 	// 振り向き速度
 	const float kTurn = 0.4f;
 	// 重力
-	const float kGravity = 0.01f;
+	const float kGravity = 0.001f;
 	// ジャンプ
 	const float kJumpPower = 0.2f;
 	// ダッシュの時間<frame>

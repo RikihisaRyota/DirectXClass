@@ -5,7 +5,7 @@
 
 void Block::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	BaseCharacter::Initialize(std::move(model));
-	worldTransform_.at(0).translation_.y =-10.0f;
+	worldTransform_.at(0).translation_.y = -5.0f;
 	worldTransform_.at(0).scale_ = {10.0f,10.0f,10.0f};
 
 	BaseCharacter::Update();

@@ -80,7 +80,7 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	player_->Draw(viewProjection_);
-	//block_->Draw(viewProjection_);
+	block_->Draw(viewProjection_);
 
 	block_->HitBoxDraw(viewProjection_);
 	player_->HitBoxDraw(viewProjection_);
