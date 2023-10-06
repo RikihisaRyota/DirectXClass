@@ -13,15 +13,22 @@ void Block::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	}
 	float scale = 5.0f;
 	worldTransform_.at(0).translation_ = { 0.0f,0.0f,0.0f };
-	worldTransform_.at(0).scale_ = { scale ,scale ,scale };
-	worldTransform_.at(1).translation_ = { 0.0f,0.0f,scale * 2.0f };
+	worldTransform_.at(0).scale_ = { scale ,scale ,10.0f };
+
+	worldTransform_.at(1).translation_ = { scale * 3,0.0f,scale};
 	worldTransform_.at(1).scale_ = { scale ,scale ,scale };
-	worldTransform_.at(2).translation_ = { scale * 4,0.0f,scale * 6.0f};
+
+	worldTransform_.at(2).translation_ = { scale * 6,0.0f,scale };
 	worldTransform_.at(2).scale_ = { scale ,scale ,scale };
-	worldTransform_.at(3).translation_ = { scale * 4,0.0f,scale *6.0f };
+
+	worldTransform_.at(3).translation_ = { scale * 6.0f,0.0f,scale * 4.0f };
 	worldTransform_.at(3).scale_ = { scale ,scale ,scale };
-	worldTransform_.at(4).translation_ = { scale * 6,0.0f,scale * 8.0f };
+
+	worldTransform_.at(4).translation_ = { scale * 6.0f,0.0f,scale * 7.0f };
 	worldTransform_.at(4).scale_ = { scale ,scale ,scale };
+
+	worldTransform_.at(5).translation_ = { scale * 9.0f,0.0f,scale * 7.0f };
+	worldTransform_.at(5).scale_ = { scale ,scale ,scale };
 
 	BaseCharacter::Update();
 
@@ -53,7 +60,6 @@ void Block::HitBoxInitialize(uint32_t collisionMask) {
 	aabb_.resize(worldTransform_.size());
 	obb_.resize(worldTransform_.size());
 	for (size_t i = 0; i < worldTransform_.size(); i++) {
-
 		// AABB
 		min_ = { -worldTransform_.at(i).scale_ };
 		max_ = { worldTransform_.at(i).scale_ };
@@ -77,7 +83,7 @@ void Block::HitBoxInitialize(uint32_t collisionMask) {
 					 },
 			.size_{size_}
 		};
-		obb_.at(0) = OBBSetRotate(obb_.at(i), worldTransform_.at(i).rotation_);
+		obb_.at(i) = OBBSetRotate(obb_.at(i), worldTransform_.at(i).rotation_);
 		// Sphere
 		sphere_ = {
 			.center_{worldTransform_.at(i).translation_},
@@ -92,6 +98,8 @@ void Block::HitBoxUpdate() {
 }
 
 void Block::HitBoxDraw(const ViewProjection& viewProjection) {
-	DrawAABB(aabb_.at(0), viewProjection, Vector4(0.0f, 0.5f, 0.25f, 1.0f));
-	DrawOBB(obb_.at(0), viewProjection, Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+	for (size_t i = 0; i < worldTransform_.size(); i++) {
+		DrawAABB(aabb_.at(0), viewProjection, Vector4(0.0f, 0.5f, 0.25f, 1.0f));
+		DrawOBB(obb_.at(0), viewProjection, Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+	}
 }
