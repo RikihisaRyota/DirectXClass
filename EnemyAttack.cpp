@@ -13,11 +13,7 @@ void EnemyAttack::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	BaseCharacter::Initialize(std::move(model));
 	worldTransform_.at(0).scale_ = { 4.0f, 1.0f, 4.0f };
 	worldTransform_.at(0).UpdateMatrix();
-	// 衝突属性を設定
-	SetCollisionAttribute(kCollisionAttributeEnemyAttack);
-	// 衝突対象を自分以外に設定
-	SetCollisionMask(~kCollisionAttributeEnemyAttack);
-	HitBoxInitialize();
+	HitBoxInitialize(kCollisionAttributeEnemyAttack);
 
 	press_ = std::make_unique<EnemyPress>();
 	press_->SetPlayerEnemy(player_, enemy_, this);
@@ -64,7 +60,7 @@ void EnemyAttack::Initialize() {
 		// ふるまいリクエストをリセット
 		behaviorRequest_ = std::nullopt;
 		// ヒットボックスの再設定
-		HitBoxInitialize();
+		HitBoxInitialize(kCollisionAttributeEnemyAttack);
 	}
 }
 
@@ -185,7 +181,11 @@ void EnemyAttack::Draw(const ViewProjection& viewProjection) {
 	}
 }
 
-void EnemyAttack::HitBoxInitialize() {
+void EnemyAttack::HitBoxInitialize(uint32_t collisionMask) {
+	// 衝突属性を設定
+	SetCollisionAttribute(collisionMask);
+	// 衝突対象を自分以外に設定
+	SetCollisionMask(~collisionMask);
 	aabb_.clear();
 	obb_.clear();
 	size_t size = worldTransform_.size();
@@ -267,7 +267,7 @@ void EnemyAttack::HitBoxDraw(const ViewProjection& viewProjection) {
 	}
 }
 
-void EnemyAttack::OnCollision(const OBB& obb, uint32_t type) {
+void EnemyAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) {
 	OBB obb1 = obb;
 	uint32_t t = type;
 	t;
@@ -281,7 +281,7 @@ void EnemyAttack::OnCollision(const OBB& obb, uint32_t type) {
 			for (size_t i = 0; i < worldTransform_.size(); i++) {
 				if (IsCollision(
 					OBB(*player_->GetOBB(0)), Sphere(GetOBB(i)->center_, GetOBB(i)->size_.z))) {
-					PlayerHP::SetAdd(75);
+					
 					press_->SetHit(true);
 				}
 			}
@@ -291,7 +291,7 @@ void EnemyAttack::OnCollision(const OBB& obb, uint32_t type) {
 		if (dash_->GetAttack()) {
 			for (size_t i = 0; i < worldTransform_.size(); i++) {
 				if (IsCollision(*player_->GetOBB(0), *enemy_->GetOBB(i))) {
-					PlayerHP::SetAdd(55);
+					
 					dash_->SetHit(true);
 				}
 			}
@@ -300,22 +300,17 @@ void EnemyAttack::OnCollision(const OBB& obb, uint32_t type) {
 	case EnemyAttack::Behavior::kPunchAttack:
 		if (punch_->GetAttack()) {
 			IsAttack_ = true;
-			PlayerHP::SetAdd(45);
 			punch_->SetHit(true);
 		}
 		break;
 	case EnemyAttack::Behavior::kTornadoAttack:
 		if (tornade_->GetAttack()) {
 			IsAttack_ = true;
-			// 連続ヒット
-			PlayerHP::SetAdd(15);
-			// tornade_->SetHit(true);
 		}
 		break;
 	case EnemyAttack::Behavior::kMeteoAttack:
 		if (meteo_->GetAttack()) {
 			IsAttack_ = true;
-			PlayerHP::SetAdd(85);
 			meteo_->SetHit(true);
 		}
 		break;

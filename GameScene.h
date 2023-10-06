@@ -17,6 +17,8 @@
 
 #include "Block.h"
 #include "CollisionManager.h"
+#include "Enemy.h"
+#include "EnemyAttack.h"
 #include "Player.h"
 
 class DirectXCommon;
@@ -67,6 +69,8 @@ private: // メンバ変数
 
 	std::unique_ptr<Block> block_;
 	std::unique_ptr<CollisionManager> collisionManager_;
+	std::unique_ptr<Enemy> enemy_;
+	std::unique_ptr<EnemyAttack> enemyAttack_;
 	std::unique_ptr<Player> player_;
 
 };

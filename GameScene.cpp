@@ -20,6 +20,8 @@ void GameScene::Initialize() {
 #pragma region 生成
 	block_ = std::make_unique<Block>();
 	collisionManager_ = std::make_unique<CollisionManager>();
+	enemy_ = std::make_unique<Enemy>();
+	enemyAttack_ = std::make_unique<EnemyAttack>();
 	player_ = std::make_unique<Player>();
 #pragma endregion
 	// プレイヤー
@@ -41,6 +43,7 @@ void GameScene::Initialize() {
 	// ブロック初期化
 	block_->Initialize(std::move(blockModel));
 
+	// 
 	//フォローカメラ
 	followCamera_.Intialize();
 	followCamera_.SetTarget(&player_.get()->GetWorldTransform());
@@ -52,10 +55,13 @@ void GameScene::Update() {
 	// フォローカメラ	
 	/*followCamera_.Update();
 	viewProjection_ = *followCamera_.GetViewProjection();*/
-	// プレイヤー
-	player_->Update();
 	// ブロック
 	block_->Update();
+	// プレイヤー
+	player_->Update();
+	// 敵
+	enemy_->Update();
+	enemyAttack_->Update();
 	// コリジョンマネージャー
 	collisionManager_->Update(player_.get(),block_.get());
 }
@@ -88,8 +94,10 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	player_->Draw(viewProjection_);
 	block_->Draw(viewProjection_);
+	enemy_->Draw(viewProjection_);
+	enemyAttack_->Draw(viewProjection_);
+	player_->Draw(viewProjection_);
 
 	block_->HitBoxDraw(viewProjection_);
 	player_->HitBoxDraw(viewProjection_);

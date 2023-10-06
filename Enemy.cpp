@@ -1,5 +1,6 @@
 #include "Enemy.h"
 
+#include "Collision.h"
 #include"Draw.h"
 #include "ImGuiManager.h"
 #include "Input.h"
@@ -7,7 +8,6 @@
 #include "EnemyAttack.h"
 #include "EnemyHP.h"
 #include "Player.h"
-
 #include "RandomNumberGenerator.h"
 
 void Enemy::Initialize(std::vector<std::unique_ptr<Model>> model) {
@@ -15,6 +15,11 @@ void Enemy::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	// worldTransform_をずらす
 	worldTransform_.at(0).translation_ = Vector3(0.0f, kFloor_Distance_, 10.0f);
 	vector_ = Normalize(worldTransform_.at(0).translation_);
+	area_ = {
+		.center_{30.0f,0.0f,5.0f},
+		.min_{-5.0f,-5.0f,-5.0f} ,
+		.max_{5.0f,5.0f,5.0f},
+	};
 	// AABBのサイズ
 	AABB aabb;
 	OBB obb;
@@ -38,64 +43,62 @@ void Enemy::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	// 転送
 	BaseCharacter::Update();
 #pragma region 当たり判定
-	// 衝突属性を設定
-	SetCollisionAttribute(kCollisionAttributeEnemy);
-	// 衝突対象を自分以外に設定
-	SetCollisionMask(~kCollisionAttributeEnemy);
-
-	HitBoxInitialize();
+	HitBoxInitialize(kCollisionAttributeEnemy);
 #pragma endregion
 }
 
 void Enemy::Update() {
-	if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_1)) {
-		behaviorRequest_ = Behavior::kAttack;
-		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
-	}
-	if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_2)) {
-		behaviorRequest_ = Behavior::kAttack;
-		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kDashAttack);
-	}
-	if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_3)) {
-		behaviorRequest_ = Behavior::kAttack;
-		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
-	}
-	if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_4)) {
-		behaviorRequest_ = Behavior::kAttack;
-		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kTornadoAttack);
-	}
-	if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_5)) {
-		behaviorRequest_ = Behavior::kAttack;
-		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kMeteoAttack);
-	}
-	if (behaviorRequest_) {
-		// ふるまいを変更
-		behavior_ = behaviorRequest_.value();
-		// 各ふるまいごとの初期化を実行
+	if (IsCollision(area_, *player_->GetAABB(0))) {
+		if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_1)) {
+			behaviorRequest_ = Behavior::kAttack;
+			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
+		}
+		if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_2)) {
+			behaviorRequest_ = Behavior::kAttack;
+			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kDashAttack);
+		}
+		if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_3)) {
+			behaviorRequest_ = Behavior::kAttack;
+			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
+		}
+		if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_4)) {
+			behaviorRequest_ = Behavior::kAttack;
+			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kTornadoAttack);
+		}
+		if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_5)) {
+			behaviorRequest_ = Behavior::kAttack;
+			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kMeteoAttack);
+		}
+		if (behaviorRequest_) {
+			// ふるまいを変更
+			behavior_ = behaviorRequest_.value();
+			// 各ふるまいごとの初期化を実行
+			switch (behavior_) {
+			case Enemy::Behavior::kRoot:
+			default:
+				RootInitialize();
+				break;
+			case Enemy::Behavior::kAttack:
+				enemyAttack_->Initialize();
+				break;
+			}
+			// ふるまいリクエストをリセット
+			behaviorRequest_ = std::nullopt;
+		}
 		switch (behavior_) {
 		case Enemy::Behavior::kRoot:
 		default:
-			RootInitialize();
+			RootUpdate();
 			break;
 		case Enemy::Behavior::kAttack:
-			enemyAttack_->Initialize();
+			enemyAttack_->Update();
 			break;
 		}
-		// ふるまいリクエストをリセット
-		behaviorRequest_ = std::nullopt;
+		// 転送
+		BaseCharacter::Update();
+		HitBoxUpdate();
 	}
-	switch (behavior_) {
-	case Enemy::Behavior::kRoot:
-	default:
-		RootUpdate();
-		break;
-	case Enemy::Behavior::kAttack:
-		enemyAttack_->Update();
-		break;
-	}
-	// 転送
-	BaseCharacter::Update();
-	HitBoxUpdate();
+	
 #ifdef DEBUG
 	/*ImGui::Begin("Enemy");
 	ImGui::Text(
@@ -133,7 +136,11 @@ void Enemy::EnemyRotate(const Vector3& vector1) {
 	interRotate_ = rotate;
 }
 
-void Enemy::HitBoxInitialize() {
+void Enemy::HitBoxInitialize(uint32_t collisionMask) {
+	// 衝突属性を設定
+	SetCollisionAttribute(collisionMask);
+	// 衝突対象を自分以外に設定
+	SetCollisionMask(~collisionMask);
 	// AABB
 	min_ = { -5.0f, -5.0f, -5.0f };
 	max_ = { 5.0f, 5.0f, 5.0f };
@@ -144,8 +151,8 @@ void Enemy::HitBoxInitialize() {
 	// AABB
 	aabb_.at(0) = {
 		.center_{worldTransform_.at(0).translation_},
-		.min_{aabb_.at(0).center_ + min_},
-		.max_{aabb_.at(0).center_ + max_},
+		.min_{worldTransform_.at(0).translation_ + min_},
+		.max_{worldTransform_.at(0).translation_ + max_},
 	};
 	// OBB
 	obb_.at(0) = {
@@ -194,10 +201,6 @@ void Enemy::RootUpdate() {
 	else
 		if (std::fabs(Length(worldTransform_.at(0).translation_ - player_->GetWorldTransform().translation_)) < kDistance_) {
 			dash_Attack_ = false;
-			if (static_cast<uint32_t>(enemyHP_->GetHP()) <= enemyHP_->GetMaxHP() * (meteo_count_Max - meteo_count_) / meteo_count_Max) {
-				meteo_Attack_ = true;
-				meteo_count_++;
-			}
 			if (meteo_Attack_) {
 				behaviorRequest_ = Behavior::kAttack;
 				enemyAttack_->SetBehavior(EnemyAttack::Behavior::kMeteoAttack);
@@ -339,7 +342,7 @@ void Enemy::HitBoxUpdate() {
 	};
 }
 
-void Enemy::OnCollision(const OBB& obb, uint32_t type) {
+void Enemy::OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) {
 	OBB o = obb;
 	uint32_t i = type;
 	i;

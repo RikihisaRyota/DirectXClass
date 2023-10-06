@@ -1,7 +1,6 @@
 #pragma once
 #include <optional>
 
-#include "BaseCharacter.h"
 #include "Collider.h"
 
 #include "EnemyDash.h"
@@ -12,7 +11,7 @@
 
 class Enemy;
 class Player;
-class EnemyAttack : public BaseCharacter, public Collider {
+class EnemyAttack : public Collider {
 public:
 	// ふるまい
 	enum class Behavior {
@@ -43,10 +42,10 @@ public:
 	void HitBoxDraw(const ViewProjection& viewProjection) override;
 	bool GetAttack() { return IsAttack_; }
 private:
-	void HitBoxInitialize() override;
+	void HitBoxInitialize(uint32_t collisionMask) override;
 	void HitBoxUpdate() override;
 	// 衝突を検出したら呼び出されるコールバック関数
-	void OnCollision(const OBB& obb, uint32_t type) override;
+	void OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) override;
 
 private:
 	Enemy* enemy_;
