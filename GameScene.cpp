@@ -126,7 +126,7 @@ void GameScene::Draw() {
 	player_->Draw(viewProjection_);
 
 	//block_->HitBoxDraw(viewProjection_);
-	player_->HitBoxDraw(viewProjection_);
+	//player_->HitBoxDraw(viewProjection_);
 	//enemy_->HitBoxDraw(viewProjection_);
 	//enemyAttack_->HitBoxDraw(viewProjection_);
 	PrimitiveDrawer::GetInstance()->PrimitiveDrawer::Draw();
