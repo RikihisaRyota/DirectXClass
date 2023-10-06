@@ -59,9 +59,9 @@ void CollisionManager::CheakCollisionPair(Collider* colliderA, Collider* collide
 			// AABBで当たり判定
 			if (IsCollision(*aabbA, *aabbB)) {
 				colliderA->OnCollision(
-					*colliderB->GetOBB(b), static_cast<uint32_t>(Collider::Type::PlayerToBlock));
+					*colliderB->GetOBB(b), colliderB->GetWorldTransform(), static_cast<uint32_t>(Collider::Type::PlayerToBlock));
 				colliderB->OnCollision(
-					*colliderA->GetOBB(a) , static_cast<uint32_t>(Collider::Type::PlayerToBlock));
+					*colliderA->GetOBB(a) , colliderA->GetWorldTransform(), static_cast<uint32_t>(Collider::Type::PlayerToBlock));
 				OBB* obbA = colliderA->GetOBB(a);
 				OBB* obbB = colliderB->GetOBB(b);
 
@@ -71,32 +71,32 @@ void CollisionManager::CheakCollisionPair(Collider* colliderA, Collider* collide
 					if ((collisionAttributeA & kCollisionAttributePlayer) &&
 						(collisionAttributeB & kCollisionAttributeEnemyAttack)) {
 						colliderA->OnCollision(
-							*obbB, static_cast<uint32_t>(Collider::Type::PlayerToEnemyAttack));
+							*obbB, colliderB->GetWorldTransform(), static_cast<uint32_t>(Collider::Type::PlayerToEnemyAttack));
 						colliderB->OnCollision(
-							*obbA, static_cast<uint32_t>(Collider::Type::PlayerToEnemyAttack));
+							*obbA, colliderA->GetWorldTransform(), static_cast<uint32_t>(Collider::Type::PlayerToEnemyAttack));
 					}
 					// 敵とプレイヤーの攻撃
 					else if (
 						(collisionAttributeA & kCollisionAttributeEnemy) &&
 						(collisionAttributeB & kCollisionAttributePlayerAttack)) {
 						colliderA->OnCollision(
-							*obbB, static_cast<uint32_t>(Collider::Type::EnemyToPlayerAttack));
+							*obbB, colliderB->GetWorldTransform(), static_cast<uint32_t>(Collider::Type::EnemyToPlayerAttack));
 						colliderB->OnCollision(
-							*obbA, static_cast<uint32_t>(Collider::Type::EnemyToPlayerAttack));
+							*obbA, colliderA->GetWorldTransform(), static_cast<uint32_t>(Collider::Type::EnemyToPlayerAttack));
 					}
 					else if ((collisionAttributeA & kCollisionAttributePlayer) &&
 						(collisionAttributeB & kCollisionAttributeBlock)) {
 						colliderA->OnCollision(
-							*obbB, static_cast<uint32_t>(Collider::Type::PlayerToBlock));
+							*obbB, colliderB->GetWorldTransform(), static_cast<uint32_t>(Collider::Type::PlayerToBlock));
 						colliderB->OnCollision(
-							*obbA, static_cast<uint32_t>(Collider::Type::PlayerToBlock));
+							*obbA, colliderA->GetWorldTransform(), static_cast<uint32_t>(Collider::Type::PlayerToBlock));
 					}
 					else {
 						// プレイヤーと敵の衝突
 						colliderA->OnCollision(
-							*obbB, static_cast<uint32_t>(Collider::Type::PlayerToEnemy));
+							*obbB, colliderB->GetWorldTransform(), static_cast<uint32_t>(Collider::Type::PlayerToEnemy));
 						colliderB->OnCollision(
-							*obbA, static_cast<uint32_t>(Collider::Type::PlayerToEnemy));
+							*obbA, colliderA->GetWorldTransform(), static_cast<uint32_t>(Collider::Type::PlayerToEnemy));
 					}
 				}
 			}

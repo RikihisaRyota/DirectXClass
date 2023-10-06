@@ -2,7 +2,9 @@
 #include <cstdint>
 #include <vector>
 
+
 #include "AABB.h"
+#include "BaseCharacter.h"
 #include "Sphere.h"
 #include "OBB.h"
 #include "ViewProjection.h"
@@ -22,7 +24,7 @@ struct Vector3;
 /// <summary>
 /// 衝突判定オブジェクト
 /// </summary>
-class Collider {
+class Collider : public BaseCharacter {
 public:
 	enum class Type {
 		PlayerToEnemy,
@@ -32,7 +34,7 @@ public:
 	};
 
 	// 衝突時に呼ばれる関数
-	virtual void OnCollision(const OBB& obb , uint32_t type) = 0;
+	virtual void OnCollision(const OBB& obb ,const WorldTransform& worldTransform, uint32_t type) = 0;
 
 	// 衝突属性の取得
 	virtual uint32_t GetCollisionAttribute() { return collisionAttribute_; }

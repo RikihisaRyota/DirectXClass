@@ -61,7 +61,9 @@ void Player::Update() {
 		BehaviorDashUpdate();
 		break;
 	}
-	//ChackTranslation();
+	if (worldTransform_.at(0).translation_.y <= -50.0f) {
+		worldTransform_.at(0).translation_ = { 0.0f,10.0f,0.0f };
+	}
 	HitBoxUpdate();
 
 	// 転送
@@ -161,7 +163,7 @@ void Player::GetGlobalVariables() {
 	BaseCharacter::Update();
 }
 
-void Player::OnCollision(const OBB& obb, uint32_t type) {
+void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) {
 	switch (type) {
 	case static_cast<uint32_t>(Collider::Type::PlayerToEnemy):
 	{
@@ -242,7 +244,7 @@ void Player::OnCollision(const OBB& obb, uint32_t type) {
 			}
 		}
 		worldTransform_.at(0).translation_ = obb_.at(0).center_;
-		
+		//worldTransform_.at(0).parent_ = &worldTransform;
 		// 転送
 		BaseCharacter::Update();
 		HitBoxUpdate();

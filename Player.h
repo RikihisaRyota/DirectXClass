@@ -11,7 +11,7 @@
 #include "ViewProjection.h"
 #include "input.h"
 
-class Player : public BaseCharacter, public Collider {
+class Player : public Collider {
 public:
 	// 体のパーツ
 	enum class Parts {
@@ -145,7 +145,7 @@ private: // メンバ関数
 	void SetGlobalVariables();
 	void GetGlobalVariables();
 	// 衝突を検出したら呼び出されるコールバック関数
-	void OnCollision(const OBB& obb, uint32_t type) override;
+	void OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) override;
 
 public: // ゲッター,セッター
 	/// <summary>
@@ -183,7 +183,7 @@ private: // 定数系
 	// 振り向き速度
 	const float kTurn = 0.4f;
 	// 重力
-	const float kGravity = 0.001f;
+	const float kGravity = 0.01f;
 	// ジャンプ
 	const float kJumpPower = 0.2f;
 	// ダッシュの時間<frame>
