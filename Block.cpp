@@ -33,14 +33,13 @@ void Block::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	worldTransform_.at(5).scale_ = { scale ,scale ,scale };
 
 	BaseCharacter::Update();
-
 	HitBoxInitialize(kCollisionAttributeBlock);
+	angle_ = 0.0f;
 }
 
 void Block::Update() {
-	ImGui::Begin("Block");
-	ImGui::SliderFloat3("pos", &worldTransform_.at(0).translation_.x, -10.0f, 10.0f);
-	ImGui::End();
+	angle_ += 0.01f;
+	worldTransform_.at(1).translation_.z = std::cos(angle_) * 8.0f;
 	BaseCharacter::Update();
 	HitBoxUpdate();
 }

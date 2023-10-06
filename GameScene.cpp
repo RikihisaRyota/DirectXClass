@@ -23,6 +23,7 @@ void GameScene::Initialize() {
 	enemy_ = std::make_unique<Enemy>();
 	enemyAttack_ = std::make_unique<EnemyAttack>();
 	player_ = std::make_unique<Player>();
+	skydome_ = std::make_unique<Skydome>();
 #pragma endregion
 	// プレイヤー
 	std::vector<std::unique_ptr<Model>> playerModel(static_cast<int>(Player::Parts::COUNT));
@@ -69,6 +70,13 @@ void GameScene::Initialize() {
 	// 敵攻撃初期化
 	enemyAttack_->SetPlayerEnemy(player_.get(), enemy_.get());
 	enemyAttack_->Initialize(std::move(enemyAttackModel));
+
+	// 天球モデル
+	std::unique_ptr<Model> skydomeModel;
+	// 天球のモデル
+	skydomeModel.reset(Model::Create("sky", true, false));
+	// 天球初期化
+	skydome_->Initialize(std::move(skydomeModel));
 
 	//フォローカメラ
 	followCamera_.Intialize();
@@ -120,6 +128,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
+	skydome_->Draw(viewProjection_);
 	block_->Draw(viewProjection_);
 	enemy_->Draw(viewProjection_);
 	enemyAttack_->Draw(viewProjection_);

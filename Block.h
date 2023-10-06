@@ -17,5 +17,6 @@ private:
 	void HitBoxInitialize(uint32_t collisionMask) override;
 	void HitBoxUpdate() override;
 	Player* player_;
+	float angle_;
 };
 

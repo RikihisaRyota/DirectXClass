@@ -136,6 +136,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="PeraGraphicsPipeline.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PrimitiveDrawer.cpp" />
+    <ClCompile Include="Skydome.cpp" />
     <ClCompile Include="SphereRenderer.cpp" />
     <ClCompile Include="PlaneRenderer.cpp" />
     <ClCompile Include="Sprite.cpp" />
@@ -202,6 +203,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Player.h" />
     <ClInclude Include="PrimitiveDrawer.h" />
     <ClInclude Include="SafeDelete.h" />
+    <ClInclude Include="Skydome.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="SphereRenderer.h" />
     <ClInclude Include="PlaneRenderer.h" />

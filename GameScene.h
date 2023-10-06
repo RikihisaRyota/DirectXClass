@@ -20,6 +20,7 @@
 #include "Enemy.h"
 #include "EnemyAttack.h"
 #include "Player.h"
+#include "Skydome.h"
 
 class DirectXCommon;
 /// <summary>
@@ -72,5 +73,5 @@ private: // メンバ変数
 	std::unique_ptr<Enemy> enemy_;
 	std::unique_ptr<EnemyAttack> enemyAttack_;
 	std::unique_ptr<Player> player_;
-
+	std::unique_ptr<Skydome> skydome_;
 };
