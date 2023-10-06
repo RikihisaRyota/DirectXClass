@@ -17,7 +17,9 @@ void CollisionManager::CheckAllCollisions(Player* player, Block* block, Enemy* e
 	colliders_.emplace_back(block);
 	// 敵
 	colliders_.emplace_back(enemy);
-	colliders_.emplace_back(enemyAttack);
+	if (enemy->GetBehavior() == Enemy::Behavior::kAttack) {
+		colliders_.emplace_back(enemyAttack);
+	}
 	// リスト内総当たり
 	std::list<Collider*>::iterator itrA = colliders_.begin();
 	for (; itrA != colliders_.end(); ++itrA) {

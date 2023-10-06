@@ -194,17 +194,17 @@ void EnemyAttack::HitBoxInitialize(uint32_t collisionMask) {
 
 	for (size_t i = 0; i < size; i++) {
 		// AABB
-		min_ = { -5.0f, -0.9f, -5.0f };
-		max_ = { 5.0f, 1.0f, 5.0f };
+		min_ = { -2.0f, -1.0f, -2.0f };
+		max_ = { 2.0f, 1.0f, 2.0f };
 		// OBB
-		size_ = { 4.0f, 1.0f, 4.0f };
+		size_ = { 1.0f, 1.0f, 1.0f };
 		// Sphere
 		radius_ = 1.2f;
 		// AABB
 		aabb_.at(i) = {
 			.center_{worldTransform_.at(i).translation_},
-			.min_{worldTransform_.at(i).scale_+min_},
-			.max_{worldTransform_.at(i).scale_+max_},
+			.min_{worldTransform_.at(i).scale_ + min_},
+			.max_{worldTransform_.at(i).scale_ + max_},
 		};
 		// OBB
 		obb_.at(i) = {
@@ -271,51 +271,54 @@ void EnemyAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransfo
 	OBB obb1 = obb;
 	uint32_t t = type;
 	t;
-	switch (behavior_) {
-	case EnemyAttack::Behavior::kRoot:
-	default:
-		break;
-	case EnemyAttack::Behavior::kPressAttack:
-		if (press_->GetAttack()) {
-			IsAttack_ = true;
-			for (size_t i = 0; i < worldTransform_.size(); i++) {
-				if (IsCollision(
-					OBB(*player_->GetOBB(0)), Sphere(GetOBB(i)->center_, GetOBB(i)->size_.z))) {
-					player_->SetTranslation({ 0.0f,0.0f,0.0f });
-					press_->SetHit(true);
+	if (type == static_cast<uint32_t>(Collider::Type::PlayerToEnemyAttack)) {
+		switch (behavior_) {
+		case EnemyAttack::Behavior::kRoot:
+		default:
+			break;
+		case EnemyAttack::Behavior::kPressAttack:
+			if (press_->GetAttack()) {
+				IsAttack_ = true;
+				for (size_t i = 0; i < worldTransform_.size(); i++) {
+					if (IsCollision(
+						OBB(*player_->GetOBB(0)), Sphere(GetOBB(i)->center_, GetOBB(i)->size_.z))) {
+						player_->SetTranslation({ 0.0f,0.0f,0.0f });
+						press_->SetHit(true);
+					}
 				}
 			}
-		}
-		break;
-	case EnemyAttack::Behavior::kDashAttack:
-		if (dash_->GetAttack()) {
-			for (size_t i = 0; i < worldTransform_.size(); i++) {
-				if (IsCollision(*player_->GetOBB(0), *enemy_->GetOBB(i))) {
-					player_->SetTranslation({0.0f,0.0f,0.0f});
-					dash_->SetHit(true);
+			break;
+		case EnemyAttack::Behavior::kDashAttack:
+			if (dash_->GetAttack()) {
+				for (size_t i = 0; i < worldTransform_.size(); i++) {
+					if (IsCollision(*player_->GetOBB(0), *enemy_->GetOBB(i))) {
+						player_->SetTranslation({ 0.0f,0.0f,0.0f });
+						dash_->SetHit(true);
+					}
 				}
 			}
+			break;
+		case EnemyAttack::Behavior::kPunchAttack:
+			if (punch_->GetAttack()) {
+				IsAttack_ = true;
+				player_->SetTranslation({ 0.0f,0.0f,0.0f });
+				punch_->SetHit(true);
+			}
+			break;
+		case EnemyAttack::Behavior::kTornadoAttack:
+			if (tornade_->GetAttack()) {
+				player_->SetTranslation({ 0.0f,0.0f,0.0f });
+				IsAttack_ = true;
+			}
+			break;
+		case EnemyAttack::Behavior::kMeteoAttack:
+			if (meteo_->GetAttack()) {
+				player_->SetTranslation({ 0.0f,0.0f,0.0f });
+				IsAttack_ = true;
+				meteo_->SetHit(true);
+			}
+			break;
 		}
-		break;
-	case EnemyAttack::Behavior::kPunchAttack:
-		if (punch_->GetAttack()) {
-			IsAttack_ = true;
-			player_->SetTranslation({ 0.0f,0.0f,0.0f });
-			punch_->SetHit(true);
-		}
-		break;
-	case EnemyAttack::Behavior::kTornadoAttack:
-		if (tornade_->GetAttack()) {
-			player_->SetTranslation({ 0.0f,0.0f,0.0f });
-			IsAttack_ = true;
-		}
-		break;
-	case EnemyAttack::Behavior::kMeteoAttack:
-		if (meteo_->GetAttack()) {
-			player_->SetTranslation({ 0.0f,0.0f,0.0f });
-			IsAttack_ = true;
-			meteo_->SetHit(true);
-		}
-		break;
 	}
+
 }

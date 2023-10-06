@@ -167,7 +167,7 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 	switch (type) {
 	case static_cast<uint32_t>(Collider::Type::PlayerToEnemy):
 	{
-		// OBB同士が衝突していると仮定して、重なり領域を計算する
+		// OBB同士が衝突していると仮定して、重なり領域を計算する-0.399999619
 		// ここでは、OBB同士の各軸方向での重なりの幅を計算し、最小値を取得する
 		Vector3 distance = obb.center_ - obb_.at(0).center_;
 
@@ -178,29 +178,32 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 
 		if (overlapX < overlapY && overlapX < overlapZ) {
 			if (distance.x < 0.0f) {
-				obb_.at(0).center_ += Vector3{ overlapX, 0, 0 };
+				obb_.at(0).center_ += Vector3{ static_cast<float>(overlapX + 0.1f), 0, 0 };
 			}
 			else {
-				obb_.at(0).center_ += Vector3{ -overlapX, 0, 0 };
+				obb_.at(0).center_ += Vector3{ static_cast<float>(-overlapX - 0.1f), 0, 0 };
 			}
 		}
 		else if (overlapY < overlapX && overlapY < overlapZ) {
 			if (distance.y < 0.0f) {
-				obb_.at(0).center_ += Vector3{ 0, overlapY, 0 };
+				obb_.at(0).center_ += Vector3{ 0,static_cast<float>(overlapY) , 0 };
 			}
 			else {
-				obb_.at(0).center_ += Vector3{ 0, -overlapY, 0 };
+				obb_.at(0).center_ += Vector3{ 0, static_cast<float>(-overlapY), 0 };
 			}
+			acceleration_.y = 0.0f;
+			isJump = false;
 		}
 		else {
 			if (distance.z < 0.0f) {
-				obb_.at(0).center_ += Vector3{ 0, 0, overlapZ };
+				obb_.at(0).center_ += Vector3{ 0, 0, static_cast<float>(overlapZ + 0.1f) };
 			}
 			else {
-				obb_.at(0).center_ += Vector3{ 0, 0, -overlapZ };
+				obb_.at(0).center_ += Vector3{ 0, 0, static_cast<float>(-overlapZ - 0.1f) };
 			}
 		}
 		worldTransform_.at(0).translation_ = obb_.at(0).center_;
+		//worldTransform_.at(0).parent_ = &worldTransform;
 		// 転送
 		BaseCharacter::Update();
 		HitBoxUpdate();

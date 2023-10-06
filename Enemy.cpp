@@ -17,8 +17,8 @@ void Enemy::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	vector_ = Normalize(worldTransform_.at(0).translation_);
 	area_ = {
 		.center_{30.0f,5.0f,5.0f},
-		.min_{30.0f -5.0f,-5.0f,5.0f-5.0f},
-		.max_{30.0f + 5.0f,5.0f,5.0f+5.0f},
+		.min_{30.0f - 5.0f,-5.0f,5.0f - 5.0f},
+		.max_{30.0f + 5.0f,5.0f,5.0f + 5.0f},
 	};
 	// AABBのサイズ
 	AABB aabb;
@@ -48,7 +48,7 @@ void Enemy::Initialize(std::vector<std::unique_ptr<Model>> model) {
 }
 
 void Enemy::Update() {
-	if (IsCollision(area_, *player_->GetAABB(0)) ||
+	if (IsCollision(area_, *player_->GetAABB()) ||
 		behavior_ == Enemy::Behavior::kAttack) {
 		if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_1)) {
 			behaviorRequest_ = Behavior::kAttack;
@@ -99,7 +99,8 @@ void Enemy::Update() {
 		BaseCharacter::Update();
 		HitBoxUpdate();
 	}
-	
+
+
 #ifdef DEBUG
 	/*ImGui::Begin("Enemy");
 	ImGui::Text(
@@ -187,103 +188,109 @@ void Enemy::RootInitialize() {
 }
 
 void Enemy::RootUpdate() {
-	if (!dash_Attack_ &&
-		std::fabs(Length(worldTransform_.at(0).translation_ - player_->GetWorldTransform().translation_)) < kDash_Distance_ &&
-		std::fabs(Length(worldTransform_.at(0).translation_ - player_->GetWorldTransform().translation_)) > kDistance_) {
-		RandomNumberGenerator rnd;
-		int type = rnd.NextUIntRange(1, 500);
-		// 1/5の確率で三回攻撃
-		if (type % 5 == 0) {
+	//if (!dash_Attack_ &&
+	//	std::fabs(Length(worldTransform_.at(0).translation_ - player_->GetWorldTransform().translation_)) < kDash_Distance_ &&
+	//	std::fabs(Length(worldTransform_.at(0).translation_ - player_->GetWorldTransform().translation_)) > kDistance_) {
+	//	RandomNumberGenerator rnd;
+	//	int type = rnd.NextUIntRange(1, 500);
+	//	// 1/5の確率で三回攻撃
+	//	if (type % 5 == 0) {
+	//		behaviorRequest_ = Behavior::kAttack;
+	//		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kDashAttack);
+	//	}
+	//	dash_Attack_ = true;
+	//}
+	//else
+	if (std::fabs(Length(worldTransform_.at(0).translation_ - player_->GetWorldTransform().translation_)) < kDistance_) {
+		dash_Attack_ = false;
+		if (meteo_Attack_) {
 			behaviorRequest_ = Behavior::kAttack;
-			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kDashAttack);
+			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kMeteoAttack);
+			meteo_Attack_ = false;
 		}
-		dash_Attack_ = true;
-	}
-	else
-		if (std::fabs(Length(worldTransform_.at(0).translation_ - player_->GetWorldTransform().translation_)) < kDistance_) {
-			dash_Attack_ = false;
-			if (meteo_Attack_) {
+		else if (triple_Attack_) {
+			triple_count_++;
+			switch (triple_Attack_State_) {
+			case EnemyAttack::Behavior::kPressAttack:
 				behaviorRequest_ = Behavior::kAttack;
-				enemyAttack_->SetBehavior(EnemyAttack::Behavior::kMeteoAttack);
-				meteo_Attack_ = false;
+				enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
+				break;
+			case EnemyAttack::Behavior::kPunchAttack:
+				behaviorRequest_ = Behavior::kAttack;
+				enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
+				break;
+			case EnemyAttack::Behavior::kTornadoAttack:
+				behaviorRequest_ = Behavior::kAttack;
+				enemyAttack_->SetBehavior(EnemyAttack::Behavior::kTornadoAttack);
+				break;
 			}
-			else if (triple_Attack_) {
-				triple_count_++;
-				switch (triple_Attack_State_) {
-				case EnemyAttack::Behavior::kPressAttack:
-					behaviorRequest_ = Behavior::kAttack;
-					enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
-					break;
-				case EnemyAttack::Behavior::kPunchAttack:
+			if (triple_count_ >= triple_count_Max) {
+				triple_count_ = 0;
+				triple_Attack_ = false;
+				Isbreak_ = true;
+				break_count_ = break_count_Max;
+			}
+		}
+		else {
+			if (!Isbreak_) {
+				RandomNumberGenerator rnd;
+				int type = rnd.NextUIntRange(1, 500);
+				if (type % 3 == 1) {
 					behaviorRequest_ = Behavior::kAttack;
 					enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
-					break;
-				case EnemyAttack::Behavior::kTornadoAttack:
-					behaviorRequest_ = Behavior::kAttack;
-					enemyAttack_->SetBehavior(EnemyAttack::Behavior::kTornadoAttack);
-					break;
-				}
-				if (triple_count_ >= triple_count_Max) {
-					triple_count_ = 0;
-					triple_Attack_ = false;
 					Isbreak_ = true;
 					break_count_ = break_count_Max;
 				}
+				//// 1/5の確率で三回攻撃
+				//if (type % 4 == 0) {
+				//	triple_Attack_ = true;
+				//	int typ = rnd.NextUIntRange(1, 500);
+				//	if (typ % 3 == 2) {
+				//		triple_Attack_State_ = EnemyAttack::Behavior::kPressAttack;
+				//	}
+				//	else if (typ % 3 == 1) {
+				//		triple_Attack_State_ = EnemyAttack::Behavior::kPunchAttack;
+				//	}
+				//	else {
+				//		triple_Attack_State_ = EnemyAttack::Behavior::kTornadoAttack;
+				//	}
+				//}
+				//else {
+				//	int typ = rnd.NextUIntRange(1, 500);
+				//	if (typ % 3 == 2) {
+				//		behaviorRequest_ = Behavior::kAttack;
+				//		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
+				//	}
+				//	else if (typ % 3 == 1) {
+				//		behaviorRequest_ = Behavior::kAttack;
+				//		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
+				//	}
+				//	else {
+				//		behaviorRequest_ = Behavior::kAttack;
+				//		enemyAttack_->SetBehavior(EnemyAttack::Behavior::kTornadoAttack);
+				//	}
+				//	Isbreak_ = true;
+				//	break_count_ = break_count_Max;
+				//}
 			}
 			else {
-				if (!Isbreak_) {
-					RandomNumberGenerator rnd;
-					int type = rnd.NextUIntRange(1, 500);
-					// 1/5の確率で三回攻撃
-					if (type % 4 == 0) {
-						triple_Attack_ = true;
-						int typ = rnd.NextUIntRange(1, 500);
-						if (typ % 3 == 2) {
-							triple_Attack_State_ = EnemyAttack::Behavior::kPressAttack;
-						}
-						else if (typ % 3 == 1) {
-							triple_Attack_State_ = EnemyAttack::Behavior::kPunchAttack;
-						}
-						else {
-							triple_Attack_State_ = EnemyAttack::Behavior::kTornadoAttack;
-						}
-					}
-					else {
-						int typ = rnd.NextUIntRange(1, 500);
-						if (typ % 3 == 2) {
-							behaviorRequest_ = Behavior::kAttack;
-							enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
-						}
-						else if (typ % 3 == 1) {
-							behaviorRequest_ = Behavior::kAttack;
-							enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
-						}
-						else {
-							behaviorRequest_ = Behavior::kAttack;
-							enemyAttack_->SetBehavior(EnemyAttack::Behavior::kTornadoAttack);
-						}
-						Isbreak_ = true;
-						break_count_ = break_count_Max;
-					}
+				EnemyRotate(player_->GetWorldTransform().translation_ - worldTransform_.at(0).translation_);
+				break_count_--;
+				if (break_count_ <= 0) {
+					Isbreak_ = false;
+					break_count_ = break_count_Max;
 				}
-				else {
-					EnemyRotate(player_->GetWorldTransform().translation_ - worldTransform_.at(0).translation_);
-					break_count_--;
-					if (break_count_ <= 0) {
-						Isbreak_ = false;
-						break_count_ = break_count_Max;
-					}
-				}
-
 			}
 
 		}
-		else {
-			// 移動
-			Move();
-			// 動き
-			Motion();
-		}
+
+	}
+	else {
+		// 移動
+		Move();
+		// 動き
+		Motion();
+	}
 }
 bool move = false;
 void Enemy::Move() {
@@ -346,7 +353,7 @@ void Enemy::HitBoxUpdate() {
 void Enemy::OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) {
 	if (type == static_cast<uint32_t>(Collider::Type::EnemyToBlock)) {
 		// X軸
-		if (worldTransform_.at(0).translation_.x + worldTransform_.at(0).scale_.x * 0.5f >= obb.center_.x+obb.size_.x) {
+		if (worldTransform_.at(0).translation_.x + worldTransform_.at(0).scale_.x * 0.5f >= obb.center_.x + obb.size_.x) {
 			// 敵の位置を修正してはみ出ないようにする
 			float overlapX = (worldTransform_.at(0).translation_.x + worldTransform_.at(0).scale_.x * 0.5f) - (obb.center_.x + obb.size_.x);
 			worldTransform_.at(0).translation_.x += overlapX;

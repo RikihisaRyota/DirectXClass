@@ -42,7 +42,7 @@ void GameScene::Initialize() {
 	blockModel[0].reset(Model::Create("block", true));
 	// ブロック初期化
 	block_->Initialize(std::move(blockModel));
-
+	block_->SetPlayer(player_.get());
 	// 敵
 	// 敵モデル
 	std::vector<std::unique_ptr<Model>> enemyModel(static_cast<int>(Enemy::Parts::COUNT));
@@ -125,8 +125,10 @@ void GameScene::Draw() {
 	enemyAttack_->Draw(viewProjection_);
 	player_->Draw(viewProjection_);
 
-	block_->HitBoxDraw(viewProjection_);
+	//block_->HitBoxDraw(viewProjection_);
 	player_->HitBoxDraw(viewProjection_);
+	//enemy_->HitBoxDraw(viewProjection_);
+	//enemyAttack_->HitBoxDraw(viewProjection_);
 	PrimitiveDrawer::GetInstance()->PrimitiveDrawer::Draw();
 	// 3Dオブジェクト描画後処理
 	PlaneRenderer::PostDraw();

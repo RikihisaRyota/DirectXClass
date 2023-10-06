@@ -1,8 +1,10 @@
 #include "Block.h"
 
+#include "Collision.h"
 #include "Draw.h"
 #include "MyMath.h"
 #include "ImGuiManager.h"
+#include "Player.h"
 
 void Block::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	BaseCharacter::Initialize(std::move(model));
@@ -50,9 +52,11 @@ void Block::Draw(const ViewProjection& viewProjection) {
 }
 
 void Block::OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) {
-	OBB o = obb;
-	uint32_t i = type;
-
+	if (type == static_cast<uint32_t>(Collider::Type::PlayerToBlock)) {
+		if (IsCollision(obb_.at(5), obb)) {
+			player_->SetTranslation({ 0.0f,0.0f,0.0f });
+		}
+	}
 }
 
 void Block::HitBoxInitialize(uint32_t collisionMask) {
