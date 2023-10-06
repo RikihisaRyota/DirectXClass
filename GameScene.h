@@ -5,6 +5,7 @@
 #include "Audio.h"
 #include "Cube.h"
 #include "DebugCamera.h"
+#include "FollowCamera.h"
 #include "Input.h"
 #include "PrimitiveDrawer.h"
 #include "Model.h"
@@ -62,7 +63,8 @@ private: // メンバ変数
 	/// ゲーム用
 	/// </summary>
 	ViewProjection viewProjection_;
-	
+	FollowCamera followCamera_;
+
 	std::unique_ptr<Block> block_;
 	std::unique_ptr<CollisionManager> collisionManager_;
 	std::unique_ptr<Player> player_;

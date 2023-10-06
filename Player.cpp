@@ -244,7 +244,7 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 			}
 		}
 		worldTransform_.at(0).translation_ = obb_.at(0).center_;
-		//worldTransform_.at(0).parent_ = &worldTransform;
+		worldTransform_.at(0).parent_ = &worldTransform;
 		// 転送
 		BaseCharacter::Update();
 		HitBoxUpdate();
@@ -362,9 +362,9 @@ void Player::GamePadInput() {
 	}*/
 	// ダッシュ開始
 	if ((!IsDash_) &&
-		(Input::GetInstance()->TriggerKey(DIK_LSHIFT) /*||
+		(Input::GetInstance()->TriggerKey(DIK_LSHIFT) ||
 			(Input::GetInstance()->GetJoystickState(0, joyState) &&
-				(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_X))*/)) {
+				(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_X)))) {
 		behaviorRequest_ = Behavior::kDash;
 	}
 	// ジャンプ
@@ -377,26 +377,27 @@ void Player::Move() {
 	// 移動量
 	vector_ = { 0.0f, 0.0f, 0.0f };
 #pragma region ゲームパット
-	//// ゲームパットの状態を得る変数
-	//XINPUT_STATE joyState{};
-	//// ゲームパットの状況取得
-	//// 入力がなかったら何もしない
-	//if (Input::GetInstance()->GetJoystickState(0, joyState)) {
-	//	const float kMargin = 0.7f;
-	//	// 移動量
-	//	Vector3 move = {
-	//		static_cast<float>(joyState.Gamepad.sThumbLX),
-	//		0.0f,
-	//		static_cast<float>(joyState.Gamepad.sThumbLY),
-	//	};
-	//	if (move.Length() > kMargin) {
-	//		vector_ = {
-	//			static_cast<float>(joyState.Gamepad.sThumbLX),
-	//			0.0f,
-	//			static_cast<float>(joyState.Gamepad.sThumbLY),
-	//		};
-	//	}
-	//}
+	// ゲームパットの状態を得る変数
+	XINPUT_STATE joyState{};
+	// ゲームパットの状況取得
+	// 入力がなかったら何もしない
+	if (Input::GetInstance()->IsControllerConnected()) {
+		Input::GetInstance()->GetJoystickState(0, joyState);
+		const float kMargin = 0.7f;
+		// 移動量
+		Vector3 move = {
+			static_cast<float>(joyState.Gamepad.sThumbLX),
+			0.0f,
+			static_cast<float>(joyState.Gamepad.sThumbLY),
+		};
+		if (move.Length() > kMargin) {
+			vector_ = {
+				static_cast<float>(joyState.Gamepad.sThumbLX),
+				0.0f,
+				static_cast<float>(joyState.Gamepad.sThumbLY),
+			};
+		}
+	}
 #pragma endregion
 #pragma region キーボード
 	if (Input::GetInstance()->PushKey(DIK_W)) {
@@ -449,7 +450,7 @@ void Player::Gravity() {
 	}
 	velocity_+= acceleration_;
 	worldTransform_.at(0).translation_ += velocity_;
-
+	worldTransform_.at(0).parent_ = nullptr;
 	if (std::fabs(velocity_.x) <= 0.001 && std::fabs(velocity_.z) <= 0.001) {
 		velocity_.x = 0.0f;
 		velocity_.z = 0.0f;

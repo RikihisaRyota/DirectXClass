@@ -40,13 +40,22 @@ void GameScene::Initialize() {
 	blockModel[0].reset(Model::Create("block", true));
 	// ブロック初期化
 	block_->Initialize(std::move(blockModel));
+
+	//フォローカメラ
+	followCamera_.Intialize();
+	followCamera_.SetTarget(&player_.get()->GetWorldTransform());
 }
 
 void GameScene::Update() {
 	// デバックカメラ
 	debugCamera_->Update(&viewProjection_);
+	// フォローカメラ	
+	/*followCamera_.Update();
+	viewProjection_ = *followCamera_.GetViewProjection();*/
 	// プレイヤー
 	player_->Update();
+	// ブロック
+	block_->Update();
 	// コリジョンマネージャー
 	collisionManager_->Update(player_.get(),block_.get());
 }

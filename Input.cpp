@@ -217,6 +217,17 @@ bool Input::GetJoystickStatePrevious(int32_t stickNo, XINPUT_STATE& out) const {
 	}
 	return false;
 }
+bool Input::IsControllerConnected() const {
+	for (DWORD i = 0; i < XUSER_MAX_COUNT; ++i) {
+		XINPUT_STATE state;
+		if (XInputGetState(i, &state) == ERROR_SUCCESS) {
+			// コントローラーが接続されている
+			return true;
+		}
+	}
+	// どのコントローラーも接続されていない
+	return false;
+}
 //BOOL CALLBACK Input::EnumJoystickObjectsCallback(const DIDEVICEOBJECTINSTANCE* instance, VOID* context) {
 //	IDirectInputDevice8* device = static_cast<IDirectInputDevice8*>(context);
 //

@@ -72,7 +72,8 @@ void FollowCamera::GamePad() {
 	// ゲームパットの状態を得る変数
 	XINPUT_STATE joyState{};
 	// ゲームパットの状況取得
-	if (Input::GetInstance()->GetJoystickState(0, joyState)) {
+	if (Input::GetInstance()->IsControllerConnected()) {
+		Input::GetInstance()->GetJoystickState(0, joyState);
 		// カメラの角度から回転行列を計算する
 		// X軸
 		viewProjection_.rotation_.x -=

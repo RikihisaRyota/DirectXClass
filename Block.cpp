@@ -39,6 +39,8 @@ void Block::Update() {
 	ImGui::Begin("Block");
 	ImGui::SliderFloat3("pos", &worldTransform_.at(0).translation_.x, -10.0f, 10.0f);
 	ImGui::End();
+	BaseCharacter::Update();
+	HitBoxUpdate();
 }
 
 void Block::Draw(const ViewProjection& viewProjection) {
@@ -50,6 +52,7 @@ void Block::Draw(const ViewProjection& viewProjection) {
 void Block::OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) {
 	OBB o = obb;
 	uint32_t i = type;
+
 }
 
 void Block::HitBoxInitialize(uint32_t collisionMask) {
@@ -94,7 +97,37 @@ void Block::HitBoxInitialize(uint32_t collisionMask) {
 }
 
 void Block::HitBoxUpdate() {
-
+	for (size_t i = 0; i < worldTransform_.size(); i++) {
+		// AABB
+		min_ = { -worldTransform_.at(i).scale_ };
+		max_ = { worldTransform_.at(i).scale_ };
+		// OBB
+		size_ = worldTransform_.at(i).scale_;
+		// Sphere
+		radius_ = 1.2f;
+		// AABB
+		aabb_.at(i) = {
+			.center_{worldTransform_.at(i).translation_},
+			.min_{worldTransform_.at(i).translation_ + min_},
+			.max_{worldTransform_.at(i).translation_ + max_},
+		};
+		// OBB
+		obb_.at(i) = {
+			.center_{ worldTransform_.at(i).translation_},
+			.orientations_{
+					 {1.0f, 0.0f, 0.0f},
+					 {0.0f, 1.0f, 0.0f},
+					 {0.0f, 0.0f, 1.0f},
+					 },
+			.size_{size_}
+		};
+		obb_.at(i) = OBBSetRotate(obb_.at(i), worldTransform_.at(i).rotation_);
+		// Sphere
+		sphere_ = {
+			.center_{worldTransform_.at(i).translation_},
+			.radius_{size_.x},
+		};
+	}
 }
 
 void Block::HitBoxDraw(const ViewProjection& viewProjection) {
