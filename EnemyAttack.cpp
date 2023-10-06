@@ -237,12 +237,12 @@ void EnemyAttack::HitBoxUpdate() {
 		AABB aabb;
 		aabb = {
 			.center_{worldTransform_.at(i).translation_},
-			.min_{aabb.center_ - size},
-			.max_{aabb.center_ + size},
+			.min_{worldTransform_.at(i).translation_ - size},
+			.max_{worldTransform_.at(i).translation_ + size},
 		};
 		aabb.center_ = worldTransform_.at(i).translation_;
-		aabb.min_ = { aabb.center_ - size };
-		aabb.max_ = { aabb.center_ + size };
+		aabb.min_ = { worldTransform_.at(i).translation_ - size };
+		aabb.max_ = { worldTransform_.at(i).translation_ + size };
 		aabb_.emplace_back(aabb);
 		// OBB
 		OBB obb;
