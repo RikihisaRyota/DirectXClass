@@ -244,7 +244,7 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 			}
 		}
 		worldTransform_.at(0).translation_ = obb_.at(0).center_;
-		worldTransform_.at(0).parent_ = &worldTransform;
+		//worldTransform_.at(0).parent_ = &worldTransform;
 		// 転送
 		BaseCharacter::Update();
 		HitBoxUpdate();
