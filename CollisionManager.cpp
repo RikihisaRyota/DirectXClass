@@ -5,16 +5,19 @@
 
 #include "ImGuiManager.h"
 
-void CollisionManager::Update(Player* player, Block* block) {
+void CollisionManager::Update(Player* player, Block* block, Enemy* enemy, EnemyAttack* enemyAttack) {
 	colliders_.clear();
-	CheckAllCollisions(player, block);
+	CheckAllCollisions(player, block,enemy,enemyAttack);
 }
 
-void CollisionManager::CheckAllCollisions(Player* player, Block* block) {
+void CollisionManager::CheckAllCollisions(Player* player, Block* block, Enemy* enemy, EnemyAttack* enemyAttack) {
 	// プレイヤーをリストに追加
 	colliders_.emplace_back(player);
 	// ブロックのリストを追加
 	colliders_.emplace_back(block);
+	// 敵
+	colliders_.emplace_back(enemy);
+	colliders_.emplace_back(enemyAttack);
 	// リスト内総当たり
 	std::list<Collider*>::iterator itrA = colliders_.begin();
 	for (; itrA != colliders_.end(); ++itrA) {
@@ -85,6 +88,13 @@ void CollisionManager::CheakCollisionPair(Collider* colliderA, Collider* collide
 							*obbB, colliderB->GetWorldTransform(b), static_cast<uint32_t>(Collider::Type::PlayerToBlock));
 						colliderB->OnCollision(
 							*obbA, colliderA->GetWorldTransform(a), static_cast<uint32_t>(Collider::Type::PlayerToBlock));
+					}
+					else if ((collisionAttributeA & kCollisionAttributeBlock) &&
+						(collisionAttributeB & kCollisionAttributeEnemy)) {
+						colliderA->OnCollision(
+							*obbB, colliderB->GetWorldTransform(b), static_cast<uint32_t>(Collider::Type::EnemyToBlock));
+						colliderB->OnCollision(
+							*obbA, colliderA->GetWorldTransform(a), static_cast<uint32_t>(Collider::Type::EnemyToBlock));
 					}
 					else {
 						// プレイヤーと敵の衝突

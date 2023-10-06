@@ -13,12 +13,12 @@
 void Enemy::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	BaseCharacter::Initialize(std::move(model));
 	// worldTransform_をずらす
-	worldTransform_.at(0).translation_ = Vector3(0.0f, kFloor_Distance_, 10.0f);
+	worldTransform_.at(0).translation_ = Vector3(30.0f, kFloor_Distance_, 7.5f);
 	vector_ = Normalize(worldTransform_.at(0).translation_);
 	area_ = {
-		.center_{30.0f,0.0f,5.0f},
-		.min_{-5.0f,-5.0f,-5.0f} ,
-		.max_{5.0f,5.0f,5.0f},
+		.center_{30.0f,5.0f,5.0f},
+		.min_{30.0f -5.0f,-5.0f,5.0f-5.0f},
+		.max_{30.0f + 5.0f,5.0f,5.0f+5.0f},
 	};
 	// AABBのサイズ
 	AABB aabb;
@@ -48,7 +48,8 @@ void Enemy::Initialize(std::vector<std::unique_ptr<Model>> model) {
 }
 
 void Enemy::Update() {
-	if (IsCollision(area_, *player_->GetAABB(0))) {
+	if (IsCollision(area_, *player_->GetAABB(0)) ||
+		behavior_ == Enemy::Behavior::kAttack) {
 		if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_1)) {
 			behaviorRequest_ = Behavior::kAttack;
 			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
@@ -343,7 +344,30 @@ void Enemy::HitBoxUpdate() {
 }
 
 void Enemy::OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) {
-	OBB o = obb;
-	uint32_t i = type;
-	i;
+	if (type == static_cast<uint32_t>(Collider::Type::EnemyToBlock)) {
+		// X軸
+		if (worldTransform_.at(0).translation_.x + worldTransform_.at(0).scale_.x * 0.5f >= obb.center_.x+obb.size_.x) {
+			// 敵の位置を修正してはみ出ないようにする
+			float overlapX = (worldTransform_.at(0).translation_.x + worldTransform_.at(0).scale_.x * 0.5f) - (obb.center_.x + obb.size_.x);
+			worldTransform_.at(0).translation_.x += overlapX;
+		}
+		else if (worldTransform_.at(0).translation_.x - worldTransform_.at(0).scale_.x * 0.5f <= obb.center_.x - obb.size_.x) {
+			// 敵の位置を修正してはみ出ないようにする
+			float overlapX = (worldTransform_.at(0).translation_.x - worldTransform_.at(0).scale_.x * 0.5f) - (obb.center_.x - obb.size_.x);
+			worldTransform_.at(0).translation_.x -= overlapX;
+		}
+		// Z軸
+		if (worldTransform_.at(0).translation_.z + worldTransform_.at(0).scale_.z * 0.5f >= obb.center_.z + obb.size_.z) {
+			// 敵の位置を修正してはみ出ないようにする
+			float overlapZ = (worldTransform_.at(0).translation_.z + worldTransform_.at(0).scale_.z * 0.5f) - (obb.center_.z + obb.size_.z);
+			worldTransform_.at(0).translation_.z += overlapZ;
+		}
+		else if (worldTransform_.at(0).translation_.z - worldTransform_.at(0).scale_.z * 0.5f <= obb.center_.z - obb.size_.z) {
+			// 敵の位置を修正してはみ出ないようにする
+			float overlapZ = (worldTransform_.at(0).translation_.z - worldTransform_.at(0).scale_.z * 0.5f) - (obb.center_.z - obb.size_.z);
+			worldTransform_.at(0).translation_.z -= overlapZ;
+		}
+		BaseCharacter::Update();
+		HitBoxUpdate();
+	}
 }

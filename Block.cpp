@@ -12,22 +12,22 @@ void Block::Initialize(std::vector<std::unique_ptr<Model>> model) {
 		BaseCharacter::AddWorldtransform(worldtransform);
 	}
 	float scale = 5.0f;
-	worldTransform_.at(0).translation_ = { 0.0f,0.0f,0.0f };
+	worldTransform_.at(0).translation_ = { 0.0f,-scale,0.0f };
 	worldTransform_.at(0).scale_ = { scale ,scale ,10.0f };
 
-	worldTransform_.at(1).translation_ = { scale * 3,0.0f,scale};
+	worldTransform_.at(1).translation_ = { scale * 3,-scale,scale};
 	worldTransform_.at(1).scale_ = { scale ,scale ,scale };
 
-	worldTransform_.at(2).translation_ = { scale * 6,0.0f,scale };
+	worldTransform_.at(2).translation_ = { scale * 6,-scale,scale };
 	worldTransform_.at(2).scale_ = { scale ,scale ,scale };
 
-	worldTransform_.at(3).translation_ = { scale * 6.0f,0.0f,scale * 4.0f };
+	worldTransform_.at(3).translation_ = { scale * 6.0f,-scale,scale * 4.0f };
 	worldTransform_.at(3).scale_ = { scale ,scale ,scale };
 
-	worldTransform_.at(4).translation_ = { scale * 6.0f,0.0f,scale * 7.0f };
+	worldTransform_.at(4).translation_ = { scale * 6.0f,-scale,scale * 7.0f };
 	worldTransform_.at(4).scale_ = { scale ,scale ,scale };
 
-	worldTransform_.at(5).translation_ = { scale * 9.0f,0.0f,scale * 7.0f };
+	worldTransform_.at(5).translation_ = { scale * 9.0f,-scale,scale * 7.0f };
 	worldTransform_.at(5).scale_ = { scale ,scale ,scale };
 
 	BaseCharacter::Update();

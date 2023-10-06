@@ -43,7 +43,33 @@ void GameScene::Initialize() {
 	// ブロック初期化
 	block_->Initialize(std::move(blockModel));
 
-	// 
+	// 敵
+	// 敵モデル
+	std::vector<std::unique_ptr<Model>> enemyModel(static_cast<int>(Enemy::Parts::COUNT));
+	// 敵攻撃モデル
+	std::vector<std::unique_ptr<Model>> enemyAttackModel(
+		static_cast<int>(EnemyAttack::Parts::COUNT));
+	// 敵モデル
+	enemyModel[static_cast<int>(Enemy::Parts::BODY)].reset(Model::Create("enemy_Body", true));
+	enemyModel[static_cast<int>(Enemy::Parts::HEAD)].reset(Model::Create("enemy_Head", true));
+	enemyModel[static_cast<int>(Enemy::Parts::ARML)].reset(Model::Create("enemy_armL", true));
+	enemyModel[static_cast<int>(Enemy::Parts::ARMR)].reset(Model::Create("enemy_armR", true));
+
+	// 敵攻撃モデル
+	enemyAttackModel[static_cast<int>(EnemyAttack::Parts::CIRCLE)].reset(
+		Model::Create("enemy_Attack_Circle", true));
+	enemyAttackModel[static_cast<int>(EnemyAttack::Parts::PLANE)].reset(
+		Model::Create("enemy_Attack_Plane", true));
+	enemyAttackModel[static_cast<int>(EnemyAttack::Parts::METEO)].reset(
+		Model::Create("enemy_Meteo", true));
+	// 敵初期化
+	enemy_->Initialize(std::move(enemyModel));
+	enemy_->SetPlayer(player_.get());
+	enemy_->SetEnemyAttack(enemyAttack_.get());
+	// 敵攻撃初期化
+	enemyAttack_->SetPlayerEnemy(player_.get(), enemy_.get());
+	enemyAttack_->Initialize(std::move(enemyAttackModel));
+
 	//フォローカメラ
 	followCamera_.Intialize();
 	followCamera_.SetTarget(&player_.get()->GetWorldTransform());
@@ -51,10 +77,10 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 	// デバックカメラ
-	debugCamera_->Update(&viewProjection_);
+	//debugCamera_->Update(&viewProjection_);
 	// フォローカメラ	
-	/*followCamera_.Update();
-	viewProjection_ = *followCamera_.GetViewProjection();*/
+	followCamera_.Update();
+	viewProjection_ = *followCamera_.GetViewProjection();
 	// ブロック
 	block_->Update();
 	// プレイヤー
@@ -63,7 +89,7 @@ void GameScene::Update() {
 	enemy_->Update();
 	enemyAttack_->Update();
 	// コリジョンマネージャー
-	collisionManager_->Update(player_.get(),block_.get());
+	collisionManager_->Update(player_.get(),block_.get(),enemy_.get(),enemyAttack_.get());
 }
 
 void GameScene::Draw() {

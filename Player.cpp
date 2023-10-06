@@ -61,7 +61,7 @@ void Player::Update() {
 		BehaviorDashUpdate();
 		break;
 	}
-	if (worldTransform_.at(0).translation_.y <= -50.0f) {
+	if (worldTransform_.at(0).translation_.y <= -30.0f) {
 		worldTransform_.at(0).translation_ = { 0.0f,10.0f,0.0f };
 	}
 	HitBoxUpdate();

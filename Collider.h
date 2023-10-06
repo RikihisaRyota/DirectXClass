@@ -31,6 +31,7 @@ public:
 		PlayerToEnemyAttack,
 		EnemyToPlayerAttack,
 		PlayerToBlock,
+		EnemyToBlock,
 	};
 
 	// 衝突時に呼ばれる関数

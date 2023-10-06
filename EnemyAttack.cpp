@@ -203,8 +203,8 @@ void EnemyAttack::HitBoxInitialize(uint32_t collisionMask) {
 		// AABB
 		aabb_.at(i) = {
 			.center_{worldTransform_.at(i).translation_},
-			.min_{aabb_.at(i).center_ - worldTransform_.at(i).scale_},
-			.max_{aabb_.at(i).center_ + worldTransform_.at(i).scale_},
+			.min_{worldTransform_.at(i).scale_+min_},
+			.max_{worldTransform_.at(i).scale_+max_},
 		};
 		// OBB
 		obb_.at(i) = {
@@ -281,7 +281,7 @@ void EnemyAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransfo
 			for (size_t i = 0; i < worldTransform_.size(); i++) {
 				if (IsCollision(
 					OBB(*player_->GetOBB(0)), Sphere(GetOBB(i)->center_, GetOBB(i)->size_.z))) {
-					
+					player_->SetTranslation({ 0.0f,0.0f,0.0f });
 					press_->SetHit(true);
 				}
 			}
@@ -291,7 +291,7 @@ void EnemyAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransfo
 		if (dash_->GetAttack()) {
 			for (size_t i = 0; i < worldTransform_.size(); i++) {
 				if (IsCollision(*player_->GetOBB(0), *enemy_->GetOBB(i))) {
-					
+					player_->SetTranslation({0.0f,0.0f,0.0f});
 					dash_->SetHit(true);
 				}
 			}
@@ -300,16 +300,19 @@ void EnemyAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransfo
 	case EnemyAttack::Behavior::kPunchAttack:
 		if (punch_->GetAttack()) {
 			IsAttack_ = true;
+			player_->SetTranslation({ 0.0f,0.0f,0.0f });
 			punch_->SetHit(true);
 		}
 		break;
 	case EnemyAttack::Behavior::kTornadoAttack:
 		if (tornade_->GetAttack()) {
+			player_->SetTranslation({ 0.0f,0.0f,0.0f });
 			IsAttack_ = true;
 		}
 		break;
 	case EnemyAttack::Behavior::kMeteoAttack:
 		if (meteo_->GetAttack()) {
+			player_->SetTranslation({ 0.0f,0.0f,0.0f });
 			IsAttack_ = true;
 			meteo_->SetHit(true);
 		}
