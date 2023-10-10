@@ -246,11 +246,11 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 				obb_.at(0).center_ += Vector3{ 0, 0, static_cast<float>(-overlapZ - 0.1f)};
 			}
 		}
+		worldTransform_.at(0).parent_ = &worldTransform;
 		worldTransform_.at(0).translation_ = obb_.at(0).center_;
-	/*	WorldTransform tmp = worldTransform;
-		tmp.scale_ = { 1.0f,1.0f,1.0 };
-		tmp.UpdateMatrix();
-		worldTransform_.at(0).parent_ = &tmp;*/
+		Matrix4x4 playerMat = MakeAffineMatrix(worldTransform_.at(0).scale_, worldTransform_.at(0).rotation_, worldTransform_.at(0).translation_);
+		Matrix4x4 localMat = playerMat * Inverse(worldTransform.matWorld_);
+		worldTransform_.at(0).localTranslation_ = { localMat.m[3][0],localMat.m[3][1] ,localMat.m[3][2] };
 		// 転送
 		BaseCharacter::Update();
 		HitBoxUpdate();
@@ -368,9 +368,11 @@ void Player::GamePadInput() {
 	}*/
 	// ダッシュ開始
 	if ((!IsDash_) &&
-		(Input::GetInstance()->TriggerKey(DIK_LSHIFT) ||
-			(Input::GetInstance()->GetJoystickState(0, joyState) &&
-				(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_X)))) {
+		((Input::GetInstance()->IsControllerConnected() && ((
+			Input::GetInstance()->GetJoystickState(0, joyState) &&
+			(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_X)))) ||
+			Input::GetInstance()->TriggerKey(DIK_LSHIFT)
+			)) {
 		behaviorRequest_ = Behavior::kDash;
 	}
 	// ジャンプ
@@ -447,6 +449,7 @@ void Player::Jump() {
 		!isJump) {
 		acceleration_.y = kJumpPower;
 		isJump = true;
+		//worldTransform_.at(0).parent_ = nullptr;
 	}
 }
 void Player::Gravity() {

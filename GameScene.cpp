@@ -85,7 +85,7 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 	// デバックカメラ
-	//debugCamera_->Update(&viewProjection_);
+	debugCamera_->Update(&viewProjection_);
 	// フォローカメラ	
 	followCamera_.Update();
 	viewProjection_ = *followCamera_.GetViewProjection();
@@ -128,7 +128,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	skydome_->Draw(viewProjection_);
+	//skydome_->Draw(viewProjection_);
 	block_->Draw(viewProjection_);
 	enemy_->Draw(viewProjection_);
 	enemyAttack_->Draw(viewProjection_);

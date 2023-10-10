@@ -18,8 +18,10 @@ struct WorldTransform {
 	Vector3 scale_ = { 1.0f,1.0f,1.0f };
 	// rotatition
 	Vector3 rotation_ = { 0.0f,0.0f,0.0f };
+	Vector3 localRotation_ = { 0.0f,0.0f,0.0f };
 	// translation
 	Vector3 translation_ = { 0.0f,0.0f,0.0f };
+	Vector3 localTranslation_ = { 0.0f,0.0f,0.0f };
 	// matWorld
 	Matrix4x4 matWorld_/* = MakeIdentity4x4()*/;
 	// 親となるワールド変換へのポインタ

@@ -20,7 +20,7 @@ void FollowCamera::Update() {
 	if (target_) {
 		// 追従座標の補間
 		const float kInterpolationLate = 0.2f;
-		interTarget_ = Lerp(interTarget_, target_->translation_, kInterpolationLate);
+		interTarget_ = Lerp(interTarget_, target_->translation_, 0.1f);
 		// 追従対象者からカメラまでのオフセット
 		offset_ = offsetInitialize_;
 		// ゲームパットのカメラ処理

@@ -15,7 +15,7 @@ void Block::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	}
 	float scale = 5.0f;
 	worldTransform_.at(0).translation_ = { 0.0f,-scale,0.0f };
-	worldTransform_.at(0).scale_ = { scale ,scale ,10.0f };
+	worldTransform_.at(0).scale_ = { scale ,scale ,scale };
 
 	worldTransform_.at(1).translation_ = { scale * 3,-scale,scale};
 	worldTransform_.at(1).scale_ = { scale ,scale ,scale };
@@ -39,7 +39,7 @@ void Block::Initialize(std::vector<std::unique_ptr<Model>> model) {
 
 void Block::Update() {
 	angle_ += 0.01f;
-	worldTransform_.at(1).translation_.z = std::cos(angle_) * 8.0f;
+	//worldTransform_.at(1).translation_.z = std::cos(angle_) * 8.0f;
 	BaseCharacter::Update();
 	HitBoxUpdate();
 }
