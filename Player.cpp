@@ -68,6 +68,9 @@ void Player::Update() {
 
 	// 転送
 	BaseCharacter::Update();
+	ImGui::Begin("Player");
+	ImGui::Text("position:x:%f,y:%f,z:%f", worldTransform_.at(0).translation_.x, worldTransform_.at(0).translation_.y, worldTransform_.at(0).translation_.z);
+	ImGui::End();
 }
 
 void Player::BehaviorRootUpdate() {
@@ -246,12 +249,27 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 				obb_.at(0).center_ += Vector3{ 0, 0, static_cast<float>(-overlapZ - 0.1f)};
 			}
 		}
-		worldTransform_.at(0).parent_ = &worldTransform;
 		worldTransform_.at(0).translation_ = obb_.at(0).center_;
-		Matrix4x4 playerMat = MakeAffineMatrix(worldTransform_.at(0).scale_, worldTransform_.at(0).rotation_, worldTransform_.at(0).translation_);
-		Matrix4x4 localMat = playerMat * Inverse(worldTransform.matWorld_);
-		worldTransform_.at(0).localTranslation_ = { localMat.m[3][0],localMat.m[3][1] ,localMat.m[3][2] };
-		// 転送
+		if (!worldTransform_.at(0).parent_) {
+			// 親子づけ
+			worldTransform_.at(0).parent_ = &worldTransform;
+			// プレイヤーの押し戻し処理
+			worldTransform_.at(0).translation_ = obb_.at(0).center_;
+			// 押し戻しが終わったプレイヤーワールドマトリックス
+			worldTransform_.at(0).matWorld_ = MakeAffineMatrix(
+				worldTransform_.at(0).scale_,
+				worldTransform_.at(0).rotation_,
+				worldTransform_.at(0).translation_
+			);
+			// 振れているブロック
+			Matrix4x4 stageMatrix = worldTransform.matWorld_;
+			// プレイヤーをブロックのローカル座標系に直す
+			Matrix4x4 localPlayerMatrix = worldTransform_.at(0).matWorld_ * Inverse(stageMatrix);
+			// ローカル座標系に変換
+			worldTransform_.at(0).scale_ = MakeScale(localPlayerMatrix);
+			worldTransform_.at(0).rotation_ = MakeRotateMatrix(localPlayerMatrix);
+			worldTransform_.at(0).translation_ = {0.0f,0.0f,0.0f};
+		}
 		BaseCharacter::Update();
 		HitBoxUpdate();
 		break;
@@ -449,7 +467,6 @@ void Player::Jump() {
 		!isJump) {
 		acceleration_.y = kJumpPower;
 		isJump = true;
-		//worldTransform_.at(0).parent_ = nullptr;
 	}
 }
 void Player::Gravity() {
@@ -457,9 +474,8 @@ void Player::Gravity() {
 	if (acceleration_.y >= -0.5f) {
 		acceleration_.y -= kGravity;
 	}
-	velocity_+= acceleration_;
+	velocity_ += acceleration_;
 	worldTransform_.at(0).translation_ += velocity_;
-	worldTransform_.at(0).parent_ = nullptr;
 	if (std::fabs(velocity_.x) <= 0.001 && std::fabs(velocity_.z) <= 0.001) {
 		velocity_.x = 0.0f;
 		velocity_.z = 0.0f;

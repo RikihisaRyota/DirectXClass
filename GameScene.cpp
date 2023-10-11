@@ -1,6 +1,7 @@
 #include "GameScene.h"
 
 #include "DirectXCommon.h"
+#include "Draw.h"
 #include "Matrix4x4.h"
 #include "TextureManager.h"
 #include "ImGuiManager.h"
@@ -87,8 +88,8 @@ void GameScene::Update() {
 	// デバックカメラ
 	debugCamera_->Update(&viewProjection_);
 	// フォローカメラ	
-	followCamera_.Update();
-	viewProjection_ = *followCamera_.GetViewProjection();
+	//followCamera_.Update();
+	//viewProjection_ = *followCamera_.GetViewProjection();
 	// ブロック
 	block_->Update();
 	// プレイヤー
@@ -128,13 +129,14 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	//skydome_->Draw(viewProjection_);
+	skydome_->Draw(viewProjection_);
 	block_->Draw(viewProjection_);
 	enemy_->Draw(viewProjection_);
 	enemyAttack_->Draw(viewProjection_);
 	player_->Draw(viewProjection_);
 
-	//block_->HitBoxDraw(viewProjection_);
+	//DrawSphere(Sphere({0.0f,0.0f,0.0f},3.0f),viewProjection_,Vector4(1.0f,1.0f,1.0f,1.0f));
+	block_->HitBoxDraw(viewProjection_);
 	//player_->HitBoxDraw(viewProjection_);
 	//enemy_->HitBoxDraw(viewProjection_);
 	//enemyAttack_->HitBoxDraw(viewProjection_);

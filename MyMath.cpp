@@ -328,6 +328,10 @@ Matrix4x4 MakeTranslateMatrix(const Vector3& translate) {
 	return tmp;
 }
 
+Vector3 MakeTranslateMatrix(const Matrix4x4& matrix) {
+	return Vector3(matrix.m[3][0], matrix.m[3][1], matrix.m[3][2]);
+}
+
 Matrix4x4 MakeScaleMatrix(const Vector3& scale) {
 	Matrix4x4 tmp;
 	tmp.m[0][0] = scale.x, tmp.m[0][1] = 0.0f, tmp.m[0][2] = 0.0f, tmp.m[0][3] = 0.0f;
@@ -336,6 +340,33 @@ Matrix4x4 MakeScaleMatrix(const Vector3& scale) {
 	tmp.m[3][0] = 0.0f, tmp.m[3][1] = 0.0f, tmp.m[3][2] = 0.0f, tmp.m[3][3] = 1.0f;
 	return tmp;
 }
+
+float MakeScaleX(const Matrix4x4& matrix) {
+	Vector3 scale_X = { matrix.m[0][0],matrix.m[0][1] ,matrix.m[0][2] };
+	return scale_X.Length();
+}
+
+float MakeScaleY(const Matrix4x4& matrix) {
+	Vector3 scale_Y = { matrix.m[1][0],matrix.m[1][1] ,matrix.m[1][2] };
+	return scale_Y.Length();
+}
+
+float MakeScaleZ(const Matrix4x4& matrix) {
+	Vector3 scale_Z = { matrix.m[2][0],matrix.m[2][1] ,matrix.m[2][2] };
+	return scale_Z.Length();
+}
+
+Vector3 MakeScale(const Matrix4x4& matrix) {
+	Vector3 scale_X = { matrix.m[0][0],matrix.m[0][1] ,matrix.m[0][2] };
+	Vector3 scale_Y = { matrix.m[1][0],matrix.m[1][1] ,matrix.m[1][2] };
+	Vector3 scale_Z = { matrix.m[2][0],matrix.m[2][1] ,matrix.m[2][2] };
+	Vector3 result{};
+	result.x = scale_X.Length();
+	result.y = scale_Y.Length();
+	result.z = scale_Z.Length();
+	return result;
+}
+
 
 Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix) {
 	Vector3 result{ 0.0f, 0.0f, 0.0f };
@@ -394,6 +425,16 @@ Matrix4x4 MakeRotateXYZMatrix(const Vector3& rotation) {
 	mat *= MakeRotateYMatrix(rotation.y);
 	mat *= MakeRotateZMatrix(rotation.z);
 	return mat;
+}
+
+Vector3 MakeRotateMatrix(const Matrix4x4& matrix) {
+	// 参考にしたサイト
+	// https://www.kazetest.com/vcmemo/euler2rotationmatrix/euler2rotationmatrix.htm
+	return Vector3(
+		std::atan2(matrix.m[2][1], matrix.m[2][2]),
+		std::asin(-matrix.m[2][0]),
+		std::atan2(matrix.m[1][0], matrix.m[0][0])
+		);
 }
 
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {

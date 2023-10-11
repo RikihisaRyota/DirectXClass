@@ -141,7 +141,7 @@ private: // メンバ関数
 	/// </summary>
 	void BehaviorDashUpdate();
 #pragma endregion
-	void HitBoxUpdate();
+	void HitBoxUpdate()override;
 	void SetGlobalVariables();
 	void GetGlobalVariables();
 	// 衝突を検出したら呼び出されるコールバック関数
@@ -211,4 +211,6 @@ private: // メンバ変数
 	// ふるまい
 	Behavior behavior_ = Behavior::kRoot;
 	std::optional<Behavior> behaviorRequest_ = std::nullopt;
+
+	
 };

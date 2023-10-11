@@ -50,7 +50,6 @@ void PrimitiveDrawer::Reset() {
 }
 
 void PrimitiveDrawer::SetDraw(const Vector3& v1, const Vector3& v2, const Vector4& color) {
-	HRESULT result = S_FALSE;
 	vertices_.emplace_back(Vertex({ v1.x,v1.y,v1.z,1.0f }, { color }));
 	indices_.emplace_back(darwCount);
 	darwCount++;

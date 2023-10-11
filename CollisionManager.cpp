@@ -7,7 +7,7 @@
 
 void CollisionManager::Update(Player* player, Block* block, Enemy* enemy, EnemyAttack* enemyAttack) {
 	colliders_.clear();
-	CheckAllCollisions(player, block,enemy,enemyAttack);
+	CheckAllCollisions(player, block, enemy, enemyAttack);
 }
 
 void CollisionManager::CheckAllCollisions(Player* player, Block* block, Enemy* enemy, EnemyAttack* enemyAttack) {
@@ -42,7 +42,7 @@ void CollisionManager::CheakCollisionPair(Collider* colliderA, Collider* collide
 	// 衝突フィルタリング
 	if (// 敵と敵の攻撃
 		(collisionAttributeA & kCollisionAttributeEnemy &&
-		collisionAttributeB & kCollisionAttributeEnemyAttack) ||
+			collisionAttributeB & kCollisionAttributeEnemyAttack) ||
 
 		(collisionAttributeB & kCollisionAttributeEnemy &&
 			collisionAttributeA & kCollisionAttributeEnemyAttack) ||
@@ -59,12 +59,54 @@ void CollisionManager::CheakCollisionPair(Collider* colliderA, Collider* collide
 	}
 	for (uint32_t a = 0; a < colliderA->GetAABBSize(); a++) {
 		for (uint32_t b = 0; b < colliderB->GetAABBSize(); b++) {
-			AABB* aabbA = colliderA->GetAABB(a);
-			AABB* aabbB = colliderB->GetAABB(b);
+			AABB* aabbA;
+			AABB* aabbB;
+			if (colliderA->GetWorldTransform().parent_) {
+				Matrix4x4 current = colliderA->GetWorldTransform().matWorld_;
+				Matrix4x4 parent = colliderA->GetWorldTransform().parent_->matWorld_;
+				Matrix4x4 colliderAMatrix = current * parent;
+				colliderA->SetTranslation(MakeTranslateMatrix(colliderAMatrix));
+				colliderA->HitBoxUpdate();
+				if (colliderB->GetWorldTransform().parent_) {
+					current = colliderB->GetWorldTransform().matWorld_;
+					parent = colliderB->GetWorldTransform().parent_->matWorld_;
+					colliderAMatrix = current * parent;
+					colliderB->SetTranslation(MakeTranslateMatrix(colliderAMatrix));
+					colliderB->HitBoxUpdate();
+				}
+				aabbA = colliderA->GetAABB(a);
+				aabbB = colliderB->GetAABB(b);
+			}
+			else {
+				aabbA = colliderA->GetAABB(a);
+				aabbB = colliderB->GetAABB(b);
+			}
+
 			// AABBで当たり判定
 			if (IsCollision(*aabbA, *aabbB)) {
-				OBB* obbA = colliderA->GetOBB(a);
-				OBB* obbB = colliderB->GetOBB(b);
+				OBB* obbA;
+				OBB* obbB;
+				if (colliderA->GetWorldTransform().parent_) {
+					Matrix4x4 current = colliderA->GetWorldTransform().matWorld_;
+					Matrix4x4 parent = colliderA->GetWorldTransform().parent_->matWorld_;
+					Matrix4x4 colliderAMatrix = current * parent;
+					colliderA->SetTranslation(MakeTranslateMatrix(colliderAMatrix));
+					colliderA->HitBoxUpdate();
+					if (colliderB->GetWorldTransform().parent_) {
+						current = colliderB->GetWorldTransform().matWorld_;
+						parent = colliderB->GetWorldTransform().parent_->matWorld_;
+						colliderAMatrix = current * parent;
+						colliderB->SetTranslation(MakeTranslateMatrix(colliderAMatrix));
+						colliderB->HitBoxUpdate();
+					}
+					obbA = colliderA->GetOBB(a);
+					obbB = colliderB->GetOBB(b);
+				}
+				else {
+					obbA = colliderA->GetOBB(a);
+					obbB = colliderB->GetOBB(b);
+				}
+
 				// OBBで当たり判定
 				if (IsCollision(*obbA, *obbB)) {
 					// プレイヤーと敵の攻撃

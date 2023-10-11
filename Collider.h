@@ -53,7 +53,7 @@ public:
 
 	// HitBoxDraw
 	virtual void HitBoxInitialize(uint32_t collisionMask) = 0;
-	virtual void HitBoxUpdate() = 0;
+	virtual void HitBoxUpdate();
 	virtual void HitBoxDraw(const ViewProjection& viewProjection) = 0;
 
 	AABB* GetAABB(size_t index = 0) { return &aabb_.at(index); }
