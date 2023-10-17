@@ -73,6 +73,12 @@
     <Filter Include="ヘッダー ファイル\model">
       <UniqueIdentifier>{1cff2d67-ba16-4114-8be6-92f2892aad2b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="リソース ファイル\Sprite">
+      <UniqueIdentifier>{7311778a-f892-464f-a57c-34fa14821eb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="リソース ファイル\Particle">
+      <UniqueIdentifier>{9bf21550-e1d5-4160-8521-14e88fb5ea77}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -185,6 +191,12 @@
     </ClCompile>
     <ClCompile Include="Input.cpp">
       <Filter>ソース ファイル\base</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleGraphicsPipline.cpp">
+      <Filter>ソース ファイル\graphicsPipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Particle.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -335,6 +347,12 @@
     <ClInclude Include="SafeDelete.h">
       <Filter>ヘッダー ファイル\base</Filter>
     </ClInclude>
+    <ClInclude Include="Particle.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleGraphicsPipline.h">
+      <Filter>ヘッダー ファイル\graphicsPipeline</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -344,8 +362,6 @@
   <ItemGroup>
     <FxCompile Include="Basic.VS.hlsl" />
     <FxCompile Include="Basic.PS.hlsl" />
-    <FxCompile Include="Sprite.VS.hlsl" />
-    <FxCompile Include="Sprite.PS.hlsl" />
     <FxCompile Include="OBJ.PS.hlsl" />
     <FxCompile Include="OBJ.VS.hlsl" />
     <FxCompile Include="Toon.VS.hlsl">
@@ -353,9 +369,6 @@
     </FxCompile>
     <FxCompile Include="Toon.PS.hlsl">
       <Filter>リソース ファイル\Toon</Filter>
-    </FxCompile>
-    <FxCompile Include="Lighting.PS.hlsl">
-      <Filter>リソース ファイル\Lighting</Filter>
     </FxCompile>
     <FxCompile Include="Lighting.VS.hlsl">
       <Filter>リソース ファイル\Lighting</Filter>
@@ -366,16 +379,15 @@
     <FxCompile Include="Pera.PS.hlsl">
       <Filter>リソース ファイル\Pera</Filter>
     </FxCompile>
-    <FxCompile Include="Line.PS.hlsl">
-      <Filter>リソース ファイル\Line</Filter>
+    <FxCompile Include="Sprite.PS.hlsl">
+      <Filter>リソース ファイル\Sprite</Filter>
     </FxCompile>
-    <FxCompile Include="Line.VS.hlsl">
-      <Filter>リソース ファイル\Line</Filter>
+    <FxCompile Include="Sprite.VS.hlsl">
+      <Filter>リソース ファイル\Sprite</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.hlsli" />
-    <None Include="Sprite.hlsli" />
     <None Include="OBJ.hlsli" />
     <None Include="VertexShaderOutput.hlsli" />
     <None Include="Pera.hlsli">
@@ -386,6 +398,27 @@
     </None>
     <None Include="Line.hlsli">
       <Filter>リソース ファイル\Line</Filter>
+    </None>
+    <None Include="Sprite.hlsli">
+      <Filter>リソース ファイル\Sprite</Filter>
+    </None>
+    <None Include="Particle.hlsli">
+      <Filter>リソース ファイル\Particle</Filter>
+    </None>
+    <None Include="Lighting.PS.hlsl">
+      <Filter>リソース ファイル\Lighting</Filter>
+    </None>
+    <None Include="Line.PS.hlsl">
+      <Filter>リソース ファイル\Line</Filter>
+    </None>
+    <None Include="Line.VS.hlsl">
+      <Filter>リソース ファイル\Line</Filter>
+    </None>
+    <None Include="Particle.PS.hlsl">
+      <Filter>リソース ファイル\Particle</Filter>
+    </None>
+    <None Include="Particle.VS.hlsl">
+      <Filter>リソース ファイル\Particle</Filter>
     </None>
   </ItemGroup>
 </Project>
