@@ -266,7 +266,7 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 			// プレイヤーをブロックのローカル座標系に直す
 			Matrix4x4 localPlayerMatrix = worldTransform_.at(0).matWorld_ * Inverse(stageMatrix);
 			// ローカル座標系に変換
-			worldTransform_.at(0).scale_ = MakeScale(localPlayerMatrix);
+			worldTransform_.at(0).scale_ /= MakeScale(localPlayerMatrix);
 			worldTransform_.at(0).rotation_ = MakeRotateMatrix(localPlayerMatrix);
 			worldTransform_.at(0).translation_ = {0.0f,0.0f,0.0f};
 		}

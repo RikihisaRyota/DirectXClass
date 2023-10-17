@@ -430,10 +430,17 @@ Matrix4x4 MakeRotateXYZMatrix(const Vector3& rotation) {
 Vector3 MakeRotateMatrix(const Matrix4x4& matrix) {
 	// 参考にしたサイト
 	// https://www.kazetest.com/vcmemo/euler2rotationmatrix/euler2rotationmatrix.htm
+
+	Vector3 rotate_X = {matrix.m[0][0],matrix.m[0][1] ,matrix.m[0][2] };
+	rotate_X.Normalize();
+	Vector3 rotate_Y = {matrix.m[1][0],matrix.m[1][1] ,matrix.m[1][2] };
+	rotate_Y.Normalize();
+	Vector3 rotate_Z = {matrix.m[2][0],matrix.m[2][1] ,matrix.m[2][2] };
+	rotate_Z.Normalize();
 	return Vector3(
-		std::atan2(matrix.m[2][1], matrix.m[2][2]),
-		std::asin(-matrix.m[2][0]),
-		std::atan2(matrix.m[1][0], matrix.m[0][0])
+		std::atan2(rotate_Z.y, rotate_Z.z),
+		std::asin(-rotate_Z.x),
+		std::atan2(rotate_Y.x, rotate_X.x)
 		);
 }
 

@@ -76,6 +76,14 @@ struct Vector3 final {
 	}
 
 	// /=演算子のオーバーロード
+	Vector3& operator/=(const Vector3& scalar) {
+		x /= scalar.x;
+		y /= scalar.y;
+		z /= scalar.z;
+		return *this;
+	}
+
+	// /=演算子のオーバーロード
 	Vector3& operator/=(float scalar) {
 		x /= scalar;
 		y /= scalar;
