@@ -11,6 +11,8 @@
 #include "ViewProjection.h"
 #include "input.h"
 
+class Enemy;
+class EnemyAttack;
 class Player : public Collider {
 public:
 	// 体のパーツ
@@ -165,6 +167,9 @@ public: // ゲッター,セッター
 	Behavior GetBehavior() const { return behavior_; }
 
 	Vector3 GetPlayerRotate() const { return interRotate_; }
+
+	void SetEnemy(Enemy* enemy) {enemy_ = enemy;}
+	void SetEnemyAttack(EnemyAttack* enemyAttack) { enemyAttack_ = enemyAttack; }
 private: // 定数系
 	// 地面から距離
 	const float kGroundDistanse = 1.0f;
@@ -192,6 +197,8 @@ private: // 定数系
 	const int32_t kDash_CoolTime_ = 30;
 	// 摩擦
 private: // メンバ変数
+	Enemy* enemy_;
+	EnemyAttack* enemyAttack_;
 	// 最終的に向きたい方向
 	Vector3 destinationAngle_;
 	// ダッシュ用方向
@@ -212,5 +219,4 @@ private: // メンバ変数
 	Behavior behavior_ = Behavior::kRoot;
 	std::optional<Behavior> behaviorRequest_ = std::nullopt;
 
-	
 };

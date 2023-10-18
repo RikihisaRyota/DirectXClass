@@ -73,7 +73,7 @@ private:
 
 	const float kFloor_Distance_ = 2.5f;
 
-	const float kMove_Speed_ = 0.5f;
+	const float kMove_Speed_ = 0.05f;
 
 	const float kDistance_ = 5.0f;
 	const float kDash_Distance_ = 10.0f;

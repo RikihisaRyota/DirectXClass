@@ -201,7 +201,7 @@ void Enemy::RootUpdate() {
 	//	dash_Attack_ = true;
 	//}
 	//else
-	if (std::fabs(Length(worldTransform_.at(0).translation_ - player_->GetWorldTransform().translation_)) < kDistance_) {
+	if (std::fabs(Length(worldTransform_.at(0).translation_ - Vector3(player_->GetWorldTransform().matWorld_.m[3][0], player_->GetWorldTransform().matWorld_.m[3][1], player_->GetWorldTransform().matWorld_.m[3][2]))) < kDistance_) {
 		dash_Attack_ = false;
 		if (meteo_Attack_) {
 			behaviorRequest_ = Behavior::kAttack;
@@ -274,7 +274,7 @@ void Enemy::RootUpdate() {
 				//}
 			}
 			else {
-				EnemyRotate(player_->GetWorldTransform().translation_ - worldTransform_.at(0).translation_);
+				EnemyRotate(Vector3(player_->GetWorldTransform().matWorld_.m[3][0], player_->GetWorldTransform().matWorld_.m[3][1], player_->GetWorldTransform().matWorld_.m[3][2]) - worldTransform_.at(0).translation_);
 				break_count_--;
 				if (break_count_ <= 0) {
 					Isbreak_ = false;
@@ -296,7 +296,7 @@ bool move = false;
 void Enemy::Move() {
 	vector_ = { 0.0f, 0.0f, 0.0f };
 
-	Vector3 end = player_->GetWorldTransform().translation_ - worldTransform_.at(0).translation_;
+	Vector3 end = Vector3(player_->GetWorldTransform().matWorld_.m[3][0], player_->GetWorldTransform().matWorld_.m[3][1], player_->GetWorldTransform().matWorld_.m[3][2]) - worldTransform_.at(0).translation_;
 	end.y = 0.0f;
 	if (end != Vector3(0.0f, 0.0f, 0.0f)) {
 		end.Normalize();
@@ -310,6 +310,7 @@ void Enemy::Move() {
 	worldTransform_.at(0).translation_.y = kFloor_Distance_;
 	// 角度の更新
 	angle_ += 0.02f;
+	
 }
 
 void Enemy::Motion() {

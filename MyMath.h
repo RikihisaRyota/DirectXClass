@@ -70,9 +70,10 @@ Matrix4x4 MakeRotateYMatrix(float radian);
 Matrix4x4 MakeRotateZMatrix(float radian);
 //4,全部
 Matrix4x4 MakeRotateXYZMatrix(const Vector3& rotation);
-// 回転座標からオイラー角
-Vector3 MakeRotateMatrix(const Matrix4x4& matrix);
-
+// 行列から回転
+Matrix4x4 MakeRotateMatrix(const Matrix4x4& matrix);
+// 行列からオイラー角
+Vector3 MakeEulerAngle(const Matrix4x4& matrix);
 // 3次元アフィン変換
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
 //1,透視投影行列

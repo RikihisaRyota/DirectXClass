@@ -12,7 +12,7 @@ void EnemyPunch::Initialize() {
 	origin_ = GetEnemy()->GetWorldTransform();
 	target_Distance_ = 5.0f;
 	// ヒットボックス
-	Vector3 toTarget_ = target_.translation_ - origin_.translation_;
+	Vector3 toTarget_ = Vector3(target_.matWorld_.m[3][0], target_.matWorld_.m[3][1], target_.matWorld_.m[3][2]) - origin_.translation_;
 	toTarget_.Normalize();
 	toTarget_ = origin_.translation_ + toTarget_ * target_Distance_;
 	Vector3 scale{3.0f, 1.0f, 3.0f};

@@ -3,6 +3,8 @@
 #include <cassert>
 
 #include "Draw.h"
+#include "Enemy.h"
+#include "EnemyAttack.h"
 #include "GlobalVarriables.h"
 #include "Input.h"
 #include "ImGuiManager.h"
@@ -61,15 +63,17 @@ void Player::Update() {
 		BehaviorDashUpdate();
 		break;
 	}
-	if (worldTransform_.at(0).translation_.y <= -30.0f) {
+	/*if (worldTransform_.at(0).translation_.y <= -30.0f) {
 		worldTransform_.at(0).translation_ = { 0.0f,10.0f,0.0f };
-	}
-	HitBoxUpdate();
+	}*/
 
 	// 転送
 	BaseCharacter::Update();
+	HitBoxUpdate();
 	ImGui::Begin("Player");
-	ImGui::Text("position:x:%f,y:%f,z:%f", worldTransform_.at(0).translation_.x, worldTransform_.at(0).translation_.y, worldTransform_.at(0).translation_.z);
+	ImGui::Text("LocalPosition:x:%f,y:%f,z:%f", worldTransform_.at(0).translation_.x, worldTransform_.at(0).translation_.y, worldTransform_.at(0).translation_.z);
+	ImGui::Text("WorldPosition:x:%f,y:%f,z:%f", worldTransform_.at(0).matWorld_.m[3][0], worldTransform_.at(0).matWorld_.m[3][1], worldTransform_.at(0).matWorld_.m[3][2]);
+	ImGui::Text("AABBCenter:x:%f,y:%f,z:%f", aabb_.at(0).center_.x, aabb_.at(0).center_.y, aabb_.at(0).center_.z);
 	ImGui::End();
 }
 
@@ -124,15 +128,16 @@ void Player::BehaviorDashUpdate() {
 }
 
 void Player::HitBoxUpdate() {
+	Vector3 position = MakeTranslateMatrix(worldTransform_.at(0).matWorld_);
 	// AABB
 	aabb_.at(0) = {
-		.center_{worldTransform_.at(0).translation_},
-		.min_{worldTransform_.at(0).translation_ + min_},
-		.max_{worldTransform_.at(0).translation_ + max_},
+		.center_{position},
+		.min_{position + min_},
+		.max_{position + max_},
 	};
 	// OBB
 	obb_.at(0) = {
-		.center_{worldTransform_.at(0).translation_},
+		.center_{position},
 		.orientations_{
 				 {1.0f, 0.0f, 0.0f},
 				 {0.0f, 1.0f, 0.0f},
@@ -143,7 +148,7 @@ void Player::HitBoxUpdate() {
 	obb_.at(0) = OBBSetRotate(obb_.at(0), worldTransform_.at(0).rotation_);
 	// Sphere
 	sphere_ = {
-		.center_{worldTransform_.at(0).translation_},
+		.center_{position},
 		.radius_{radius_},
 	};
 }
@@ -168,6 +173,14 @@ void Player::GetGlobalVariables() {
 
 void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) {
 	switch (type) {
+	case static_cast<uint32_t>(Collider::Type::PlayerToEnemyAttack):
+	{
+		if (enemyAttack_->GetAttack()) {
+			worldTransform_.at(0).parent_ = nullptr;
+			worldTransform_.at(0).translation_ = { 0.0f,10.0f,0.0f };
+		}
+	}
+	break;
 	case static_cast<uint32_t>(Collider::Type::PlayerToEnemy):
 	{
 		// OBB同士が衝突していると仮定して、重なり領域を計算する-0.399999619
@@ -205,10 +218,23 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 				obb_.at(0).center_ += Vector3{ 0, 0, static_cast<float>(-overlapZ - 0.1f) };
 			}
 		}
+		// プレイヤーの押し戻し処理
 		worldTransform_.at(0).translation_ = obb_.at(0).center_;
-		//worldTransform_.at(0).parent_ = &worldTransform;
-		// 転送
-		BaseCharacter::Update();
+		// 押し戻しが終わったプレイヤーワールドマトリックス
+		worldTransform_.at(0).matWorld_ = MakeAffineMatrix(
+			worldTransform_.at(0).scale_,
+			worldTransform_.at(0).rotation_,
+			worldTransform_.at(0).translation_
+		);
+		// 振れているブロック
+		Matrix4x4 stageMatrix = worldTransform_.at(0).parent_->matWorld_;
+		// プレイヤーをブロックのローカル座標系に直す
+		Matrix4x4 localPlayerMatrix = worldTransform_.at(0).matWorld_ * Inverse(stageMatrix);
+		// ローカル座標系に変換
+		worldTransform_.at(0).scale_ = MakeScale(localPlayerMatrix);
+		worldTransform_.at(0).rotation_ = MakeEulerAngle(MakeRotateMatrix(localPlayerMatrix));
+		worldTransform_.at(0).translation_ = MakeTranslateMatrix(localPlayerMatrix);
+		BaseCharacter::TransformUpdate();
 		HitBoxUpdate();
 		break;
 	}
@@ -246,32 +272,30 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 				obb_.at(0).center_ += Vector3{ 0, 0, static_cast<float>(overlapZ + 0.1f) };
 			}
 			else {
-				obb_.at(0).center_ += Vector3{ 0, 0, static_cast<float>(-overlapZ - 0.1f)};
+				obb_.at(0).center_ += Vector3{ 0, 0, static_cast<float>(-overlapZ - 0.1f) };
 			}
 		}
+		// 親子づけ
+		worldTransform_.at(0).parent_ = &worldTransform;
+		// プレイヤーの押し戻し処理
 		worldTransform_.at(0).translation_ = obb_.at(0).center_;
-		if (!worldTransform_.at(0).parent_) {
-			// 親子づけ
-			worldTransform_.at(0).parent_ = &worldTransform;
-			// プレイヤーの押し戻し処理
-			worldTransform_.at(0).translation_ = obb_.at(0).center_;
-			// 押し戻しが終わったプレイヤーワールドマトリックス
-			worldTransform_.at(0).matWorld_ = MakeAffineMatrix(
-				worldTransform_.at(0).scale_,
-				worldTransform_.at(0).rotation_,
-				worldTransform_.at(0).translation_
-			);
-			// 振れているブロック
-			Matrix4x4 stageMatrix = worldTransform.matWorld_;
-			// プレイヤーをブロックのローカル座標系に直す
-			Matrix4x4 localPlayerMatrix = worldTransform_.at(0).matWorld_ * Inverse(stageMatrix);
-			// ローカル座標系に変換
-			worldTransform_.at(0).scale_ /= MakeScale(localPlayerMatrix);
-			worldTransform_.at(0).rotation_ = MakeRotateMatrix(localPlayerMatrix);
-			worldTransform_.at(0).translation_ = {0.0f,0.0f,0.0f};
-		}
+		// 押し戻しが終わったプレイヤーワールドマトリックス
+		worldTransform_.at(0).matWorld_ = MakeAffineMatrix(
+			worldTransform_.at(0).scale_,
+			worldTransform_.at(0).rotation_,
+			worldTransform_.at(0).translation_
+		);
+		// 振れているブロック
+		Matrix4x4 stageMatrix = worldTransform.matWorld_;
+		// プレイヤーをブロックのローカル座標系に直す
+		Matrix4x4 localPlayerMatrix = worldTransform_.at(0).matWorld_ * Inverse(stageMatrix);
+		// ローカル座標系に変換
+		worldTransform_.at(0).scale_ = MakeScale(localPlayerMatrix);
+		worldTransform_.at(0).rotation_ = MakeEulerAngle(MakeRotateMatrix(localPlayerMatrix));
+		worldTransform_.at(0).translation_ = MakeTranslateMatrix(localPlayerMatrix);
 		BaseCharacter::Update();
 		HitBoxUpdate();
+
 		break;
 	}
 	}
@@ -476,6 +500,10 @@ void Player::Gravity() {
 	}
 	velocity_ += acceleration_;
 	worldTransform_.at(0).translation_ += velocity_;
+	if (MakeTranslateMatrix(worldTransform_.at(0).matWorld_).y <= -30.0f) {
+		worldTransform_.at(0).parent_ = nullptr;
+		worldTransform_.at(0).translation_ = { 0.0f,10.0f,0.0f };
+	}
 	if (std::fabs(velocity_.x) <= 0.001 && std::fabs(velocity_.z) <= 0.001) {
 		velocity_.x = 0.0f;
 		velocity_.z = 0.0f;

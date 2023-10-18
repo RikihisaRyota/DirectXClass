@@ -20,7 +20,7 @@ void FollowCamera::Update() {
 	if (target_) {
 		// 追従座標の補間
 		const float kInterpolationLate = 0.2f;
-		interTarget_ = Lerp(interTarget_, target_->translation_, 0.1f);
+		interTarget_ = Lerp(interTarget_, MakeTranslateMatrix(target_->matWorld_), 0.1f);
 		// 追従対象者からカメラまでのオフセット
 		offset_ = offsetInitialize_;
 		// ゲームパットのカメラ処理
@@ -97,7 +97,7 @@ void FollowCamera::GamePad() {
 		    (Input::GetInstance()->GetJoystickStatePrevious(0, joyState) &&
 		     (!joyState.Gamepad.wButtons))) {
 			if (IsTargetCamera_) {
-				Vector3 enemyVector = enemy_->translation_ - target_->translation_;
+				Vector3 enemyVector = enemy_->translation_ - MakeTranslateMatrix(target_->matWorld_);
 				enemyVector.Normalize();
 				destinationAngle_.x = enemyVector.x;
 				destinationAngle_.y = std::atan2(enemyVector.x, enemyVector.z);
@@ -163,7 +163,7 @@ void FollowCamera::Reset() {
 	// 追従対象がいれば
 	if (target_) {
 		// 追従座標・角度の初期化
-		interTarget_ = target_->translation_;
+		interTarget_ = MakeTranslateMatrix(target_->matWorld_);
 		viewProjection_.rotation_.y = target_->rotation_.y;
 	}
 	destinationAngle_.x = viewProjection_.rotation_.x;

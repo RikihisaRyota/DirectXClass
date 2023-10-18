@@ -427,21 +427,48 @@ Matrix4x4 MakeRotateXYZMatrix(const Vector3& rotation) {
 	return mat;
 }
 
-Vector3 MakeRotateMatrix(const Matrix4x4& matrix) {
-	// 参考にしたサイト
-	// https://www.kazetest.com/vcmemo/euler2rotationmatrix/euler2rotationmatrix.htm
-
+Matrix4x4 MakeRotateMatrix(const Matrix4x4& matrix) {
 	Vector3 rotate_X = {matrix.m[0][0],matrix.m[0][1] ,matrix.m[0][2] };
 	rotate_X.Normalize();
 	Vector3 rotate_Y = {matrix.m[1][0],matrix.m[1][1] ,matrix.m[1][2] };
 	rotate_Y.Normalize();
 	Vector3 rotate_Z = {matrix.m[2][0],matrix.m[2][1] ,matrix.m[2][2] };
 	rotate_Z.Normalize();
-	return Vector3(
-		std::atan2(rotate_Z.y, rotate_Z.z),
-		std::asin(-rotate_Z.x),
-		std::atan2(rotate_Y.x, rotate_X.x)
-		);
+	Matrix4x4 result{};
+	result = MakeIdentity4x4();
+	result.m[0][0] = rotate_X.x;
+	result.m[0][1] = rotate_X.y;
+	result.m[0][2] = rotate_X.z;
+
+	result.m[1][0] = rotate_Y.x;
+	result.m[1][1] = rotate_Y.y;
+	result.m[1][2] = rotate_Y.z;
+	
+	result.m[2][0] = rotate_Z.x;
+	result.m[2][1] = rotate_Z.y;
+	result.m[2][2] = rotate_Z.z;
+	return result;
+}
+
+Vector3 MakeEulerAngle(const Matrix4x4& matrix) {
+	Vector3 angles;
+
+	// Extract yaw (Y軸回りの回転)
+	angles.y = atan2(matrix.m[2][0], matrix.m[2][2]);
+
+	// Extract pitch (X軸回りの回転)
+	float sinPitch = -matrix.m[2][1];
+	if (fabs(sinPitch) >= 1.0f) {
+		angles.x = copysign(3.14159265f / 2.0f, sinPitch);
+	}
+	else {
+		angles.x = asin(sinPitch);
+	}
+
+	// Extract roll (Z軸回りの回転)
+	angles.z = atan2(matrix.m[0][1], matrix.m[1][1]);
+
+	return angles;
 }
 
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {

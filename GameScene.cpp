@@ -36,6 +36,8 @@ void GameScene::Initialize() {
 	playerModel[static_cast<int>(Player::Parts::WEAPON)].reset(Model::Create("player_Weapon", true));
 	// プレイヤー初期化
 	player_->SetViewProjection(&viewProjection_);
+	player_->SetEnemy(enemy_.get());
+	player_->SetEnemyAttack(enemyAttack_.get());
 	player_->Initialize(std::move(playerModel));
 
 	// ブロック
@@ -88,8 +90,8 @@ void GameScene::Update() {
 	// デバックカメラ
 	debugCamera_->Update(&viewProjection_);
 	// フォローカメラ	
-	//followCamera_.Update();
-	//viewProjection_ = *followCamera_.GetViewProjection();
+	followCamera_.Update();
+	viewProjection_ = *followCamera_.GetViewProjection();
 	// ブロック
 	block_->Update();
 	// プレイヤー
@@ -135,8 +137,7 @@ void GameScene::Draw() {
 	enemyAttack_->Draw(viewProjection_);
 	player_->Draw(viewProjection_);
 
-	//DrawSphere(Sphere({0.0f,0.0f,0.0f},3.0f),viewProjection_,Vector4(1.0f,1.0f,1.0f,1.0f));
-	block_->HitBoxDraw(viewProjection_);
+	//block_->HitBoxDraw(viewProjection_);
 	//player_->HitBoxDraw(viewProjection_);
 	//enemy_->HitBoxDraw(viewProjection_);
 	//enemyAttack_->HitBoxDraw(viewProjection_);

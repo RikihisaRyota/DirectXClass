@@ -40,7 +40,6 @@ void Block::Initialize(std::vector<std::unique_ptr<Model>> model) {
 
 void Block::Update() {
 	angle_ += 0.01f;
-	worldTransform_.at(0).translation_.z = std::cos(angle_) * 5.0f;
 	worldTransform_.at(1).translation_.z = std::cos(angle_) * 5.0f;
 	BaseCharacter::Update();
 	HitBoxUpdate();
@@ -55,7 +54,10 @@ void Block::Draw(const ViewProjection& viewProjection) {
 void Block::OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) {
 	if (type == static_cast<uint32_t>(Collider::Type::PlayerToBlock)) {
 		if (IsCollision(obb_.at(5), obb)) {
-			player_->SetTranslation({ 0.0f,0.0f,0.0f });
+			WorldTransform player = player_->GetWorldTransform();
+			player.parent_ = nullptr;
+			player.translation_ = { 0.0f,10.0f,0.0f };
+			player_->SetWorldtransform(player);
 		}
 	}
 }

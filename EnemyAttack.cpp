@@ -282,7 +282,10 @@ void EnemyAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransfo
 				for (size_t i = 0; i < worldTransform_.size(); i++) {
 					if (IsCollision(
 						OBB(*player_->GetOBB(0)), Sphere(GetOBB(i)->center_, GetOBB(i)->size_.z))) {
-						player_->SetTranslation({ 0.0f,0.0f,0.0f });
+						WorldTransform player = player_->GetWorldTransform();
+						player.parent_ = nullptr;
+						player.translation_ = { 0.0f,10.0f,0.0f };
+						player_->SetWorldtransform(player);
 						press_->SetHit(true);
 					}
 				}
@@ -292,7 +295,10 @@ void EnemyAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransfo
 			if (dash_->GetAttack()) {
 				for (size_t i = 0; i < worldTransform_.size(); i++) {
 					if (IsCollision(*player_->GetOBB(0), *enemy_->GetOBB(i))) {
-						player_->SetTranslation({ 0.0f,0.0f,0.0f });
+						WorldTransform player = player_->GetWorldTransform();
+						player.parent_ = nullptr;
+						player.translation_ = { 0.0f,10.0f,0.0f };
+						player_->SetWorldtransform(player);
 						dash_->SetHit(true);
 					}
 				}
@@ -301,19 +307,28 @@ void EnemyAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransfo
 		case EnemyAttack::Behavior::kPunchAttack:
 			if (punch_->GetAttack()) {
 				IsAttack_ = true;
-				player_->SetTranslation({ 0.0f,0.0f,0.0f });
+				WorldTransform player = player_->GetWorldTransform();
+				player.parent_ = nullptr;
+				player.translation_ = { 0.0f,10.0f,0.0f };
+				player_->SetWorldtransform(player);
 				punch_->SetHit(true);
 			}
 			break;
 		case EnemyAttack::Behavior::kTornadoAttack:
 			if (tornade_->GetAttack()) {
-				player_->SetTranslation({ 0.0f,0.0f,0.0f });
+				WorldTransform player = player_->GetWorldTransform();
+				player.parent_ = nullptr;
+				player.translation_ = { 0.0f,10.0f,0.0f };
+				player_->SetWorldtransform(player);
 				IsAttack_ = true;
 			}
 			break;
 		case EnemyAttack::Behavior::kMeteoAttack:
 			if (meteo_->GetAttack()) {
-				player_->SetTranslation({ 0.0f,0.0f,0.0f });
+				WorldTransform player = player_->GetWorldTransform();
+				player.parent_ = nullptr;
+				player.translation_ = { 0.0f,10.0f,0.0f };
+				player_->SetWorldtransform(player);
 				IsAttack_ = true;
 				meteo_->SetHit(true);
 			}

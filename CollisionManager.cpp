@@ -59,58 +59,24 @@ void CollisionManager::CheakCollisionPair(Collider* colliderA, Collider* collide
 	}
 	for (uint32_t a = 0; a < colliderA->GetAABBSize(); a++) {
 		for (uint32_t b = 0; b < colliderB->GetAABBSize(); b++) {
-			AABB* aabbA;
-			AABB* aabbB;
-			if (colliderA->GetWorldTransform().parent_) {
-				Matrix4x4 current = colliderA->GetWorldTransform().matWorld_;
-				Matrix4x4 parent = colliderA->GetWorldTransform().parent_->matWorld_;
-				Matrix4x4 colliderAMatrix = current * parent;
-				colliderA->SetTranslation(MakeTranslateMatrix(colliderAMatrix));
-				colliderA->HitBoxUpdate();
-				if (colliderB->GetWorldTransform().parent_) {
-					current = colliderB->GetWorldTransform().matWorld_;
-					parent = colliderB->GetWorldTransform().parent_->matWorld_;
-					colliderAMatrix = current * parent;
-					colliderB->SetTranslation(MakeTranslateMatrix(colliderAMatrix));
-					colliderB->HitBoxUpdate();
-				}
-				aabbA = colliderA->GetAABB(a);
-				aabbB = colliderB->GetAABB(b);
-			}
-			else {
-				aabbA = colliderA->GetAABB(a);
-				aabbB = colliderB->GetAABB(b);
-			}
-
+			AABB* aabbA = colliderA->GetAABB(a);
+			AABB* aabbB = colliderB->GetAABB(b);
 			// AABBで当たり判定
 			if (IsCollision(*aabbA, *aabbB)) {
-				OBB* obbA;
-				OBB* obbB;
-				if (colliderA->GetWorldTransform().parent_) {
-					Matrix4x4 current = colliderA->GetWorldTransform().matWorld_;
-					Matrix4x4 parent = colliderA->GetWorldTransform().parent_->matWorld_;
-					Matrix4x4 colliderAMatrix = current * parent;
-					colliderA->SetTranslation(MakeTranslateMatrix(colliderAMatrix));
-					colliderA->HitBoxUpdate();
-					if (colliderB->GetWorldTransform().parent_) {
-						current = colliderB->GetWorldTransform().matWorld_;
-						parent = colliderB->GetWorldTransform().parent_->matWorld_;
-						colliderAMatrix = current * parent;
-						colliderB->SetTranslation(MakeTranslateMatrix(colliderAMatrix));
-						colliderB->HitBoxUpdate();
-					}
-					obbA = colliderA->GetOBB(a);
-					obbB = colliderB->GetOBB(b);
-				}
-				else {
-					obbA = colliderA->GetOBB(a);
-					obbB = colliderB->GetOBB(b);
-				}
-
+				OBB* obbA = colliderA->GetOBB(a);
+				OBB* obbB = colliderB->GetOBB(b);
 				// OBBで当たり判定
 				if (IsCollision(*obbA, *obbB)) {
-					// プレイヤーと敵の攻撃
+					// プレイヤーと敵
 					if ((collisionAttributeA & kCollisionAttributePlayer) &&
+						(collisionAttributeB & kCollisionAttributeEnemy)) {
+						colliderA->OnCollision(
+							*obbB, colliderB->GetWorldTransform(b), static_cast<uint32_t>(Collider::Type::PlayerToEnemy));
+						colliderB->OnCollision(
+							*obbA, colliderA->GetWorldTransform(a), static_cast<uint32_t>(Collider::Type::PlayerToEnemy));
+					}
+					// プレイヤーと敵の攻撃
+					else if ((collisionAttributeA & kCollisionAttributePlayer) &&
 						(collisionAttributeB & kCollisionAttributeEnemyAttack)) {
 						colliderA->OnCollision(
 							*obbB, colliderB->GetWorldTransform(b), static_cast<uint32_t>(Collider::Type::PlayerToEnemyAttack));
@@ -139,13 +105,6 @@ void CollisionManager::CheakCollisionPair(Collider* colliderA, Collider* collide
 							*obbB, colliderB->GetWorldTransform(b), static_cast<uint32_t>(Collider::Type::EnemyToBlock));
 						colliderB->OnCollision(
 							*obbA, colliderA->GetWorldTransform(a), static_cast<uint32_t>(Collider::Type::EnemyToBlock));
-					}
-					else {
-						// プレイヤーと敵の衝突
-						colliderA->OnCollision(
-							*obbB, colliderB->GetWorldTransform(b), static_cast<uint32_t>(Collider::Type::PlayerToEnemy));
-						colliderB->OnCollision(
-							*obbA, colliderA->GetWorldTransform(a), static_cast<uint32_t>(Collider::Type::PlayerToEnemy));
 					}
 				}
 			}

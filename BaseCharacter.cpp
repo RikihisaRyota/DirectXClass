@@ -42,6 +42,16 @@ void BaseCharacter::Update() {
 	}
 }
 
+void BaseCharacter::TransformUpdate() {
+	for (size_t i = 0; i < worldTransform_.size(); i++) {
+		worldTransform_.at(i).TransferMatrix();
+		worldTransform_Motion_.at(i).TransferMatrix();
+		for (size_t model = 0; model < worldTransforms_Parts_.at(i).size(); model++) {
+			worldTransforms_Parts_.at(i).at(model).TransferMatrix();
+		}
+	}
+}
+
 void BaseCharacter::AddWorldtransform(const WorldTransform& worldtransfrom) {
 	WorldTransform worldTransform_Motion;
 	std::vector<WorldTransform> worldTransforms_Parts;
