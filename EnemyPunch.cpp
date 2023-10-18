@@ -32,7 +32,7 @@ void EnemyPunch::Initialize() {
 		kTarget_Start_Rotate_.Normalize();
 	}
 	// エンドの角度
-	kTarget_End_Rotate_ = target_.translation_ - origin_.translation_;
+	kTarget_End_Rotate_ = Vector3(target_.matWorld_.m[3][0], target_.matWorld_.m[3][1], target_.matWorld_.m[3][2]) - origin_.translation_;
 	if (kTarget_End_Rotate_ != Vector3(0.0f, 0.0f, 0.0f)) {
 		kTarget_End_Rotate_.Normalize();
 	}

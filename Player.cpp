@@ -71,9 +71,14 @@ void Player::Update() {
 	BaseCharacter::Update();
 	HitBoxUpdate();
 	ImGui::Begin("Player");
-	ImGui::Text("LocalPosition:x:%f,y:%f,z:%f", worldTransform_.at(0).translation_.x, worldTransform_.at(0).translation_.y, worldTransform_.at(0).translation_.z);
-	ImGui::Text("WorldPosition:x:%f,y:%f,z:%f", worldTransform_.at(0).matWorld_.m[3][0], worldTransform_.at(0).matWorld_.m[3][1], worldTransform_.at(0).matWorld_.m[3][2]);
-	ImGui::Text("AABBCenter:x:%f,y:%f,z:%f", aabb_.at(0).center_.x, aabb_.at(0).center_.y, aabb_.at(0).center_.z);
+	ImGui::Text("Jump : B or SPACE");
+	ImGui::Text("Dush : X or SHIFT");
+	if (ImGui::TreeNode("Debug")) {
+		ImGui::Text("LocalPosition:x:%f,y:%f,z:%f", worldTransform_.at(0).translation_.x, worldTransform_.at(0).translation_.y, worldTransform_.at(0).translation_.z);
+		ImGui::Text("WorldPosition:x:%f,y:%f,z:%f", worldTransform_.at(0).matWorld_.m[3][0], worldTransform_.at(0).matWorld_.m[3][1], worldTransform_.at(0).matWorld_.m[3][2]);
+		ImGui::Text("AABBCenter:x:%f,y:%f,z:%f", aabb_.at(0).center_.x, aabb_.at(0).center_.y, aabb_.at(0).center_.z);
+		ImGui::TreePop();
+	}
 	ImGui::End();
 }
 
