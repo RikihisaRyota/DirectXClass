@@ -42,6 +42,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// LineGraphicsPipelineの静的初期化
 	LineGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
+	// ParticleGraphicsPipelineの静的初期化
+	ParticleGraphicsPipline::SetDevice(dxCommon->GetDevice());
+
 	// Planeの静的初期化
 	PlaneRenderer::SetDevice(dxCommon->GetDevice());
 

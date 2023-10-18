@@ -1,5 +1,6 @@
 #include "Particle.h"
 
+#include "DirectXCommon.h"
 #include "TextureManager.h"
 #include "MyMath.h"
 
@@ -40,8 +41,8 @@ Particle* Particle::Create(uint32_t IsLighting, bool IsToon) {
 	return particle;
 }
 
-void Particle::Draw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
-	BasicDraw(worldTransform, viewProjection, textureHadle);
+void Particle::Draw(const ViewProjection& viewProjection, uint32_t textureHadle) {
+	BasicDraw( viewProjection, textureHadle);
 }
 
 void Particle::SetMaterial(const cMaterial& material) {
@@ -114,8 +115,9 @@ void Particle::Initialize() {
 	instancingBuff_->Map(0, nullptr,reinterpret_cast<void**>(&worldTransform_));
 	// 単位行列
 	for (size_t i = 0; i < kNumInstance_; i++) {
-		worldTransform_[i].matWorld_ = MakeIdentity4x4();
-		worldTransform_[i].TransferMatrix();
+		worldTransform_[i].Initialize();
+		worldTransform_[i].translation_ = { i * 0.1f,i * 0.1f ,i * 0.1f };
+		worldTransform_[i].UpdateMatrix();
 	}
 	// シェーダーリソースビュー
 	D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
@@ -125,12 +127,14 @@ void Particle::Initialize() {
 	desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 	desc.Buffer.NumElements = kNumInstance_;
 	desc.Buffer.StructureByteStride = sizeof(WorldTransform);
-	TextureManager::GetInstance()->GetCPUDescriptorHandle();
-	TextureManager::GetInstance()->GetGPUDescriptorHandle();
+	descriptorSizeSRV = DirectXCommon::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	instancingSRVCPUHandle = TextureManager::GetInstance()->GetCPUDescriptorHandle(descriptorSizeSRV);
+	instancingSRVGPUHandle = TextureManager::GetInstance()->GetGPUDescriptorHandle(descriptorSizeSRV);
+	DirectXCommon::GetInstance()->GetDevice()->CreateShaderResourceView(instancingBuff_.Get(),&desc, instancingSRVCPUHandle);
 #pragma endregion
 }
 
-void Particle::BasicDraw(const WorldTransform& worldTransform, const ViewProjection& viewProjection, uint32_t textureHadle) {
+void Particle::BasicDraw(const ViewProjection& viewProjection, uint32_t textureHadle) {
 	// ルートシグネチャの設定
 	cmdList_->SetGraphicsRootSignature(basicGraphicsPipline_->GetRootSignature());
 
@@ -146,20 +150,20 @@ void Particle::BasicDraw(const WorldTransform& worldTransform, const ViewProject
 	// インデックスバッファの設定
 	cmdList_->IASetIndexBuffer(&ibView_);
 
-	// CBVをセット（ワールド行列）
-	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(ParticleGraphicsPipline::ROOT_PARAMETER_TYP::WORLDTRANSFORM), worldTransform.constBuff_->GetGPUVirtualAddress());
-
 	// CBVをセット（ビュープロジェクション行列）
 	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(ParticleGraphicsPipline::ROOT_PARAMETER_TYP::VIEWPROJECTION), viewProjection.constBuff_->GetGPUVirtualAddress());
 
 	// CBVをセット（Material）
 	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(ParticleGraphicsPipline::ROOT_PARAMETER_TYP::MATERIAL), materialBuff_->GetGPUVirtualAddress());
 
+	// instancing用のStructuredBuffをSRVにセット
+	cmdList_->SetGraphicsRootDescriptorTable(1, instancingSRVGPUHandle);
+
 	// SRVをセット
 	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(cmdList_.Get(), static_cast<int>(ParticleGraphicsPipline::ROOT_PARAMETER_TYP::TEXTURE), textureHadle);
 
 	// 描画コマンド
-	cmdList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
+	cmdList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), kNumInstance_, 0, 0, 0);
 }
 
 ComPtr<ID3D12Resource> Particle::CreateBuffer(UINT size) {

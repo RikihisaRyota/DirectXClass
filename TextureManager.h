@@ -94,7 +94,7 @@ public: // メンバ関数
 	/// srvの生成
 	/// </summary>
 	/// <param name="metadata">metadata</param>
-	void CreateShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* texture);
+	void CreateShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResourec, uint32_t count);
 	void CreateShaderResourceView(ID3D12Resource* textureResourec);
 	/// <summary>
 	/// デスクリプタテーブルをセット
@@ -131,7 +131,7 @@ public: // メンバ関数
 	/// <param name="descriptorSize">descriptorSize</param>
 	/// <param name="index">index</param>
 	/// <returns></returns>
-	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(uint32_t descriptorSize);
 
 	/// <summary>
 	/// GetCPUDescriptorHandle
@@ -140,7 +140,7 @@ public: // メンバ関数
 	/// <param name="descriptorSize">descriptorSize</param>
 	/// <param name="index">index</param>
 	/// <returns></returns>
-	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
+	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(uint32_t descriptorSize);
 
 	/// <summary>
 	/// リソース情報取得

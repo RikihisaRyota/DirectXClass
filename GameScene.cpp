@@ -44,6 +44,9 @@ void GameScene::Initialize() {
 	inGameLoopSoundHandle_ = audio_->SoundLoadWave("Resources/Audio/ingameBGM.wav");
 	inGameLoopPlayHandle_ = -1;
 	isTitle_ = true;
+
+	//particle_ = std::make_unique<Particle>();
+	//particle_.reset(Particle::Create());
 }
 
 void GameScene::Update() {
@@ -1296,6 +1299,7 @@ void GameScene::Draw() {
 			}
 		}
 	}
+	//particle_->Draw(viewProjection_);
 	PrimitiveDrawer::GetInstance()->PrimitiveDrawer::Draw();
 	// 3Dオブジェクト描画後処理
 	PlaneRenderer::PostDraw();

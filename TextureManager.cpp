@@ -47,25 +47,24 @@ uint32_t TextureManager::LoadInternal(const std::string& filePath) {
 	// どこが空いているか探す
 	for (uint32_t i = static_cast<int>(TextureHandle::COUNT); i < kNumDescriptors; i++) {
 		if (!useTable_[i]) {
-			kNumDescriptorsCount = i;
 
 			useTable_[i] = true;
 
 			// TextureデータをCPUにロード
 			DirectX::ScratchImage mipImage = LoadTexture(filePath);
 
-			textures_[kNumDescriptorsCount].name = filePath;
+			textures_[i].name = filePath;
 
 			const DirectX::TexMetadata& metadata = mipImage.GetMetadata();
 
 			// TextureResourceの設定
-			textures_[kNumDescriptorsCount].resource = CreateTextureResourec(metadata);
+			textures_[i].resource = CreateTextureResourec(metadata);
 
 			// TextureResourceをTextureデータに転送
-			UploadTextureData(textures_[kNumDescriptorsCount].resource.Get(), mipImage);
+			UploadTextureData(textures_[i].resource.Get(), mipImage);
 
 			// SRVの作成
-			CreateShaderResourceView(metadata, textures_[kNumDescriptorsCount].resource.Get());
+			CreateShaderResourceView(metadata, textures_[i].resource.Get(),i);
 
 			// 解放
 			mipImage.Release();
@@ -145,7 +144,7 @@ void TextureManager::UploadTextureData(ID3D12Resource* texture, const DirectX::S
 	}
 }
 
-void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResourec) {
+void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResourec,uint32_t count) {
 	// metaDataを基にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = metadata.format;
@@ -154,8 +153,8 @@ void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metada
 	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
 
 	// SRVを作成するDescriptorHeapの場所を決める
-	textures_[kNumDescriptorsCount].cpuDescHandleSRV = GetCPUDescriptorHandle(srvDescriptorHeap_.Get(), descriptorHandleIncrementSize, kNumDescriptorsCount);
-	textures_[kNumDescriptorsCount].gpuDescHandleSRV = GetGPUDescriptorHandle(srvDescriptorHeap_.Get(), descriptorHandleIncrementSize, kNumDescriptorsCount);
+	textures_[kNumDescriptorsCount].cpuDescHandleSRV = GetCPUDescriptorHandle(descriptorHandleIncrementSize);
+	textures_[kNumDescriptorsCount].gpuDescHandleSRV = GetGPUDescriptorHandle(descriptorHandleIncrementSize);
 
 	// SRVの生成
 	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[kNumDescriptorsCount].cpuDescHandleSRV);
@@ -168,8 +167,8 @@ void TextureManager::CreateShaderResourceView(ID3D12Resource* textureResourec) {
 	srvDesc.Texture1D.MipLevels = 1;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	// SRVを作成するDescriptorHeapの場所を決める
-	textures_[static_cast<int>(TextureHandle::PERA)].cpuDescHandleSRV = GetCPUDescriptorHandle(srvDescriptorHeap_.Get(), descriptorHandleIncrementSize, static_cast<int>(TextureHandle::PERA));
-	textures_[static_cast<int>(TextureHandle::PERA)].gpuDescHandleSRV = GetGPUDescriptorHandle(srvDescriptorHeap_.Get(), descriptorHandleIncrementSize, static_cast<int>(TextureHandle::PERA));
+	textures_[static_cast<int>(TextureHandle::PERA)].cpuDescHandleSRV = GetCPUDescriptorHandle(descriptorHandleIncrementSize);
+	textures_[static_cast<int>(TextureHandle::PERA)].gpuDescHandleSRV = GetGPUDescriptorHandle(descriptorHandleIncrementSize);
 
 	// SRVの生成
 	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[static_cast<int>(TextureHandle::PERA)].cpuDescHandleSRV);
@@ -234,7 +233,7 @@ void TextureManager::Initialize(DirectXCommon* device) {
 		UploadTextureData(textures_[kNumDescriptorsCount].resource.Get(), mipImage);
 
 		// SRVの作成
-		CreateShaderResourceView(metadata, textures_[kNumDescriptorsCount].resource.Get());
+		CreateShaderResourceView(metadata, textures_[kNumDescriptorsCount].resource.Get(),i);
 
 		// 解放
 		mipImage.Release();
@@ -243,15 +242,16 @@ void TextureManager::Initialize(DirectXCommon* device) {
 }
 
 
-D3D12_CPU_DESCRIPTOR_HANDLE TextureManager::GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index) {
-	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	handleCPU.ptr += (descriptorSize * index);
+D3D12_CPU_DESCRIPTOR_HANDLE TextureManager::GetCPUDescriptorHandle(uint32_t descriptorSize) {
+	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = srvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+	handleCPU.ptr += (descriptorSize * kNumDescriptorsCount);
+	kNumDescriptorsCount++;
 	return handleCPU;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index) {
-	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	handleGPU.ptr += (descriptorSize * index);
+D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetGPUDescriptorHandle(uint32_t descriptorSize) {
+	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = srvDescriptorHeap_->GetGPUDescriptorHandleForHeapStart();
+	handleGPU.ptr += (descriptorSize * kNumDescriptorsCount);
 	return handleGPU;
 }
 

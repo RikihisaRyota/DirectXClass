@@ -16,18 +16,12 @@ public:
 	static void PostDraw();
 	static Particle* Create(uint32_t IsLighting = 1, bool IsToon = false);
 	void Draw(
-		const WorldTransform& worldTransform,
 		const ViewProjection& viewProjection,
 		uint32_t textureHadle = 0u);
 	void SetMaterial(const cMaterial& material);
 private:
 	void Initialize();
 	void BasicDraw(
-		const WorldTransform& worldTransform,
-		const ViewProjection& viewProjection,
-		uint32_t textureHadle);
-	void ToonDraw(
-		const WorldTransform& worldTransform,
 		const ViewProjection& viewProjection,
 		uint32_t textureHadle);
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(UINT size);
@@ -63,10 +57,13 @@ private:
 #pragma endregion
 #pragma region ワールドトランスフォーム
 	const uint32_t kNumInstance_ = 10;
+	uint32_t descriptorSizeSRV = 0u;
 	// ワールドトランスフォームマトリックスリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingBuff_;
 	// ワールドトランスフォーム
 	WorldTransform* worldTransform_ = nullptr;
+	D3D12_CPU_DESCRIPTOR_HANDLE instancingSRVCPUHandle;
+	D3D12_GPU_DESCRIPTOR_HANDLE instancingSRVGPUHandle;
 #pragma endregion
 
 };
