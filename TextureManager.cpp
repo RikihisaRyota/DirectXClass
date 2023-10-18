@@ -215,8 +215,6 @@ void TextureManager::Initialize(DirectXCommon* device) {
 	filePath[0] = ("resources/white1x1.png");
 	filePath[1] = ("resources/toon.png");
 	for (uint32_t i = 0; i < InitialTexture; i++) {
-		kNumDescriptorsCount = i;
-
 		useTable_[i] = true;
 
 		// TextureデータをCPUにロード
