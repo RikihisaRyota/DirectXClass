@@ -61,7 +61,7 @@ private:
 	// ワールドトランスフォームマトリックスリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingBuff_;
 	// ワールドトランスフォーム
-	WorldTransform* worldTransform_ = nullptr;
+	WorldTransform* mapWorldTransform_ = nullptr;
 	D3D12_CPU_DESCRIPTOR_HANDLE instancingSRVCPUHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE instancingSRVGPUHandle;
 #pragma endregion

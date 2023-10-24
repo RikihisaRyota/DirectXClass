@@ -112,11 +112,11 @@ void Particle::Initialize() {
 #pragma endregion
 #pragma region ワールドトランスフォームバッファ
 	instancingBuff_ = CreateBuffer(sizeof(WorldTransform) * kNumInstance_);
-	instancingBuff_->Map(0, nullptr,reinterpret_cast<void**>(&worldTransform_));
+	instancingBuff_->Map(0, nullptr,reinterpret_cast<void**>(&mapWorldTransform_));
 	// 単位行列
 	WorldTransform worldTransform[10];
 	for (size_t i = 0; i < kNumInstance_; i++) {
-		
+		mapWorldTransform_->matWorld_
 	}
 	// シェーダーリソースビュー
 	D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
