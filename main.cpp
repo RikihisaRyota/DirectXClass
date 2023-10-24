@@ -78,6 +78,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Audio* audio = Audio::GetInstance();
 	audio->Initialize();
 
+	// パーティクル
+	Particle::SetDevice(dxCommon->GetDevice());
+
 	// ゲームシーンの初期化
 	GameScene* gameScene = nullptr;
 	gameScene = new GameScene();

@@ -33,8 +33,8 @@ void GameScene::Initialize() {
 	// 線
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection_);
 
-	sprite_[0].reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
-	sprite_[1].reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
+	//sprite_[0].reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
+	//sprite_[1].reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
 
 	// 音テスト
 	audio_ = Audio::GetInstance();
@@ -45,8 +45,8 @@ void GameScene::Initialize() {
 	inGameLoopPlayHandle_ = -1;
 	isTitle_ = true;
 
-	//particle_ = std::make_unique<Particle>();
-	//particle_.reset(Particle::Create());
+	particle_ = std::make_unique<Particle>();
+	particle_.reset(Particle::Create());
 }
 
 void GameScene::Update() {
@@ -71,17 +71,17 @@ void GameScene::Update() {
 	debugCamera_->Update(&viewProjection_);
 
 
-	ImGui::Begin("Sprite:");
-	Vector2 position = sprite_[0]->GetPosition();
-	ImGui::SliderFloat2("position", &position.x, 0.0f, 1280.0f);
-	sprite_[0]->SetPosition(position);
-	Vector4 color = sprite_[0]->GetColor();
-	ImGui::SliderFloat4("color", &color.x, -1.0f, 1.0f);
-	sprite_[0]->SetColor(color);
-	Vector2 size = sprite_[0]->GetSize();
-	ImGui::SliderFloat2("size", &size.x, -5.0f, 5.0f);
-	sprite_[0]->SetSize(size);
-	ImGui::End();
+	//ImGui::Begin("Sprite:");
+	//Vector2 position = sprite_[0]->GetPosition();
+	//ImGui::SliderFloat2("position", &position.x, 0.0f, 1280.0f);
+	//sprite_[0]->SetPosition(position);
+	//Vector4 color = sprite_[0]->GetColor();
+	//ImGui::SliderFloat4("color", &color.x, -1.0f, 1.0f);
+	//sprite_[0]->SetColor(color);
+	//Vector2 size = sprite_[0]->GetSize();
+	//ImGui::SliderFloat2("size", &size.x, -5.0f, 5.0f);
+	//sprite_[0]->SetSize(size);
+	//ImGui::End();
 
 #pragma region ライト
 	{
@@ -1315,19 +1315,21 @@ void GameScene::Draw() {
 #pragma region 前景スプライト描画
 	// 前景スプライト描画前処理
 	Sprite::PreDraw(commandList);
+	Particle::PreDraw(commandList);
 
 	/// <summary>
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
 	Sprite::SetBlendState(Sprite::BlendState::kNormal);
-	for (size_t i = 0; i < 2; i++) {
-		sprite_[i]->Draw();
-	}
-
+	//for (size_t i = 0; i < 2; i++) {
+	//	sprite_[i]->Draw();
+	//}
+	particle_->Draw(viewProjection_);
 	// スプライト描画後処理
 	Sprite::PostDraw();
-
+	Particle::PostDraw();
 #pragma endregion
+
 }
 
 void GameScene::Release() {

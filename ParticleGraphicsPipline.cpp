@@ -36,17 +36,24 @@ void ParticleGraphicsPipline::CreateRootsignature() {
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	// DescriptorRangeの設定
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	descriptorRange[0].BaseShaderRegister = 0;// t0を使用
-	descriptorRange[0].NumDescriptors = 1;// 数は1つ
-	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;// SRVを使う
-	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;// Offsetを自動計算
+	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
+	// StructuredBuffer用
+	descriptorRange[0].BaseShaderRegister = 0; // t0から始まる
+	descriptorRange[0].NumDescriptors = 1; // 数は1つ
+	descriptorRange[0].RangeType= D3D12_DESCRIPTOR_RANGE_TYPE_SRV;// SRVを使う
+	descriptorRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;// Offsetを自動計算
+	// テクスチャ
+	descriptorRange[1].BaseShaderRegister = 1;// t1を使用
+	descriptorRange[1].NumDescriptors = 1;// 数は1つ
+	descriptorRange[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;// SRVを使う
+	descriptorRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;// Offsetを自動計算
 
 	// rootParameterの生成
 	D3D12_ROOT_PARAMETER rootParameters[static_cast<int>(ROOT_PARAMETER_TYP::COUNT)] = {};
-	rootParameters[static_cast<int>(ROOT_PARAMETER_TYP::WORLDTRANSFORM)].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
+	rootParameters[static_cast<int>(ROOT_PARAMETER_TYP::WORLDTRANSFORM)].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
 	rootParameters[static_cast<int>(ROOT_PARAMETER_TYP::WORLDTRANSFORM)].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
-	rootParameters[static_cast<int>(ROOT_PARAMETER_TYP::WORLDTRANSFORM)].Descriptor.ShaderRegister = static_cast<int>(ROOT_PARAMETER_TYP::WORLDTRANSFORM); //!< レジスタ番号0とバインド
+	rootParameters[static_cast<int>(ROOT_PARAMETER_TYP::WORLDTRANSFORM)].DescriptorTable.pDescriptorRanges = &descriptorRange[0]; // 最初のデスクリプタレンジを指定
+	rootParameters[static_cast<int>(ROOT_PARAMETER_TYP::WORLDTRANSFORM)].DescriptorTable.NumDescriptorRanges = 1; // 1つのデスクリプタレンジを利用
 
 	rootParameters[static_cast<int>(ROOT_PARAMETER_TYP::VIEWPROJECTION)].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; //!< CBVで使う
 	rootParameters[static_cast<int>(ROOT_PARAMETER_TYP::VIEWPROJECTION)].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; //!< Shaderで使う
@@ -58,7 +65,7 @@ void ParticleGraphicsPipline::CreateRootsignature() {
 
 	rootParameters[static_cast<int>(ROOT_PARAMETER_TYP::TEXTURE)].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;// DescriptorTableを使う
 	rootParameters[static_cast<int>(ROOT_PARAMETER_TYP::TEXTURE)].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;// PixelShaderで使う
-	rootParameters[static_cast<int>(ROOT_PARAMETER_TYP::TEXTURE)].DescriptorTable.pDescriptorRanges = &descriptorRange[0]; // 最初のデスクリプタレンジを指定
+	rootParameters[static_cast<int>(ROOT_PARAMETER_TYP::TEXTURE)].DescriptorTable.pDescriptorRanges = &descriptorRange[1]; // 最初のデスクリプタレンジを指定
 	rootParameters[static_cast<int>(ROOT_PARAMETER_TYP::TEXTURE)].DescriptorTable.NumDescriptorRanges = 1; // 1つのデスクリプタレンジを利用
 
 	descriptionRootSignature.pParameters = rootParameters; //!< ルートパラメータ配列へのポインタ

@@ -114,23 +114,22 @@ void Particle::Initialize() {
 	instancingBuff_ = CreateBuffer(sizeof(WorldTransform) * kNumInstance_);
 	instancingBuff_->Map(0, nullptr,reinterpret_cast<void**>(&worldTransform_));
 	// 単位行列
+	WorldTransform worldTransform[10];
 	for (size_t i = 0; i < kNumInstance_; i++) {
-		worldTransform_[i].Initialize();
-		worldTransform_[i].translation_ = { i * 0.1f,i * 0.1f ,i * 0.1f };
-		worldTransform_[i].UpdateMatrix();
+		
 	}
 	// シェーダーリソースビュー
 	D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
 	desc.Format = DXGI_FORMAT_UNKNOWN;
 	desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	desc.Buffer.FirstElement = 0;
 	desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 	desc.Buffer.NumElements = kNumInstance_;
 	desc.Buffer.StructureByteStride = sizeof(WorldTransform);
-	descriptorSizeSRV = DirectXCommon::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	instancingSRVCPUHandle = TextureManager::GetInstance()->GetCPUDescriptorHandle(descriptorSizeSRV);
-	instancingSRVGPUHandle = TextureManager::GetInstance()->GetGPUDescriptorHandle(descriptorSizeSRV);
-	DirectXCommon::GetInstance()->GetDevice()->CreateShaderResourceView(instancingBuff_.Get(),&desc, instancingSRVCPUHandle);
+	descriptorSizeSRV = sDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	TextureManager::GetInstance()->GetCPUGPUHandle(instancingSRVCPUHandle, instancingSRVGPUHandle, descriptorSizeSRV);
+	sDevice->CreateShaderResourceView(instancingBuff_.Get(),&desc, instancingSRVCPUHandle);
 #pragma endregion
 }
 
@@ -150,14 +149,14 @@ void Particle::BasicDraw(const ViewProjection& viewProjection, uint32_t textureH
 	// インデックスバッファの設定
 	cmdList_->IASetIndexBuffer(&ibView_);
 
+	// instancing用のStructuredBuffをSRVにセット
+	cmdList_->SetGraphicsRootDescriptorTable(static_cast<int>(ParticleGraphicsPipline::ROOT_PARAMETER_TYP::WORLDTRANSFORM), instancingSRVGPUHandle);
+	
 	// CBVをセット（ビュープロジェクション行列）
 	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(ParticleGraphicsPipline::ROOT_PARAMETER_TYP::VIEWPROJECTION), viewProjection.constBuff_->GetGPUVirtualAddress());
 
 	// CBVをセット（Material）
 	cmdList_->SetGraphicsRootConstantBufferView(static_cast<int>(ParticleGraphicsPipline::ROOT_PARAMETER_TYP::MATERIAL), materialBuff_->GetGPUVirtualAddress());
-
-	// instancing用のStructuredBuffをSRVにセット
-	cmdList_->SetGraphicsRootDescriptorTable(1, instancingSRVGPUHandle);
 
 	// SRVをセット
 	TextureManager::GetInstance()->SetGraphicsRootDescriptorTable(cmdList_.Get(), static_cast<int>(ParticleGraphicsPipline::ROOT_PARAMETER_TYP::TEXTURE), textureHadle);

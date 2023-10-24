@@ -153,11 +153,12 @@ void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metada
 	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
 
 	// SRVを作成するDescriptorHeapの場所を決める
-	textures_[kNumDescriptorsCount].cpuDescHandleSRV = GetCPUDescriptorHandle(descriptorHandleIncrementSize);
-	textures_[kNumDescriptorsCount].gpuDescHandleSRV = GetGPUDescriptorHandle(descriptorHandleIncrementSize);
-
+	GetCPUGPUHandle(
+		textures_[kNumDescriptorsCount].cpuDescHandleSRV, 
+		textures_[kNumDescriptorsCount].gpuDescHandleSRV, 
+		descriptorHandleIncrementSize);
 	// SRVの生成
-	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[kNumDescriptorsCount].cpuDescHandleSRV);
+	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[kNumDescriptorsCount - 1].cpuDescHandleSRV);
 }
 
 void TextureManager::CreateShaderResourceView(ID3D12Resource* textureResourec) {
@@ -243,7 +244,6 @@ void TextureManager::Initialize(DirectXCommon* device) {
 D3D12_CPU_DESCRIPTOR_HANDLE TextureManager::GetCPUDescriptorHandle(uint32_t descriptorSize) {
 	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = srvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
 	handleCPU.ptr += (descriptorSize * kNumDescriptorsCount);
-	kNumDescriptorsCount++;
 	return handleCPU;
 }
 
@@ -257,4 +257,10 @@ const D3D12_RESOURCE_DESC TextureManager::GetResoureDesc(uint32_t textureHandle)
 	assert(textureHandle < textures_.size());
 	Texture& texture = textures_.at(textureHandle);
 	return texture.resource->GetDesc();
+}
+
+void TextureManager::GetCPUGPUHandle(D3D12_CPU_DESCRIPTOR_HANDLE& cpu, D3D12_GPU_DESCRIPTOR_HANDLE& gpu, uint32_t descriptorSize) {
+	cpu = GetCPUDescriptorHandle(descriptorSize);
+	gpu = GetGPUDescriptorHandle(descriptorSize);
+	kNumDescriptorsCount++;
 }

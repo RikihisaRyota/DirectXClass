@@ -30,7 +30,5 @@ VertexShaderOutput main(VertexShaderInput input,uint instanceID:SV_InstanceID)
     output.position = mul(mul(output.position, gWorldTransform[instanceID].world), mul(gViewProjection.view, gViewProjection.projection));
     output.normal = normalize(mul(input.normal, (float3x3) gWorldTransform[instanceID].world));
     output.texcoord = input.texcoord;
-    output.ray = input.position;
-    output.ray = mul(output.ray, gWorldTransform[instanceID].world);
     return output;
 }
