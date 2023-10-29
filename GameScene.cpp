@@ -101,6 +101,7 @@ void GameScene::Update() {
 	// ブロック
 	block_->Update();
 	// プレイヤー
+	playerAttack_->Update();
 	player_->Update();
 	// 敵
 	enemy_->Update();
