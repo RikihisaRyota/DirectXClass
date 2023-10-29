@@ -46,7 +46,7 @@ void Pera::Initialize(DirectXCommon* dxCommon, ID3D12Resource* buff, ID3D12Descr
 		// レンダーターゲットビューの生成
 		sDxCommon_->GetInstance()->GetDevice()->CreateRenderTargetView(peraResource_.Get(), &rtvDesc, rtvHandle_);
 
-		TextureManager::GetInstance()->CreateShaderResourceView(peraResource_.Get());
+		//TextureManager::GetInstance()->CreateShaderResourceView(peraResource_.Get());
 	}
 }
 

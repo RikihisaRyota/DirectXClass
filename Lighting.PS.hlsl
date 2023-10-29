@@ -54,10 +54,10 @@ PixelShaderOutput main(VertexShaderOutput input)
         
         float4 diffuse = gDirectionLight.color * cos * gDirectionLight.intensity;
         // スペキュラー
-        float3 refVec = reflect(gDirectionLight.direction, input.normal);
+        float3 refVec = reflect(gDirectionLight.direction, normalize(input.normal));
         float3 toEye = normalize(gViewProjection.cameraPos - input.ray.xyz);
         float t = saturate(dot(refVec, toEye));
-        t = pow(t, 5.0f);
+        t = pow(t, 20.0f);
         float4 specular = gDirectionLight.color * t * gDirectionLight.sharpness;
         // アンビエント
         float4 ambient = float4(0.1f, 0.1f, 0.1f, 0.0f);

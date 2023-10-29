@@ -11,6 +11,10 @@
 
 class Particle {
 public:
+	struct TransformationMatrix {
+		Matrix4x4 World;
+	};
+public:
 	static void SetDevice(ID3D12Device* device);
 	static void PreDraw(ID3D12GraphicsCommandList* cmdList);
 	static void PostDraw();
@@ -61,7 +65,7 @@ private:
 	// ワールドトランスフォームマトリックスリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingBuff_;
 	// ワールドトランスフォーム
-	WorldTransform* mapWorldTransform_ = nullptr;
+	TransformationMatrix* instancingDate_ = nullptr;
 	D3D12_CPU_DESCRIPTOR_HANDLE instancingSRVCPUHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE instancingSRVGPUHandle;
 #pragma endregion

@@ -72,6 +72,8 @@ private: // メンバ変数
 	};
 	
 	std::unique_ptr<Sprite> sprite_[2];
+	float animation_;
+	Vector2 size_;
 
 	/// <summary>
 	/// ゲーム用

@@ -14,7 +14,9 @@ void GameScene::Initialize() {
 
 	// ロード
 	textureHandle_ = TextureManager::Load("resources/uvChecker.png");
-
+	auto tex = TextureManager::Load("resources/ikamoveSheet.png");
+	animation_ = 0.0f;
+	size_ = {256.0f,256.0f};
 	// デバックカメラ
 	debugCamera_ = new DebugCamera();
 
@@ -33,8 +35,9 @@ void GameScene::Initialize() {
 	// 線
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection_);
 
-	//sprite_[0].reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
-	//sprite_[1].reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
+	sprite_[0].reset(Sprite::Create(textureHandle_, Vector2(0.0f, 0.0f)));
+	sprite_[1].reset(Sprite::Create(tex, Vector2(1280.0f*0.5f, 0.0f),Vector4(1.0f,1.0f,1.0f,1.0f), Vector2(0.5f, 0.5f)));
+	sprite_[1]->SetSize(Vector2(64.0f, 64.0f));
 
 	// 音テスト
 	audio_ = Audio::GetInstance();
@@ -71,17 +74,23 @@ void GameScene::Update() {
 	debugCamera_->Update(&viewProjection_);
 
 
-	//ImGui::Begin("Sprite:");
-	//Vector2 position = sprite_[0]->GetPosition();
-	//ImGui::SliderFloat2("position", &position.x, 0.0f, 1280.0f);
-	//sprite_[0]->SetPosition(position);
-	//Vector4 color = sprite_[0]->GetColor();
-	//ImGui::SliderFloat4("color", &color.x, -1.0f, 1.0f);
-	//sprite_[0]->SetColor(color);
-	//Vector2 size = sprite_[0]->GetSize();
-	//ImGui::SliderFloat2("size", &size.x, -5.0f, 5.0f);
-	//sprite_[0]->SetSize(size);
-	//ImGui::End();
+	ImGui::Begin("Sprite:");
+	Vector2 position = sprite_[0]->GetPosition();
+	ImGui::SliderFloat2("position", &position.x, 0.0f, 1280.0f);
+	sprite_[0]->SetPosition(position);
+	Vector4 color = sprite_[0]->GetColor();
+	ImGui::SliderFloat4("color", &color.x, -1.0f, 1.0f);
+	sprite_[0]->SetColor(color);
+	Vector2 size = sprite_[0]->GetSize();
+	ImGui::SliderFloat2("size", &size.x, -5.0f, 5.0f);
+	sprite_[0]->SetSize(size);
+	ImGui::End();
+
+	sprite_[1]->SetTextureRect({ size_.x * animation_ ,0.0f }, { size_ });
+	animation_ += 1.0f;
+	if (animation_ >= 5.0f) {
+		animation_ = 0.0f;
+	}
 
 #pragma region ライト
 	{
@@ -1321,10 +1330,10 @@ void GameScene::Draw() {
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
 	Sprite::SetBlendState(Sprite::BlendState::kNormal);
-	//for (size_t i = 0; i < 2; i++) {
-	//	sprite_[i]->Draw();
-	//}
-	particle_->Draw(viewProjection_);
+	for (size_t i = 0; i < 2; i++) {
+		sprite_[i]->Draw();
+	}
+	particle_->Draw(viewProjection_, textureHandle_);
 	// スプライト描画後処理
 	Sprite::PostDraw();
 	Particle::PostDraw();

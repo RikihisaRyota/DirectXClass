@@ -15,7 +15,6 @@ public: // 静的メンバ関数
 	enum class TextureHandle {
 		WHITE1x1,
 		TOON,
-		PERA,
 		COUNT,
 	};
 
@@ -95,7 +94,7 @@ public: // メンバ関数
 	/// </summary>
 	/// <param name="metadata">metadata</param>
 	void CreateShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResourec, uint32_t count);
-	void CreateShaderResourceView(ID3D12Resource* textureResourec);
+	//void CreateShaderResourceView(ID3D12Resource* textureResourec);
 	/// <summary>
 	/// デスクリプタテーブルをセット
 	/// </summary>

@@ -111,12 +111,14 @@ void Particle::Initialize() {
 	material_->uvTransform_ = MakeAffineMatrix(Vector3(1.0f, 1.0f, 1.0f), Vector3(0.0f, 0.0f, 0.0f), Vector3(0.0f, 0.0f, 0.0f));
 #pragma endregion
 #pragma region ワールドトランスフォームバッファ
-	instancingBuff_ = CreateBuffer(sizeof(WorldTransform) * kNumInstance_);
-	instancingBuff_->Map(0, nullptr,reinterpret_cast<void**>(&mapWorldTransform_));
+	instancingBuff_ = CreateBuffer(sizeof(TransformationMatrix) * kNumInstance_);
+	instancingBuff_->Map(0, nullptr,reinterpret_cast<void**>(&instancingDate_));
 	// 単位行列
-	WorldTransform worldTransform[10];
 	for (size_t i = 0; i < kNumInstance_; i++) {
-		mapWorldTransform_->matWorld_
+		instancingDate_[i].World = MakeIdentity4x4();
+		instancingDate_[i].World.m[3][0] = i * 0.1f;
+		instancingDate_[i].World.m[3][1] = i * 0.1f;
+		instancingDate_[i].World.m[3][2] = i * 0.1f;
 	}
 	// シェーダーリソースビュー
 	D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
@@ -126,7 +128,7 @@ void Particle::Initialize() {
 	desc.Buffer.FirstElement = 0;
 	desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 	desc.Buffer.NumElements = kNumInstance_;
-	desc.Buffer.StructureByteStride = sizeof(WorldTransform);
+	desc.Buffer.StructureByteStride = sizeof(TransformationMatrix);
 	descriptorSizeSRV = sDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	TextureManager::GetInstance()->GetCPUGPUHandle(instancingSRVCPUHandle, instancingSRVGPUHandle, descriptorSizeSRV);
 	sDevice->CreateShaderResourceView(instancingBuff_.Get(),&desc, instancingSRVCPUHandle);

@@ -45,7 +45,7 @@ void TextureManager::UnLoadInternal() {
 
 uint32_t TextureManager::LoadInternal(const std::string& filePath) {
 	// どこが空いているか探す
-	for (uint32_t i = static_cast<int>(TextureHandle::COUNT); i < kNumDescriptors; i++) {
+	for (uint32_t i = 0; i < kNumDescriptors; i++) {
 		if (!useTable_[i]) {
 
 			useTable_[i] = true;
@@ -72,7 +72,7 @@ uint32_t TextureManager::LoadInternal(const std::string& filePath) {
 			break;
 		}
 	}
-	return kNumDescriptorsCount;
+	return kNumDescriptorsCount-1;
 }
 
 DirectX::ScratchImage TextureManager::LoadTexture(const std::string& filePath) {
@@ -161,19 +161,19 @@ void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metada
 	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[kNumDescriptorsCount - 1].cpuDescHandleSRV);
 }
 
-void TextureManager::CreateShaderResourceView(ID3D12Resource* textureResourec) {
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	srvDesc.Texture1D.MipLevels = 1;
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	// SRVを作成するDescriptorHeapの場所を決める
-	textures_[static_cast<int>(TextureHandle::PERA)].cpuDescHandleSRV = GetCPUDescriptorHandle(descriptorHandleIncrementSize);
-	textures_[static_cast<int>(TextureHandle::PERA)].gpuDescHandleSRV = GetGPUDescriptorHandle(descriptorHandleIncrementSize);
-
-	// SRVの生成
-	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[static_cast<int>(TextureHandle::PERA)].cpuDescHandleSRV);
-}
+//void TextureManager::CreateShaderResourceView(ID3D12Resource* textureResourec) {
+//	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+//	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+//	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+//	srvDesc.Texture1D.MipLevels = 1;
+//	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+//	// SRVを作成するDescriptorHeapの場所を決める
+//	textures_[static_cast<int>(TextureHandle::PERA)].cpuDescHandleSRV = GetCPUDescriptorHandle(descriptorHandleIncrementSize);
+//	textures_[static_cast<int>(TextureHandle::PERA)].gpuDescHandleSRV = GetGPUDescriptorHandle(descriptorHandleIncrementSize);
+//
+//	// SRVの生成
+//	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[static_cast<int>(TextureHandle::PERA)].cpuDescHandleSRV);
+//}
 
 void TextureManager::SetGraphicsRootDescriptorTable(ID3D12GraphicsCommandList* commandList, UINT rootParamIndex, uint32_t textureHandle) {
 	// シェーダリソースビューをセット
@@ -208,7 +208,7 @@ void TextureManager::Initialize(DirectXCommon* device) {
 		textures_[i].cpuDescHandleSRV.ptr = 0;
 		textures_[i].gpuDescHandleSRV.ptr = 0;
 		textures_[i].name.clear();
-		useTable_[i] = 0;
+		useTable_[i] = false;
 	}
 	// 初期テクスチャ
 	const int InitialTexture = 2;
