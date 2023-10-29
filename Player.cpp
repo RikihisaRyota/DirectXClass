@@ -401,7 +401,7 @@ void Player::GamePadInput() {
 	// プレイヤー移動
 	Move();
 	// 攻撃開始
-	/*if (Input::GetInstance()->TriggerKey(DIK_Q) ||
+	if (Input::GetInstance()->TriggerKey(DIK_Q) ||
 		(Input::GetInstance()->GetJoystickState(0, joyState) &&
 			(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_Y))) {
 		behaviorRequest_ = Behavior::kAttack;
@@ -412,7 +412,7 @@ void Player::GamePadInput() {
 			(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_B))) {
 		behaviorRequest_ = Behavior::kAttack;
 		playerAttack_->SetBehavior(PlayerAttack::Behavior::kTripleAttack);
-	}*/
+	}
 	// ダッシュ開始
 	if ((!IsDash_) &&
 		((Input::GetInstance()->IsControllerConnected() && ((
