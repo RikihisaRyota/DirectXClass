@@ -48,6 +48,9 @@ void Player::Update() {
 		default:
 			BehaviorRootInitialize();
 			break;
+		case Player::Behavior::kAttack:
+			BehaviorAttackInitialize();
+			break;
 		case Player::Behavior::kDash:
 			BehaviorDashInitialize();
 			break;
@@ -59,6 +62,9 @@ void Player::Update() {
 	case Player::Behavior::kRoot:
 	default:
 		BehaviorRootUpdate();
+		break;
+	case Player::Behavior::kAttack:
+		BehaviorAttackUpdate();
 		break;
 	case Player::Behavior::kDash:
 		BehaviorDashUpdate();
@@ -96,6 +102,14 @@ void Player::BehaviorRootUpdate() {
 			IsDash_ = false;
 		}
 	}
+}
+
+void Player::BehaviorAttackInitialize() {
+	playerAttack_->Initialize();
+}
+
+void Player::BehaviorAttackUpdate() {
+	playerAttack_->Update();
 }
 
 void Player::BehaviorDashInitialize() {
@@ -386,6 +400,9 @@ void Player::BehaviorInitialize() {
 		case Player::Behavior::kRoot:
 		default:
 			BehaviorRootInitialize();
+			break;
+		case Player::Behavior::kAttack:
+			BehaviorAttackInitialize();
 			break;
 		case Player::Behavior::kDash:
 			BehaviorDashInitialize();

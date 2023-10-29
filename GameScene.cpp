@@ -142,6 +142,8 @@ void GameScene::Draw() {
 	enemy_->Draw(viewProjection_);
 	enemyAttack_->Draw(viewProjection_);
 	player_->Draw(viewProjection_);
+	// パーティクル
+	playerAttack_->ParticleDraw(viewProjection_);
 
 	//block_->HitBoxDraw(viewProjection_);
 	//player_->HitBoxDraw(viewProjection_);

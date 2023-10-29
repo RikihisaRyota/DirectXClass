@@ -136,6 +136,14 @@ private: // メンバ関数
 	/// </summary>
 	void BehaviorRootUpdate();
 	/// <summary>
+	/// 攻撃行動初期化
+	/// </summary>
+	void BehaviorAttackInitialize();
+	/// <summary>
+	/// 攻撃行動更新
+	/// </summary>
+	void BehaviorAttackUpdate();
+	/// <summary>
 	/// ダッシュ行動初期化
 	/// </summary>
 	void BehaviorDashInitialize();
@@ -164,13 +172,13 @@ public: // ゲッター,セッター
 	void SetBehavior(const Behavior& behavior) {
 		behavior_ = behavior;
 	}
-	
+
 	Behavior GetBehavior() const { return behavior_; }
 
 	Vector3 GetPlayerRotate() const { return interRotate_; }
 
 	void SetPlayerAttack(PlayerAttack* playerAttack) { playerAttack_ = playerAttack; }
-	void SetEnemy(Enemy* enemy) {enemy_ = enemy;}
+	void SetEnemy(Enemy* enemy) { enemy_ = enemy; }
 	void SetEnemyAttack(EnemyAttack* enemyAttack) { enemyAttack_ = enemyAttack; }
 private: // 定数系
 	// 地面から距離
