@@ -169,6 +169,7 @@ public: // ゲッター,セッター
 
 	Vector3 GetPlayerRotate() const { return interRotate_; }
 
+	void SetPlayerAttack(PlayerAttack* playerAttack) { playerAttack_ = playerAttack; }
 	void SetEnemy(Enemy* enemy) {enemy_ = enemy;}
 	void SetEnemyAttack(EnemyAttack* enemyAttack) { enemyAttack_ = enemyAttack; }
 private: // 定数系
@@ -198,6 +199,7 @@ private: // 定数系
 	const int32_t kDash_CoolTime_ = 30;
 	// 摩擦
 private: // メンバ変数
+	PlayerAttack* playerAttack_;
 	Enemy* enemy_;
 	EnemyAttack* enemyAttack_;
 	// 最終的に向きたい方向

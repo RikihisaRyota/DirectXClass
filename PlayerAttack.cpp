@@ -15,11 +15,8 @@
 void PlayerAttack::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	// 基底クラス
 	BaseCharacter::Initialize(std::move(model));
-	// 衝突属性を設定
-	SetCollisionAttribute(kCollisionAttributePlayerAttack);
-	// 衝突対象を自分以外に設定
-	SetCollisionMask(~kCollisionAttributePlayerAttack);
-	HitBoxInitialize();
+
+	HitBoxInitialize(kCollisionAttributePlayerAttack);
 
 	first_SoundHandle_ = Audio::GetInstance()->SoundLoadWave("resources/first_attack.wav");
 	third_SoundHandle_ = Audio::GetInstance()->SoundLoadWave("resources/third_attack.wav");
@@ -517,7 +514,7 @@ void PlayerAttack::ChargeParticleCreate(const Vector3& emitter) {
 		// フラグ
 		particle->IsAlive_ = true;
 		// Plane生成
-		particle->plate_ = Plate::Create();
+		particle->plate_ = PlaneRenderer::Create();
 		cMaterial material;
 		material.color_ = Vector4(1.0f, Clamp(1.0f - charge_T_, 0.0f, 1.0f), 20.0f / 255.0f, 0.4f);
 		particle->plate_->SetMaterial(material);
@@ -570,7 +567,7 @@ void PlayerAttack::HitParticleCreate(const Vector3& emitter) {
 	// フラグ
 	particle->IsAlive_ = true;
 	// Plane生成
-	particle->plate_= Plate::Create();
+	particle->plate_= PlaneRenderer::Create();
 	cMaterial material;
 	material.color_ = Vector4(0.9f,0.5f, 20.0f / 255.0f, 0.4f);
 	particle->plate_->SetMaterial(material);
@@ -641,7 +638,11 @@ void PlayerAttack::ParticleDraw(const ViewProjection& viewProjection) {
 	HitParticleDraw(viewProjection);
 }
 
-void PlayerAttack::HitBoxInitialize() {
+void PlayerAttack::HitBoxInitialize(uint32_t collisionMask) {
+	// 衝突属性を設定
+	SetCollisionAttribute(collisionMask);
+	// 衝突対象を自分以外に設定
+	SetCollisionMask(~collisionMask);
 	// AABB
 	min_ = { -5.1f, -0.9f, -5.1f };
 	max_ = { 5.1f, 5.1f, 5.1f };
@@ -666,7 +667,7 @@ void PlayerAttack::HitBoxDraw(const ViewProjection& viewProjection) {
 	DrawOBB(obb_.at(0), viewProjection, Vector4(1.0f, 0.0f, 0.0f, 1.0f));
 }
 
-void PlayerAttack::OnCollision(const OBB& obb, uint32_t type) {
+void PlayerAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) {
 	OBB a = obb;
 	uint32_t i = type;
 	i;

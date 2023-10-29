@@ -24,21 +24,27 @@ void GameScene::Initialize() {
 	enemy_ = std::make_unique<Enemy>();
 	enemyAttack_ = std::make_unique<EnemyAttack>();
 	player_ = std::make_unique<Player>();
+	playerAttack_ = std::make_unique<PlayerAttack>();
 	skydome_ = std::make_unique<Skydome>();
 #pragma endregion
 	// プレイヤー
 	std::vector<std::unique_ptr<Model>> playerModel(static_cast<int>(Player::Parts::COUNT));
+	std::vector<std::unique_ptr<Model>> playerAttackModel(static_cast<int>(Player::Parts::COUNT));
 	// プレイヤーモデル
 	playerModel[static_cast<int>(Player::Parts::HEAD)].reset(Model::Create("head", true));
 	playerModel[static_cast<int>(Player::Parts::BODY)].reset(Model::Create("body", true));
 	playerModel[static_cast<int>(Player::Parts::ARML)].reset(Model::Create("armL", true));
 	playerModel[static_cast<int>(Player::Parts::ARMR)].reset(Model::Create("armR", true));
 	playerModel[static_cast<int>(Player::Parts::WEAPON)].reset(Model::Create("player_Weapon", true));
+	playerAttackModel[static_cast<int>(PlayerAttack::Parts::WEAPON)].reset(Model::Create("player_Weapon", true));
 	// プレイヤー初期化
 	player_->SetViewProjection(&viewProjection_);
+	player_->SetPlayerAttack(playerAttack_.get());
 	player_->SetEnemy(enemy_.get());
 	player_->SetEnemyAttack(enemyAttack_.get());
 	player_->Initialize(std::move(playerModel));
+
+	playerAttack_->Initialize(std::move(playerAttackModel));
 
 	// ブロック
 	std::vector<std::unique_ptr<Model>> blockModel(1);

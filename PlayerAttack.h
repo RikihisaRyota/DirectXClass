@@ -2,13 +2,12 @@
 #include <optional>
 #include <list>
 
-#include "BaseCharacter.h"
 #include "Collider.h"
-#include "Plate.h"
+#include "PlaneRenderer.h"
 
 class Player;
 class Enemy;
-class PlayerAttack : public BaseCharacter, public Collider {
+class PlayerAttack :public Collider {
 public:
 	enum class Parts {
 		WEAPON,
@@ -34,7 +33,7 @@ public:
 		Vector3 velocity_;
 		int time_;
 		bool IsAlive_;
-		Plate* plate_;
+		PlaneRenderer* plate_;
 	};
 
 	struct HitParticle {
