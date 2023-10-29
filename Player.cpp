@@ -15,8 +15,8 @@
 void Player::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	// 基底クラス
 	BaseCharacter::Initialize(std::move(model));
-	//SetGlobalVariables();
-	//GetGlobalVariables();
+	SetGlobalVariables();
+	GetGlobalVariables();
 	worldTransform_.at(0).translation_.y = 10.0f;
 	BaseCharacter::Update();
 	destinationAngle_ = { 0.0f, 0.0f, 1.0f };
