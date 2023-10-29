@@ -135,6 +135,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Pera.cpp" />
     <ClCompile Include="PeraGraphicsPipeline.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="PlayerAttack.cpp" />
     <ClCompile Include="PrimitiveDrawer.cpp" />
     <ClCompile Include="Skydome.cpp" />
     <ClCompile Include="SphereRenderer.cpp" />
@@ -183,7 +184,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="FollowCamera.h" />
     <ClInclude Include="GameScene.h" />
-    <ClInclude Include="GlobalVarriables.h" />
+    <ClInclude Include="GlobalVariables.h" />
     <ClInclude Include="Ground.h" />
     <ClInclude Include="ImGuiManager.h" />
     <ClInclude Include="Input.h" />
@@ -201,6 +202,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="PeraGraphicsPipeline.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayerAttack.h" />
     <ClInclude Include="PrimitiveDrawer.h" />
     <ClInclude Include="SafeDelete.h" />
     <ClInclude Include="Skydome.h" />

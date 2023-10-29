@@ -5,11 +5,12 @@
 #include "Draw.h"
 #include "Enemy.h"
 #include "EnemyAttack.h"
-#include "GlobalVarriables.h"
+#include "GlobalVariables.h"
 #include "Input.h"
 #include "ImGuiManager.h"
 #include "MyMath.h"
 #include "TextureManager.h"
+#include "PlayerAttack.h"
 
 void Player::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	// 基底クラス

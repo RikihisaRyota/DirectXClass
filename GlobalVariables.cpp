@@ -1,6 +1,6 @@
-#include "GlobalVarriables.h"
+#include "GlobalVariables.h"
 
-#include "../../externals/nlohmann/json.hpp"
+#include <../nlohmann/json.hpp>
 #include <fstream>
 
 #include "ImGuiManager.h"
@@ -138,7 +138,7 @@ void GlobalVariables::SaveFile(const std::string& groupName) {
 
 void GlobalVariables::LoadFiles() {
 	// グローバル変数の保存先ファイルパス
-	const std::string kDirectoryPath = "Resources/GlobalVariables/";
+	const std::string kDirectoryPath = "resources/GlobalVariables/";
 	// ディレクトリが無ければ作成する
 	std::filesystem::path dir(kDirectoryPath);
 	if (!std::filesystem::exists(kDirectoryPath)) {
@@ -161,7 +161,7 @@ void GlobalVariables::LoadFiles() {
 
 void GlobalVariables::LoadFile(const std::string& groupName) {
 	// グローバル変数の保存先ファイルパス
-	const std::string kDirectoryPath = "Resources/GlobalVariables/";
+	const std::string kDirectoryPath = "resources/GlobalVariables/";
 	// 読み込むjsonファイルのフルパスを合成する
 	std::string filePath = kDirectoryPath + groupName + ".json";
 	// 読み込み用ファイルストリーム

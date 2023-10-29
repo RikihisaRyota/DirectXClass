@@ -60,11 +60,11 @@ public:
 	/// </summary>
 	void Draw(const ViewProjection& viewProjection);
 	void ParticleDraw(const ViewProjection& viewProjection);
-	void HitBoxInitialize() override;
+	void HitBoxInitialize(uint32_t collisionMask) override;
 	void HitBoxDraw(const ViewProjection& viewProjection) override;
 
 	// 衝突を検出したら呼び出されるコールバック関数
-	void OnCollision(const OBB& obb, uint32_t type) override;
+	void OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) override;
 
 	void SetPlayer(Player* player) { player_ = player; }
 	void SetEnemy(Enemy* enmey) { enemy_ =enmey; }

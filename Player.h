@@ -13,6 +13,7 @@
 
 class Enemy;
 class EnemyAttack;
+class PlayerAttack;
 class Player : public Collider {
 public:
 	// 体のパーツ
