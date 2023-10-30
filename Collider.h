@@ -29,7 +29,7 @@ public:
 	enum class Type {
 		PlayerToEnemy,
 		PlayerToEnemyAttack,
-		EnemyToPlayerAttack,
+		PlayerAttackToEnemy,
 		PlayerToBlock,
 		EnemyToBlock,
 	};

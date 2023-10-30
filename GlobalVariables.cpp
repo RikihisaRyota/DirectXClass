@@ -18,7 +18,7 @@ void GlobalVariables::CreateGroup(const std::string& groupName) {
 }
 
 void GlobalVariables::Update() { 
-#ifdef DEBUG
+#ifdef _DEBUG
 	// メニューバーを使用可能なフラグをつけてウィンドウを開く
 	if (!ImGui::Begin("Global Variables", nullptr, ImGuiWindowFlags_MenuBar)) {
 		return;
@@ -45,15 +45,15 @@ void GlobalVariables::Update() {
 			// int32_t型の値を保持していれば
 			if (std::holds_alternative<int32_t>(item)) {
 				int32_t* ptr = std::get_if<int32_t>(&item);
-				ImGui::SliderInt(
-				    itemName.c_str(), ptr, save_int_Value_ - 100, save_int_Value_ + 100);
+				ImGui::DragInt(
+				    itemName.c_str(), ptr,1.0f);
 			} else if (std::holds_alternative<float>(item)) {
 				float* ptr = std::get_if<float>(&item);
-				ImGui::SliderFloat(
-				    itemName.c_str(), ptr, save_float_Value_ - 100.0f, save_float_Value_ + 100.0f);
+				ImGui::DragFloat(
+				    itemName.c_str(), ptr,1.0f);
 			} else if (std::holds_alternative<Vector3>(item)) {
 				Vector3* ptr = std::get_if<Vector3>(&item);
-				ImGui::SliderFloat3(itemName.c_str(), reinterpret_cast<float*>(ptr), -10.0f, 10.0f);
+				ImGui::DragFloat3(itemName.c_str(), reinterpret_cast<float*>(ptr),1.0f);
 			}
 		}
 		// 改行

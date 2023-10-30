@@ -2,6 +2,7 @@
 
 #include "DirectXCommon.h"
 #include "Draw.h"
+#include "GlobalVariables.h"
 #include "Matrix4x4.h"
 #include "TextureManager.h"
 #include "ImGuiManager.h"
@@ -44,6 +45,8 @@ void GameScene::Initialize() {
 	player_->SetEnemyAttack(enemyAttack_.get());
 	player_->Initialize(std::move(playerModel));
 
+	playerAttack_->SetPlayer(player_.get());
+	playerAttack_->SetEnemy(enemy_.get());
 	playerAttack_->Initialize(std::move(playerAttackModel));
 
 	// ブロック
@@ -93,6 +96,7 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
+	GlobalVariables::GetInstance()->Update();
 	// デバックカメラ
 	debugCamera_->Update(&viewProjection_);
 	// フォローカメラ	
@@ -107,7 +111,7 @@ void GameScene::Update() {
 	enemy_->Update();
 	enemyAttack_->Update();
 	// コリジョンマネージャー
-	collisionManager_->Update(player_.get(),block_.get(),enemy_.get(),enemyAttack_.get());
+	collisionManager_->Update(player_.get(), playerAttack_.get(),block_.get(),enemy_.get(),enemyAttack_.get());
 }
 
 void GameScene::Draw() {
@@ -143,6 +147,9 @@ void GameScene::Draw() {
 	enemy_->Draw(viewProjection_);
 	enemyAttack_->Draw(viewProjection_);
 	player_->Draw(viewProjection_);
+	if (player_->GetBehavior() == Player::Behavior::kAttack) {
+		playerAttack_->Draw(viewProjection_);
+	}
 	// パーティクル
 	playerAttack_->ParticleDraw(viewProjection_);
 

@@ -42,6 +42,8 @@ public:
 	void EnemyRotate(const Vector3& vector);
 	float GetFloorDistance() { return kFloor_Distance_; }
 	void SetPlayer(Player* player) { player_ = player; }
+	bool GetIsAlive() { return isAlive_; }
+	void SetIsAlive(bool flag) { isAlive_ = flag; }
 private:
 	void HitBoxInitialize(uint32_t collisionMask) override;
 	void RootInitialize();
@@ -110,4 +112,6 @@ private:
 	bool Isbreak_;
 	uint32_t break_count_ = 0;
 	uint32_t break_count_Max = 30;
+
+	bool isAlive_;
 };

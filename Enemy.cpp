@@ -40,6 +40,7 @@ void Enemy::Initialize(std::vector<std::unique_ptr<Model>> model) {
 
 	Isbreak_ = false;
 	break_count_ = 0;
+	isAlive_ = true;
 	// 転送
 	BaseCharacter::Update();
 #pragma region 当たり判定
@@ -48,8 +49,9 @@ void Enemy::Initialize(std::vector<std::unique_ptr<Model>> model) {
 }
 
 void Enemy::Update() {
-	if (IsCollision(area_, *player_->GetAABB()) ||
-		behavior_ == Enemy::Behavior::kAttack) {
+	if (isAlive_ &&
+		(IsCollision(area_, *player_->GetAABB()) ||
+			behavior_ == Enemy::Behavior::kAttack)) {
 		if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_1)) {
 			behaviorRequest_ = Behavior::kAttack;
 			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
@@ -118,8 +120,10 @@ void Enemy::Update() {
 }
 
 void Enemy::Draw(const ViewProjection& viewProjection) {
-	for (size_t i = 0; i < worldTransforms_Parts_.at(0).size(); i++) {
-		models_[i]->Draw(worldTransforms_Parts_.at(0)[i], viewProjection);
+	if (isAlive_) {
+		for (size_t i = 0; i < worldTransforms_Parts_.at(0).size(); i++) {
+			models_[i]->Draw(worldTransforms_Parts_.at(0)[i], viewProjection);
+		}
 	}
 }
 
@@ -139,6 +143,7 @@ void Enemy::EnemyRotate(const Vector3& vector1) {
 }
 
 void Enemy::HitBoxInitialize(uint32_t collisionMask) {
+	Vector3 position = { worldTransform_.at(0).matWorld_.m[3][0], worldTransform_.at(0).matWorld_.m[3][1] ,worldTransform_.at(0).matWorld_.m[3][2] };
 	// 衝突属性を設定
 	SetCollisionAttribute(collisionMask);
 	// 衝突対象を自分以外に設定
@@ -152,13 +157,13 @@ void Enemy::HitBoxInitialize(uint32_t collisionMask) {
 	radius_ = 1.2f;
 	// AABB
 	aabb_.at(0) = {
-		.center_{worldTransform_.at(0).translation_},
-		.min_{worldTransform_.at(0).translation_ + min_},
-		.max_{worldTransform_.at(0).translation_ + max_},
+		.center_{position},
+		.min_{position + min_},
+		.max_{position + max_},
 	};
 	// OBB
 	obb_.at(0) = {
-		.center_{worldTransform_.at(0).translation_},
+		.center_{position},
 		.orientations_{
 				 {1.0f, 0.0f, 0.0f},
 				 {0.0f, 1.0f, 0.0f},
@@ -169,7 +174,7 @@ void Enemy::HitBoxInitialize(uint32_t collisionMask) {
 	obb_.at(0) = OBBSetRotate(obb_.at(0), worldTransform_.at(0).rotation_);
 	// Sphere
 	sphere_ = {
-		.center_{worldTransform_.at(0).translation_},
+		.center_{position},
 		.radius_{radius_},
 	};
 }
@@ -310,7 +315,7 @@ void Enemy::Move() {
 	worldTransform_.at(0).translation_.y = kFloor_Distance_;
 	// 角度の更新
 	angle_ += 0.02f;
-	
+
 }
 
 void Enemy::Motion() {
@@ -327,15 +332,16 @@ void Enemy::Base() {
 void Enemy::Body() {}
 
 void Enemy::HitBoxUpdate() {
+	Vector3 position = { worldTransform_.at(0).matWorld_.m[3][0], worldTransform_.at(0).matWorld_.m[3][1] ,worldTransform_.at(0).matWorld_.m[3][2] };
 	// AABB
 	aabb_.at(0) = {
-		.center_{worldTransform_.at(0).translation_},
+		.center_{position},
 		.min_{aabb_.at(0).center_ + min_},
 		.max_{aabb_.at(0).center_ + max_},
 	};
 	// OBB
 	obb_.at(0) = {
-		.center_{worldTransform_.at(0).translation_},
+		.center_{position},
 		.orientations_{
 				 {1.0f, 0.0f, 0.0f},
 				 {0.0f, 1.0f, 0.0f},
@@ -346,7 +352,7 @@ void Enemy::HitBoxUpdate() {
 	obb_.at(0) = OBBSetRotate(obb_.at(0), worldTransform_.at(0).rotation_);
 	// Sphere
 	sphere_ = {
-		.center_{worldTransform_.at(0).translation_},
+		.center_{position},
 		.radius_{radius_},
 	};
 }
@@ -377,5 +383,8 @@ void Enemy::OnCollision(const OBB& obb, const WorldTransform& worldTransform, ui
 		}
 		BaseCharacter::Update();
 		HitBoxUpdate();
+	}
+	if (type == static_cast<uint32_t>(Collider::Type::PlayerAttackToEnemy)) {
+		isAlive_ = false;
 	}
 }

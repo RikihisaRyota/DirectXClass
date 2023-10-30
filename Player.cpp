@@ -15,9 +15,8 @@
 void Player::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	// 基底クラス
 	BaseCharacter::Initialize(std::move(model));
-	GetGlobalVariables();
 	//SetGlobalVariables();
-	worldTransform_.at(0).translation_.y = 10.0f;
+	GetGlobalVariables();
 	BaseCharacter::Update();
 	destinationAngle_ = { 0.0f, 0.0f, 1.0f };
 	// 転送
@@ -70,22 +69,20 @@ void Player::Update() {
 		BehaviorDashUpdate();
 		break;
 	}
+	if (Input::GetInstance()->TriggerKey(DIK_R)) {
+		GetGlobalVariables();
+	}
 	/*if (worldTransform_.at(0).translation_.y <= -30.0f) {
 		worldTransform_.at(0).translation_ = { 0.0f,10.0f,0.0f };
 	}*/
-
+	
 	// 転送
 	BaseCharacter::Update();
 	HitBoxUpdate();
 	ImGui::Begin("Player");
 	ImGui::Text("Jump : B or SPACE");
 	ImGui::Text("Dush : X or SHIFT");
-	if (ImGui::TreeNode("Debug")) {
-		ImGui::Text("LocalPosition:x:%f,y:%f,z:%f", worldTransform_.at(0).translation_.x, worldTransform_.at(0).translation_.y, worldTransform_.at(0).translation_.z);
-		ImGui::Text("WorldPosition:x:%f,y:%f,z:%f", worldTransform_.at(0).matWorld_.m[3][0], worldTransform_.at(0).matWorld_.m[3][1], worldTransform_.at(0).matWorld_.m[3][2]);
-		ImGui::Text("AABBCenter:x:%f,y:%f,z:%f", aabb_.at(0).center_.x, aabb_.at(0).center_.y, aabb_.at(0).center_.z);
-		ImGui::TreePop();
-	}
+	ImGui::Text("Reset : R");
 	ImGui::End();
 }
 
@@ -178,14 +175,16 @@ void Player::SetGlobalVariables() {
 	globalVariables = GlobalVariables::GetInstance();
 	const char* groupName = "Player";
 	// グループ追加
-	GlobalVariables::GetInstance()->CreateGroup(groupName);
-	GlobalVariables::GetInstance()->SaveFile(groupName);
+	globalVariables->CreateGroup(groupName);
+	//globalVariables->SetValue(groupName,"position",Vector3(0.0f,10.0f,0.0f));
+	globalVariables->SaveFile(groupName);
 }
 
 void Player::GetGlobalVariables() {
 	GlobalVariables* globalVariables = nullptr;
 	globalVariables = GlobalVariables::GetInstance();
 	const char* groupName = "Player";
+	globalVariables->LoadFiles();
 	worldTransform_.at(0).translation_ = globalVariables->GetValue<Vector3>(groupName, "position");
 	// 転送
 	BaseCharacter::Update();

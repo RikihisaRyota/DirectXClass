@@ -153,7 +153,7 @@ void PlayerAttack::ChageAttackInitialize() {
 	// チャージ中は攻撃判定なし
 	hitFlag_ = true;
 	IsChageAttack_ = false;
-	ChargeParticleCreate(worldTransform_.at(0).translation_);
+	ChargeParticleCreate(MakeTranslateMatrix(worldTransform_.at(0).matWorld_));
 	particle_Count_ = 0;
 }
 
@@ -167,7 +167,7 @@ void PlayerAttack::ChageAttackUpdate() {
 			(Input::GetInstance()->GetJoystickState(0, joyState) &&
 				(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_Y))) {
 			// パーティクル
-			ChargeParticleCreate(worldTransform_.at(0).translation_);
+			ChargeParticleCreate(MakeTranslateMatrix(worldTransform_.at(0).matWorld_));
 			// チャージ中は攻撃判定なし
 			hitFlag_ = true;
 			charge_T_ += charge_Speed_;
@@ -257,14 +257,15 @@ void PlayerAttack::TripleAttackInitialize() {
 }
 
 void PlayerAttack::RootUpdate() {
-	if (!ISChageAttack_Count_Start_) {
-		if (kChageAttackCount > 0) {
-			kChageAttackCount--;
-		}
-		else {
-			IsChageAttack_ = true;
-		}
-	}
+	//if (!ISChageAttack_Count_Start_) {
+	//	if (kChageAttackCount > 0) {
+	//		kChageAttackCount--;
+	//	}
+	//	else {
+	//		IsChageAttack_ = true;
+	//	}
+	//}
+	IsChageAttack_ = true;
 	if (!ISTripleAttack_Count_Start_) {
 		if (kTripleAttackCount > 0) {
 			kTripleAttackCount--;
@@ -427,15 +428,18 @@ void PlayerAttack::HitBoxUpdate() {
 	default:
 		break;
 	case PlayerAttack::Behavior::kChargeAttack:
+	{
+
+		Vector3 localTranslate = MakeTranslateMatrix(worldTransform_.at(0).matWorld_);
 		// AABB
 		aabb_.at(0) = {
-			.center_{worldTransform_.at(0).translation_},
-			.min_{aabb_.at(0).center_ + min_},
-			.max_{aabb_.at(0).center_ + max_},
+			.center_{localTranslate},
+			.min_{localTranslate + min_},
+			.max_{localTranslate + max_},
 		};
 		// OBB
 		obb_.at(0) = {
-			.center_{worldTransform_.at(0).translation_},
+			.center_{localTranslate},
 			.orientations_{
 					 {1.0f, 0.0f, 0.0f},
 					 {0.0f, 1.0f, 0.0f},
@@ -446,17 +450,20 @@ void PlayerAttack::HitBoxUpdate() {
 		obb_.at(0) = OBBSetRotate(
 			obb_.at(0), worldTransform_.at(0).rotation_,
 			worldTransforms_Parts_.at(0)[static_cast<int>(Parts::WEAPON)].rotation_);
+	}
 		break;
 	case PlayerAttack::Behavior::kTripleAttack:
+	{
+		Vector3 localTranslate = MakeTranslateMatrix(worldTransform_.at(0).matWorld_);
 		// AABB
 		aabb_.at(0) = {
-			.center_{worldTransform_.at(0).translation_},
-			.min_{aabb_.at(0).center_ + tripleAttackMin_},
-			.max_{aabb_.at(0).center_ + tripleAttackMax_},
+			.center_{localTranslate},
+			.min_{localTranslate + tripleAttackMin_},
+			.max_{localTranslate + tripleAttackMax_},
 		};
 		// OBB
 		obb_.at(0) = {
-			.center_{worldTransform_.at(0).translation_ + center_},
+			.center_{localTranslate + center_},
 			.orientations_{
 					 {1.0f, 0.0f, 0.0f},
 					 {0.0f, 1.0f, 0.0f},
@@ -466,6 +473,7 @@ void PlayerAttack::HitBoxUpdate() {
 		};
 		obb_.at(0) = OBBSetRotate(obb_.at(0), worldTransform_.at(0).rotation_);
 
+	}
 		break;
 	}
 }
@@ -507,7 +515,7 @@ void PlayerAttack::ChargeParticleCreate(const Vector3& emitter) {
 		float distance = rnd.NextFloatRange(distance_min_, distance_max_);
 		particle->worldTransform_.translation_ = emitter + range * distance;
 		// 速度と向き
-		Vector3 velocity = Vector3(player_->GetWorldTransform().translation_ - particle->worldTransform_.translation_);
+		Vector3 velocity = Vector3(MakeTranslateMatrix(player_->GetWorldTransform().matWorld_) - particle->worldTransform_.translation_);
 		particle->velocity_ = Normalize(velocity) * kSpeed;
 		// 寿命
 		particle->time_ = time_max_;
@@ -679,7 +687,7 @@ void PlayerAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransf
 		if (!hitFlag_) {
 			EnemyHP::SetAdd(static_cast<uint32_t>(45 * (charge_T_ + 1.0f)));
 			hitFlag_ = true;
-			HitParticleCreate(enemy_->GetWorldTransform().translation_);
+			HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));
 			Audio::GetInstance()->SoundPlayWave(chage_SoundHandle_);
 		}
 
@@ -691,7 +699,7 @@ void PlayerAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransf
 			if (!hitFlag_) {
 				EnemyHP::SetAdd(15);
 				hitFlag_ = true;
-				HitParticleCreate(enemy_->GetWorldTransform().translation_);
+				HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));
 				Audio::GetInstance()->SoundPlayWave(first_SoundHandle_);
 			}
 			break;
@@ -699,7 +707,7 @@ void PlayerAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransf
 			if (!hitFlag_) {
 				EnemyHP::SetAdd(20);
 				hitFlag_ = true;
-				HitParticleCreate(enemy_->GetWorldTransform().translation_);
+				HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));
 				Audio::GetInstance()->SoundPlayWave(first_SoundHandle_);
 			}
 			break;
@@ -707,7 +715,7 @@ void PlayerAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransf
 			if (!hitFlag_) {
 				EnemyHP::SetAdd(40);
 				hitFlag_ = true;
-				HitParticleCreate(enemy_->GetWorldTransform().translation_);
+				HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));
 				Audio::GetInstance()->SoundPlayWave(third_SoundHandle_);
 			}
 			break;

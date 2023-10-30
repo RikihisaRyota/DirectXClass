@@ -62,7 +62,8 @@ public: // メンバ関数
 	void PlayerRotate(const Vector3& vector);
 
 	void BehaviorInitialize();
-
+	void SetGlobalVariables();
+	void GetGlobalVariables();
 private: // メンバ関数
 #pragma region 移動系
 	/// <summary>
@@ -153,8 +154,7 @@ private: // メンバ関数
 	void BehaviorDashUpdate();
 #pragma endregion
 	void HitBoxUpdate()override;
-	void SetGlobalVariables();
-	void GetGlobalVariables();
+	
 	// 衝突を検出したら呼び出されるコールバック関数
 	void OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) override;
 

@@ -145,38 +145,41 @@ void EnemyAttack::Update() {
 }
 
 void EnemyAttack::Draw(const ViewProjection& viewProjection) {
-	for (size_t i = 0; i < worldTransform_.size(); i++) {
-		switch (behavior_) {
-		case EnemyAttack::Behavior::kRoot:
-		default:
-			break;
-		case EnemyAttack::Behavior::kPressAttack:
-			models_[static_cast<int>(EnemyAttack::Parts::CIRCLE)]->Draw(
-				worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
-				viewProjection);
-			break;
-		case EnemyAttack::Behavior::kDashAttack:
-			models_[static_cast<int>(EnemyAttack::Parts::PLANE)]->Draw(
-				worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::PLANE)],
-				viewProjection);
-			break;
-		case EnemyAttack::Behavior::kPunchAttack:
-			models_[static_cast<int>(EnemyAttack::Parts::CIRCLE)]->Draw(
-				worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
-				viewProjection);
-		case EnemyAttack::Behavior::kTornadoAttack:
-			models_[static_cast<int>(EnemyAttack::Parts::CIRCLE)]->Draw(
-				worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
-				viewProjection);
-			break;
-		case EnemyAttack::Behavior::kMeteoAttack:
-			models_[static_cast<int>(EnemyAttack::Parts::CIRCLE)]->Draw(
-				worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
-				viewProjection);
-			models_[static_cast<int>(EnemyAttack::Parts::METEO)]->Draw(
-				worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::METEO)],
-				viewProjection);
-			break;
+	if (enemy_->GetIsAlive()) {
+
+		for (size_t i = 0; i < worldTransform_.size(); i++) {
+			switch (behavior_) {
+			case EnemyAttack::Behavior::kRoot:
+			default:
+				break;
+			case EnemyAttack::Behavior::kPressAttack:
+				models_[static_cast<int>(EnemyAttack::Parts::CIRCLE)]->Draw(
+					worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
+					viewProjection);
+				break;
+			case EnemyAttack::Behavior::kDashAttack:
+				models_[static_cast<int>(EnemyAttack::Parts::PLANE)]->Draw(
+					worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::PLANE)],
+					viewProjection);
+				break;
+			case EnemyAttack::Behavior::kPunchAttack:
+				models_[static_cast<int>(EnemyAttack::Parts::CIRCLE)]->Draw(
+					worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
+					viewProjection);
+			case EnemyAttack::Behavior::kTornadoAttack:
+				models_[static_cast<int>(EnemyAttack::Parts::CIRCLE)]->Draw(
+					worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
+					viewProjection);
+				break;
+			case EnemyAttack::Behavior::kMeteoAttack:
+				models_[static_cast<int>(EnemyAttack::Parts::CIRCLE)]->Draw(
+					worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::CIRCLE)],
+					viewProjection);
+				models_[static_cast<int>(EnemyAttack::Parts::METEO)]->Draw(
+					worldTransforms_Parts_.at(i)[static_cast<int>(EnemyAttack::Parts::METEO)],
+					viewProjection);
+				break;
+			}
 		}
 	}
 }

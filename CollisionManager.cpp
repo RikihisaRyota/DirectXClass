@@ -5,20 +5,25 @@
 
 #include "ImGuiManager.h"
 
-void CollisionManager::Update(Player* player, Block* block, Enemy* enemy, EnemyAttack* enemyAttack) {
+void CollisionManager::Update(Player* player, PlayerAttack* PlayerAttack, Block* block, Enemy* enemy, EnemyAttack* enemyAttack) {
 	colliders_.clear();
-	CheckAllCollisions(player, block, enemy, enemyAttack);
+	CheckAllCollisions(player, PlayerAttack, block, enemy, enemyAttack);
 }
 
-void CollisionManager::CheckAllCollisions(Player* player, Block* block, Enemy* enemy, EnemyAttack* enemyAttack) {
+void CollisionManager::CheckAllCollisions(Player* player, PlayerAttack* PlayerAttack, Block* block, Enemy* enemy, EnemyAttack* enemyAttack) {
 	// プレイヤーをリストに追加
 	colliders_.emplace_back(player);
+	if (player->GetBehavior() == Player::Behavior::kAttack) {
+		colliders_.emplace_back(PlayerAttack);
+	}
 	// ブロックのリストを追加
 	colliders_.emplace_back(block);
 	// 敵
-	colliders_.emplace_back(enemy);
-	if (enemy->GetBehavior() == Enemy::Behavior::kAttack) {
-		colliders_.emplace_back(enemyAttack);
+	if (enemy->GetIsAlive()) {
+		colliders_.emplace_back(enemy);
+		if (enemy->GetBehavior() == Enemy::Behavior::kAttack) {
+			colliders_.emplace_back(enemyAttack);
+		}
 	}
 	// リスト内総当たり
 	std::list<Collider*>::iterator itrA = colliders_.begin();
@@ -85,12 +90,12 @@ void CollisionManager::CheakCollisionPair(Collider* colliderA, Collider* collide
 					}
 					// 敵とプレイヤーの攻撃
 					else if (
-						(collisionAttributeA & kCollisionAttributeEnemy) &&
-						(collisionAttributeB & kCollisionAttributePlayerAttack)) {
+						(collisionAttributeA & kCollisionAttributePlayerAttack) &&
+						(collisionAttributeB & kCollisionAttributeEnemy)) {
 						colliderA->OnCollision(
-							*obbB, colliderB->GetWorldTransform(b), static_cast<uint32_t>(Collider::Type::EnemyToPlayerAttack));
+							*obbB, colliderB->GetWorldTransform(b), static_cast<uint32_t>(Collider::Type::PlayerAttackToEnemy));
 						colliderB->OnCollision(
-							*obbA, colliderA->GetWorldTransform(a), static_cast<uint32_t>(Collider::Type::EnemyToPlayerAttack));
+							*obbA, colliderA->GetWorldTransform(a), static_cast<uint32_t>(Collider::Type::PlayerAttackToEnemy));
 					}
 					else if ((collisionAttributeA & kCollisionAttributePlayer) &&
 						(collisionAttributeB & kCollisionAttributeBlock)) {

@@ -8,14 +8,15 @@
 #include "Enemy.h"
 #include "EnemyAttack.h"
 #include "Player.h"
+#include "PlayerAttack.h"
 
 class CollisionManager {
 public:
-	void Update(Player* player, Block* block, Enemy* enemy, EnemyAttack* enemyAttack);
+	void Update(Player* player, PlayerAttack* PlayerAttack, Block* block, Enemy* enemy, EnemyAttack* enemyAttack);
 
 private:
 	// メンバ関数
-	void CheckAllCollisions(Player* player, Block* block,Enemy* enemy,EnemyAttack* enemyAttack);
+	void CheckAllCollisions(Player* player, PlayerAttack* PlayerAttack, Block* block,Enemy* enemy,EnemyAttack* enemyAttack);
 	/// <summary>
 	/// コライダー2つの衝突判定と応答
 	/// </summary>

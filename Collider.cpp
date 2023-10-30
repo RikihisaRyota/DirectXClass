@@ -4,14 +4,15 @@
 
 void Collider::HitBoxUpdate() {
 	// AABB
+	Vector3 worldTranslate = { worldTransform_.at(0).matWorld_.m[3][0] ,worldTransform_.at(0).matWorld_.m[3][1] ,worldTransform_.at(0).matWorld_.m[3][2] };
 	aabb_.at(0) = {
-		.center_{worldTransform_.at(0).translation_},
-		.min_{worldTransform_.at(0).translation_ + min_},
-		.max_{worldTransform_.at(0).translation_ + max_},
+		.center_{worldTranslate},
+		.min_{worldTranslate + min_},
+		.max_{worldTranslate + max_},
 	};
 	// OBB
 	obb_.at(0) = {
-		.center_{worldTransform_.at(0).translation_},
+		.center_{worldTranslate},
 		.orientations_{
 				 {1.0f, 0.0f, 0.0f},
 				 {0.0f, 1.0f, 0.0f},
@@ -22,7 +23,7 @@ void Collider::HitBoxUpdate() {
 	obb_.at(0) = OBBSetRotate(obb_.at(0), worldTransform_.at(0).rotation_);
 	// Sphere
 	sphere_ = {
-		.center_{worldTransform_.at(0).translation_},
+		.center_{worldTranslate},
 		.radius_{radius_},
 	};
 }
