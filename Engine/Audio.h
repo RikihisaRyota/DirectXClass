@@ -59,7 +59,7 @@ public:
     /// </summary>
     /// <param name="filename"></param>
     /// <returns></returns>
-    size_t SoundLoadWave(const char* filename);
+    size_t SoundLoadWave(const std::string& fileName);
 
     void StopSound(size_t playHandle);
     void SetPitch(size_t playHandle, float pitch);

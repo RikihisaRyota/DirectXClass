@@ -13,7 +13,7 @@
 #include "Pera.h"
 
 #include "SafeDelete.h"
-#include "../Particle.h"
+#include "Particle.h"
 #include "PlaneRenderer.h"
 #include "SphereRenderer.h"
 #include "Sprite.h"

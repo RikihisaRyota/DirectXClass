@@ -13,8 +13,8 @@ void GameScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 
 	// ロード
-	textureHandle_ = TextureManager::Load("resources/uvChecker.png");
-	auto tex = TextureManager::Load("resources/ikamoveSheet.png");
+	textureHandle_ = TextureManager::Load("uvChecker.png");
+	auto tex = TextureManager::Load("ikamoveSheet.png");
 	animation_ = 0.0f;
 	size_ = {256.0f,256.0f};
 	// デバックカメラ
@@ -41,10 +41,10 @@ void GameScene::Initialize() {
 
 	// 音テスト
 	audio_ = Audio::GetInstance();
-	SESoundHandle_ = audio_->SoundLoadWave("Resources/Audio/pick.wav");
-	titleLoopSoundHandle_ = audio_->SoundLoadWave("Resources/Audio/titleBGM.wav");
+	SESoundHandle_ = audio_->SoundLoadWave("pick.wav");
+	titleLoopSoundHandle_ = audio_->SoundLoadWave("titleBGM.wav");
 	titleLoopPlayHandle_ = -1;
-	inGameLoopSoundHandle_ = audio_->SoundLoadWave("Resources/Audio/ingameBGM.wav");
+	inGameLoopSoundHandle_ = audio_->SoundLoadWave("ingameBGM.wav");
 	inGameLoopPlayHandle_ = -1;
 	isTitle_ = true;
 

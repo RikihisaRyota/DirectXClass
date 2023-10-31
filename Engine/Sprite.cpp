@@ -39,7 +39,7 @@ void Sprite::StaticInitialize(
 	ComPtr<ID3DBlob> errorBlob; // エラーオブジェクト
 
 	// 頂点シェーダの読み込みとコンパイル
-	std::wstring vsFile = /*directoryPath + */L"Sprite.VS.hlsl";
+	std::wstring vsFile = /*directoryPath + */L"Resources/Shaders/Sprite.VS.hlsl";
 	result = D3DCompileFromFile(
 		vsFile.c_str(), // シェーダファイル名
 		nullptr,
@@ -62,7 +62,7 @@ void Sprite::StaticInitialize(
 	}
 
 	// ピクセルシェーダの読み込みとコンパイル
-	std::wstring psFile = /*directoryPath + */L"Sprite.PS.hlsl";
+	std::wstring psFile = /*directoryPath + */L"Resources/Shaders/Sprite.PS.hlsl";
 	result = D3DCompileFromFile(
 		psFile.c_str(), // シェーダファイル名
 		nullptr,

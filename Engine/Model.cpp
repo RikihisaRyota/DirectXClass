@@ -138,7 +138,7 @@ void Model::LoadObjFile(const std::string& filename) {
 	std::vector<Vector2> texcoords; //!< テクスチャ座標
 	std::string line; //!< ファイルから読み込んだ1行を格納するもの
 
-	std::ifstream file("resources/" + filename + "/" + filename + ".obj"); //!< ファイルを開く
+	std::ifstream file("Resources/" + filename + "/" + filename + ".obj"); //!< ファイルを開く
 	assert(file.is_open()); //!< とりあえず開けなかったら止める
 
 	while (std::getline(file, line)) {

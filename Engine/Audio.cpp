@@ -113,9 +113,9 @@ void Audio::SoundPlayLoopEnd(size_t playHandle) {
     }
 }
 
-size_t Audio::SoundLoadWave(const char* filename) {
+size_t Audio::SoundLoadWave(const std::string& fileName) {
     auto iter = std::find_if(soundData_.begin(), soundData_.end(), [&](const SoundData& soundData) {
-        return soundData.filename == filename;
+        return soundData.filename == fileName;
         });
     if (iter != soundData_.end()) {
         return std::distance(soundData_.begin(), iter);
@@ -125,7 +125,7 @@ size_t Audio::SoundLoadWave(const char* filename) {
     // ファイル入出ストリームのインスタンス
     std::ifstream file;
     // wavファイルをバイナリモードで開く
-    file.open(filename, std::ios_base::binary);
+    file.open("Resources/Audios/" + fileName, std::ios_base::binary);
     // ファイルオープン失敗を検出する
     assert(file.is_open());
 #pragma endregion
@@ -208,7 +208,7 @@ size_t Audio::SoundLoadWave(const char* filename) {
 #pragma region 読み込んだ音声データのreturn
     // returnする為の音声データ
     SoundData soundData = {};
-    soundData.filename = filename;
+    soundData.filename = fileName;
     soundData.wfex = format.fmt;
     soundData.pBuffer = std::move(pBuffer);
     soundData.bufferSize = data.size;
