@@ -555,6 +555,32 @@ Matrix4x4 MakeRotateAxisAngle(const Vector3& axis, float angle) {
 	return mat;
 }
 
+Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to) {
+	Vector3 cross = Cross(to, from);
+	float sin = cross.Length();
+	float cos = Dot(to, from);
+	Vector3 n{};
+	if (cross.Length() > 0) {
+		n = Normalize(cross);
+	}
+	else if (from.x != 0.0f || from.y != 0.0f) {
+		n.x = from.z;
+		n.y = 0.0f;
+		n.z = -from.x;
+
+	}else if (from.x!=0.0f||from.y!=0.0f) {
+		n.x = from.y;
+		n.y = -from.x;
+		n.z = 0.0f;
+	}
+	Matrix4x4 mat{};
+	mat = MakeIdentity4x4();
+	mat.m[0][0] = n.x * n.x * (1 - cos) + cos, mat.m[0][1] = n.x * n.y * (1 - cos) + n.z * sin, mat.m[0][2] = n.x * n.z * (1 - cos) - n.y * sin;
+	mat.m[1][0] = n.x * n.y * (1 - cos) - n.z * sin, mat.m[1][1] = n.y * n.y * (1 - cos) + cos, mat.m[1][2] = n.y * n.z * (1 - cos) + n.x * sin;
+	mat.m[2][0] = n.x * n.z * (1 - cos) + n.y * sin, mat.m[2][1] = n.y * n.z * (1 - cos) - n.x * sin, mat.m[2][2] = n.z * n.z * (1 - cos) + cos;
+	return mat;
+}
+
 Matrix4x4 MakeBillboard(const Vector3& target, const Vector3& eye, const Vector3& up) {
 	// ビルボード回転行列
 	// X軸

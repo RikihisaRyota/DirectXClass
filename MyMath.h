@@ -89,6 +89,7 @@ Matrix4x4 MakeLookAtLH(const Vector3& target, const Vector3& eye, const Vector3&
 
 // 任意軸回転行列
 Matrix4x4 MakeRotateAxisAngle(const Vector3& axis, float angle);
+Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to);
 // Billboard
 Matrix4x4 MakeBillboard(const Vector3& target, const Vector3& eye, const Vector3& up);
 Matrix4x4 MakeBillboardXAxsizLook(const Vector3& target, const Vector3& eye, const Vector3& up);
