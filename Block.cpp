@@ -54,6 +54,9 @@ void Block::Draw(const ViewProjection& viewProjection) {
 void Block::OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) {
 	if (type == static_cast<uint32_t>(Collider::Type::PlayerToBlock)) {
 		if (IsCollision(obb_.at(5), obb)) {
+			auto playerWorldTransform=player_->GetWorldTransform();
+			playerWorldTransform.parent_ = nullptr;
+			player_->SetWorldtransform(playerWorldTransform);
 			player_->GetGlobalVariables();
 		}
 	}

@@ -385,7 +385,10 @@ void Player::PlayerRotate(const Vector3& vector1) {
 	}
 	Vector3 rotate = Lerp(interRotate_, vector, kTurn);
 	//  Y軸回り角度(θy)
-	worldTransform_.at(0).rotation_.y = std::atan2(rotate.x, rotate.z);
+	float sin = Cross(interRotate_, vector).Length();
+	float cos = Dot(interRotate_, vector);
+
+	worldTransform_.at(0).rotation_.y += std::cosf(cos);
 	// プレイヤーの向いている方向
 	interRotate_ = rotate;
 }
@@ -561,8 +564,13 @@ void Player::PlayerRotate() {
 		interRotate_.Normalize();
 	}
 	Vector3 rotate = Lerp(interRotate_, vector_, kTurn);
+	
+	float sin = Cross(interRotate_, vector_).Length();
+	float cos = Dot(vector_,interRotate_);
+
 	//  Y軸回り角度(θy)
-	worldTransform_.at(0).rotation_.y = std::atan2(rotate.x, rotate.z);
+	worldTransform_.at(0).rotation_.y += std::asinf(sin);
+	//worldTransform_.at(0).rotation_.y = std::atan2(rotate.x,rotate.z);
 	// プレイヤーの向いている方向
 	interRotate_ = rotate;
 }

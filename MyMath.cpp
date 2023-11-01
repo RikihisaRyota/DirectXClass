@@ -546,6 +546,15 @@ Matrix4x4 MakeLookAtLH(const Vector3& target, const Vector3& eye, const Vector3&
 	};
 }
 
+Matrix4x4 MakeRotateAxisAngle(const Vector3& axis, float angle) {
+	Matrix4x4 mat{};
+	mat = MakeIdentity4x4();
+	mat.m[0][0] = axis.x * axis.x * (1 - std::cosf(angle)) + std::cosf(angle), mat.m[0][1] = axis.x * axis.y * (1 - std::cosf(angle)) + axis.z * std::sinf(angle), mat.m[0][2] = axis.x * axis.z * (1 - std::cosf(angle)) - axis.y * std::sinf(angle);
+	mat.m[1][0] = axis.x * axis.y * (1 - std::cosf(angle)) - axis.x * std::sinf(angle), mat.m[1][1] = axis.y * axis.y * (1 - std::cosf(angle)) + std::cosf(angle), mat.m[1][2] = axis.y * axis.z * (1 - std::cosf(angle)) + axis.x * std::sinf(angle);
+	mat.m[2][0] = axis.x * axis.z * (1 - std::cosf(angle)) + axis.y * std::sinf(angle), mat.m[2][1] = axis.y * axis.z * (1 - std::cosf(angle)) - axis.z * std::sinf(angle), mat.m[2][2] = axis.z * axis.z * (1 - std::cosf(angle)) + std::cosf(angle);
+	return mat;
+}
+
 Matrix4x4 MakeBillboard(const Vector3& target, const Vector3& eye, const Vector3& up) {
 	// ビルボード回転行列
 	// X軸
@@ -755,6 +764,10 @@ Vector3 Perpendicular(const Vector3& vector) {
 
 Vector3 Cross(const Vector3& a, const Vector3& b) {
 	return { a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x };
+}
+
+float Cross(const Vector2& v1, const Vector2& v2) {
+	return {v1.x*v2.y-v1.y-v2.x};
 }
 
 AABB AABBAssignment(const AABB& aabb) {

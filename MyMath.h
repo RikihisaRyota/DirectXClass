@@ -87,7 +87,9 @@ Matrix4x4 MakeViewMatrix(const Vector3& rotation, const Vector3& translation);
 // LookAtLH
 Matrix4x4 MakeLookAtLH(const Vector3& target, const Vector3& eye, const Vector3& up);
 
-// Billbord
+// 任意軸回転行列
+Matrix4x4 MakeRotateAxisAngle(const Vector3& axis, float angle);
+// Billboard
 Matrix4x4 MakeBillboard(const Vector3& target, const Vector3& eye, const Vector3& up);
 Matrix4x4 MakeBillboardXAxsizLook(const Vector3& target, const Vector3& eye, const Vector3& up);
 Matrix4x4 MakeBillboardYAxsizLook(const Vector3& target, const Vector3& eye, const Vector3& up);
@@ -155,6 +157,7 @@ Vector3 Perpendicular(const Vector3& vector);
 
 // 外積
 Vector3 Cross(const Vector3& v1, const Vector3& v2);
+float Cross(const Vector2& v1, const Vector2& v2);
 
 // AABBに値を代入
 AABB AABBAssignment(const AABB& aabb);

@@ -136,8 +136,11 @@ void Enemy::EnemyRotate(const Vector3& vector1) {
 		interRotate_.Normalize();
 	}
 	Vector3 rotate = Lerp(interRotate_, vector, kTurn);
+
+	float cos = Dot(interRotate_, rotate);
+	float sin = Cross(rotate, interRotate_).Length();
 	//  Y軸回り角度(θy)
-	worldTransform_.at(0).rotation_.y = std::atan2(rotate.x, rotate.z);
+	worldTransform_.at(0).rotation_.y = std::sinf(sin);
 	// プレイヤーの向いている方向
 	interRotate_ = rotate;
 }

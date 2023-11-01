@@ -578,9 +578,6 @@
     <None Include="resources\shaders\Lighting.hlsli">
       <Filter>リソース ファイル\Lighting</Filter>
     </None>
-    <None Include="resources\shaders\Primitive.hlsli">
-      <Filter>リソース ファイル\Line</Filter>
-    </None>
     <None Include="resources\shaders\Pera.hlsli">
       <Filter>リソース ファイル\Pera</Filter>
     </None>
