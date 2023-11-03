@@ -300,6 +300,9 @@
     <ClInclude Include="Engine\Draw.h">
       <Filter>ソース ファイル\base</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Triangle.h">
+      <Filter>ソース ファイル\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

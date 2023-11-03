@@ -21,7 +21,7 @@ struct ViewProjection
 	// X,Y,Z軸回りのローカル回転角
 	Vector3 rotation_ = { 0.0f, 0.0f, 0.0f };
 	// ローカル座標
-	Vector3 translation_ = { 0.0f, 0.0f, -10.0f };
+	Vector3 translation_ = { 0.0f, 10.0f, -40.0f };
 #pragma endregion ビュー行列の設定
 
 #pragma region 射影行列の設定
@@ -30,9 +30,9 @@ struct ViewProjection
 	// ビューポートのアスペクト比
 	float aspectRatio_ = (float)16 / 9;
 	// 深度限界（手前側）
-	float nearZ_ = 0.1f;
+	float nearZ_ = 10.0f;
 	// 深度限界（奥側）
-	float farZ_ = 1000.0f;
+	float farZ_ = 100.0f;
 #pragma endregion
 
 	// ビュー行列
