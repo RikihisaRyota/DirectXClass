@@ -96,6 +96,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\CubeRenderer.cpp" />
     <ClCompile Include="Engine\DebugCamera.cpp" />
     <ClCompile Include="Engine\DirectXCommon.cpp" />
+    <ClCompile Include="Engine\Draw.cpp" />
     <ClCompile Include="Engine\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Input.cpp" />
     <ClCompile Include="Engine\LineGraphicsPipline.cpp" />
@@ -139,6 +140,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\cVertexPos.h" />
     <ClInclude Include="Engine\DebugCamera.h" />
     <ClInclude Include="Engine\DirectXCommon.h" />
+    <ClInclude Include="Engine\Draw.h" />
     <ClInclude Include="Engine\ImGuiManager.h" />
     <ClInclude Include="Engine\Input.h" />
     <ClInclude Include="Engine\Line.h" />
