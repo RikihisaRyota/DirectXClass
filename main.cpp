@@ -43,7 +43,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	LineGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
 	// ParticleGraphicsPipelineの静的初期化
-	ParticleGraphicsPipline::SetDevice(dxCommon->GetDevice());
+	//ParticleGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
 	// Planeの静的初期化
 	PlaneRenderer::SetDevice(dxCommon->GetDevice());
@@ -77,9 +77,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// Audio
 	Audio* audio = Audio::GetInstance();
 	audio->Initialize();
-
-	// パーティクル
-	Particle::SetDevice(dxCommon->GetDevice());
 
 	// ゲームシーンの初期化
 	GameScene* gameScene = nullptr;

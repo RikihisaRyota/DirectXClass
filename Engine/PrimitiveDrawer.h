@@ -69,5 +69,5 @@ private:
 
 	static const UINT kMaxLineCount = 4096;
 
-	static UINT darwCount;
+	static UINT drawCount;
 };

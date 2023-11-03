@@ -58,9 +58,6 @@
     <ClCompile Include="externals\imgui\imgui_widgets.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="BillParticle.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\BasicGraphicsPipline.cpp">
       <Filter>ソース ファイル\graphicsPipeline</Filter>
     </ClCompile>
@@ -144,12 +141,6 @@
     </ClCompile>
     <ClCompile Include="Engine\MyMath.cpp">
       <Filter>ソース ファイル\math</Filter>
-    </ClCompile>
-    <ClCompile Include="Particle.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Pera.cpp">
-      <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="GameScene.cpp">
       <Filter>ソース ファイル\scene</Filter>
@@ -300,17 +291,8 @@
     <ClInclude Include="Engine\LineGraphicsPipline.h">
       <Filter>ソース ファイル\graphicsPipeline</Filter>
     </ClInclude>
-    <ClInclude Include="BillParticle.h">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="GameScene.h">
       <Filter>ソース ファイル\scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Particle.h">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Pera.h">
-      <Filter>ソース ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
