@@ -1,42 +1,38 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="ソース ファイル">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="imgui">
       <UniqueIdentifier>{447101c5-b2ef-4cb8-addd-b9672e728694}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\3d">
+    <Filter Include="engine">
+      <UniqueIdentifier>{fd7b7799-9ebe-423e-a0b4-beb85a48b00b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\3d">
       <UniqueIdentifier>{20b0100f-75a9-4eff-8ea7-7d6573527bba}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\math">
-      <UniqueIdentifier>{d43ca315-7c93-4f09-8bd7-11aa6e3e6d72}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\scene">
-      <UniqueIdentifier>{a6e1cd55-5481-4792-b29d-7ec4f475fe9b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\graphicsPipeline">
-      <UniqueIdentifier>{0ae6f59c-2c7e-4a17-8144-61b346b0d4ff}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Figure">
+    <Filter Include="engine\Figure">
       <UniqueIdentifier>{8876adc9-e507-405f-aa45-ef1f92bbae77}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\model">
-      <UniqueIdentifier>{a7a46f90-25f4-452c-bcb4-331caee956ae}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\base">
+    <Filter Include="engine\base">
       <UniqueIdentifier>{574f905d-4242-41ea-bf11-1c4708d97ae3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\base\constantBuffer">
+    <Filter Include="engine\base\constantBuffer">
       <UniqueIdentifier>{2586de3b-a9b3-48af-8673-5fa59185e7cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\graphicsPipeline">
+      <UniqueIdentifier>{0ae6f59c-2c7e-4a17-8144-61b346b0d4ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\math">
+      <UniqueIdentifier>{d43ca315-7c93-4f09-8bd7-11aa6e3e6d72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\model">
+      <UniqueIdentifier>{a7a46f90-25f4-452c-bcb4-331caee956ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\scene">
+      <UniqueIdentifier>{a6e1cd55-5481-4792-b29d-7ec4f475fe9b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="externals\imgui\imgui.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
@@ -59,95 +55,94 @@
       <Filter>imgui</Filter>
     </ClCompile>
     <ClCompile Include="Engine\BasicGraphicsPipline.cpp">
-      <Filter>ソース ファイル\graphicsPipeline</Filter>
+      <Filter>engine\graphicsPipeline</Filter>
     </ClCompile>
     <ClCompile Include="Engine\LineGraphicsPipline.cpp">
-      <Filter>ソース ファイル\graphicsPipeline</Filter>
+      <Filter>engine\graphicsPipeline</Filter>
     </ClCompile>
     <ClCompile Include="Engine\ParticleGraphicsPipline.cpp">
-      <Filter>ソース ファイル\graphicsPipeline</Filter>
+      <Filter>engine\graphicsPipeline</Filter>
     </ClCompile>
     <ClCompile Include="Engine\PeraGraphicsPipeline.cpp">
-      <Filter>ソース ファイル\graphicsPipeline</Filter>
+      <Filter>engine\graphicsPipeline</Filter>
     </ClCompile>
     <ClCompile Include="Engine\SpriteGraphicsPipline.cpp">
-      <Filter>ソース ファイル\graphicsPipeline</Filter>
+      <Filter>engine\graphicsPipeline</Filter>
     </ClCompile>
     <ClCompile Include="Engine\ToonGraphicsPipline.cpp">
-      <Filter>ソース ファイル\graphicsPipeline</Filter>
+      <Filter>engine\graphicsPipeline</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Audio.cpp">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClCompile>
     <ClCompile Include="Engine\ConvertString.cpp">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClCompile>
     <ClCompile Include="Engine\DebugCamera.cpp">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClCompile>
     <ClCompile Include="Engine\DirectXCommon.cpp">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClCompile>
     <ClCompile Include="Engine\ImGuiManager.cpp">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Input.cpp">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClCompile>
     <ClCompile Include="Engine\TextureManager.cpp">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClCompile>
     <ClCompile Include="Engine\WinApp.cpp">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClCompile>
     <ClCompile Include="Engine\ViewProjection.cpp">
-      <Filter>ソース ファイル\3d</Filter>
+      <Filter>engine\3d</Filter>
     </ClCompile>
     <ClCompile Include="Engine\WorldTransform.cpp">
-      <Filter>ソース ファイル\3d</Filter>
+      <Filter>engine\3d</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Model.cpp">
-      <Filter>ソース ファイル\model</Filter>
+      <Filter>engine\model</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Mesh.cpp">
-      <Filter>ソース ファイル\model</Filter>
+      <Filter>engine\model</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Sprite.cpp">
-      <Filter>ソース ファイル\Figure</Filter>
+      <Filter>engine\Figure</Filter>
     </ClCompile>
     <ClCompile Include="Engine\SphereRenderer.cpp">
-      <Filter>ソース ファイル\Figure</Filter>
+      <Filter>engine\Figure</Filter>
     </ClCompile>
     <ClCompile Include="Engine\PlaneRenderer.cpp">
-      <Filter>ソース ファイル\Figure</Filter>
+      <Filter>engine\Figure</Filter>
     </ClCompile>
     <ClCompile Include="Engine\CubeRenderer.cpp">
-      <Filter>ソース ファイル\Figure</Filter>
+      <Filter>engine\Figure</Filter>
     </ClCompile>
     <ClCompile Include="Engine\OBJ.cpp">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClCompile>
     <ClCompile Include="Engine\VertexBuffer.cpp">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClCompile>
     <ClCompile Include="Engine\PrimitiveDrawer.cpp">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Material.cpp">
-      <Filter>ソース ファイル\math</Filter>
+      <Filter>engine\math</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Matrix4x4.cpp">
-      <Filter>ソース ファイル\math</Filter>
+      <Filter>engine\math</Filter>
     </ClCompile>
     <ClCompile Include="Engine\MyMath.cpp">
-      <Filter>ソース ファイル\math</Filter>
+      <Filter>engine\math</Filter>
     </ClCompile>
     <ClCompile Include="GameScene.cpp">
-      <Filter>ソース ファイル\scene</Filter>
+      <Filter>engine\scene</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Draw.cpp">
-      <Filter>ソース ファイル\base</Filter>
-    </ClCompile>
+    <ClCompile Include="MapChip.cpp" />
+    <ClCompile Include="ModelManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -175,134 +170,130 @@
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="Engine\BasicGraphicsPipline.h">
-      <Filter>ソース ファイル\graphicsPipeline</Filter>
+      <Filter>engine\graphicsPipeline</Filter>
     </ClInclude>
     <ClInclude Include="Engine\ParticleGraphicsPipline.h">
-      <Filter>ソース ファイル\graphicsPipeline</Filter>
+      <Filter>engine\graphicsPipeline</Filter>
     </ClInclude>
     <ClInclude Include="Engine\PeraGraphicsPipeline.h">
-      <Filter>ソース ファイル\graphicsPipeline</Filter>
+      <Filter>engine\graphicsPipeline</Filter>
     </ClInclude>
     <ClInclude Include="Engine\SpriteGraphicsPipline.h">
-      <Filter>ソース ファイル\graphicsPipeline</Filter>
+      <Filter>engine\graphicsPipeline</Filter>
     </ClInclude>
     <ClInclude Include="Engine\ToonGraphicsPipline.h">
-      <Filter>ソース ファイル\graphicsPipeline</Filter>
+      <Filter>engine\graphicsPipeline</Filter>
     </ClInclude>
     <ClInclude Include="Engine\cDirectionalLight.h">
-      <Filter>ソース ファイル\base\constantBuffer</Filter>
+      <Filter>engine\base\constantBuffer</Filter>
     </ClInclude>
     <ClInclude Include="Engine\cVertexPos.h">
-      <Filter>ソース ファイル\base\constantBuffer</Filter>
+      <Filter>engine\base\constantBuffer</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Audio.h">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\ImGuiManager.h">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\DirectXCommon.h">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\DebugCamera.h">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\ConvertString.h">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Input.h">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\PrimitiveDrawer.h">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\SafeDelete.h">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\TextureManager.h">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\OBJ.h">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\WinApp.h">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\VertexBuffer.h">
-      <Filter>ソース ファイル\base</Filter>
+      <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\WorldTransform.h">
-      <Filter>ソース ファイル\3d</Filter>
+      <Filter>engine\3d</Filter>
     </ClInclude>
     <ClInclude Include="Engine\ViewProjection.h">
-      <Filter>ソース ファイル\3d</Filter>
+      <Filter>engine\3d</Filter>
     </ClInclude>
     <ClInclude Include="Engine\cMaterial.h">
-      <Filter>ソース ファイル\base\constantBuffer</Filter>
+      <Filter>engine\base\constantBuffer</Filter>
     </ClInclude>
     <ClInclude Include="Engine\AABB.h">
-      <Filter>ソース ファイル\math</Filter>
+      <Filter>engine\math</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Vector4.h">
-      <Filter>ソース ファイル\math</Filter>
+      <Filter>engine\math</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Vector3.h">
-      <Filter>ソース ファイル\math</Filter>
+      <Filter>engine\math</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Vector2.h">
-      <Filter>ソース ファイル\math</Filter>
+      <Filter>engine\math</Filter>
     </ClInclude>
     <ClInclude Include="Engine\MyMath.h">
-      <Filter>ソース ファイル\math</Filter>
+      <Filter>engine\math</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Matrix4x4.h">
-      <Filter>ソース ファイル\math</Filter>
+      <Filter>engine\math</Filter>
     </ClInclude>
     <ClInclude Include="Engine\SphereRenderer.h">
-      <Filter>ソース ファイル\Figure</Filter>
+      <Filter>engine\Figure</Filter>
     </ClInclude>
     <ClInclude Include="Engine\PlaneRenderer.h">
-      <Filter>ソース ファイル\Figure</Filter>
+      <Filter>engine\Figure</Filter>
     </ClInclude>
     <ClInclude Include="Engine\CubeRenderer.h">
-      <Filter>ソース ファイル\Figure</Filter>
+      <Filter>engine\Figure</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Sprite.h">
-      <Filter>ソース ファイル\math</Filter>
+      <Filter>engine\math</Filter>
     </ClInclude>
     <ClInclude Include="Engine\OBB.h">
-      <Filter>ソース ファイル\math</Filter>
+      <Filter>engine\math</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Line.h">
-      <Filter>ソース ファイル\math</Filter>
+      <Filter>engine\math</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Plane.h">
-      <Filter>ソース ファイル\math</Filter>
+      <Filter>engine\math</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Sphere.h">
-      <Filter>ソース ファイル\math</Filter>
+      <Filter>engine\math</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Model.h">
-      <Filter>ソース ファイル\model</Filter>
+      <Filter>engine\model</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Mesh.h">
-      <Filter>ソース ファイル\model</Filter>
+      <Filter>engine\model</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Material.h">
-      <Filter>ソース ファイル\model</Filter>
+      <Filter>engine\model</Filter>
     </ClInclude>
     <ClInclude Include="Engine\LineGraphicsPipline.h">
-      <Filter>ソース ファイル\graphicsPipeline</Filter>
+      <Filter>engine\graphicsPipeline</Filter>
     </ClInclude>
     <ClInclude Include="GameScene.h">
-      <Filter>ソース ファイル\scene</Filter>
+      <Filter>engine\scene</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Draw.h">
-      <Filter>ソース ファイル\base</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Triangle.h">
-      <Filter>ソース ファイル\math</Filter>
-    </ClInclude>
+    <ClInclude Include="MapChip.h" />
+    <ClInclude Include="ModelManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

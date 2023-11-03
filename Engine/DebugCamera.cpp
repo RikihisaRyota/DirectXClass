@@ -10,7 +10,7 @@ DebugCamera::DebugCamera() {
 }
 
 void DebugCamera::Update(ViewProjection* viewProjection) {
-	Input* input = Input::GetInstans();
+	Input* input = Input::GetInstance();
 	int32_t wheel = input->GetWheel();
 	Vector2 mouseMove = input->GetMouseMove();
 	if (input->PushMouse(1)) {

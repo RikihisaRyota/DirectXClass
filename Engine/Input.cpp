@@ -8,7 +8,7 @@
 
 #pragma comment(lib, "dinput8.lib")
 
-Input* Input::GetInstans() {
+Input* Input::GetInstance() {
 	static Input instans;
 	return &instans;
 }

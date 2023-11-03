@@ -96,7 +96,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\CubeRenderer.cpp" />
     <ClCompile Include="Engine\DebugCamera.cpp" />
     <ClCompile Include="Engine\DirectXCommon.cpp" />
-    <ClCompile Include="Engine\Draw.cpp" />
     <ClCompile Include="Engine\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Input.cpp" />
     <ClCompile Include="Engine\LineGraphicsPipline.cpp" />
@@ -127,7 +126,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="GameScene.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MapChip.cpp" />
+    <ClCompile Include="ModelManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\AABB.h" />
@@ -140,7 +140,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\cVertexPos.h" />
     <ClInclude Include="Engine\DebugCamera.h" />
     <ClInclude Include="Engine\DirectXCommon.h" />
-    <ClInclude Include="Engine\Draw.h" />
     <ClInclude Include="Engine\ImGuiManager.h" />
     <ClInclude Include="Engine\Input.h" />
     <ClInclude Include="Engine\Line.h" />
@@ -164,7 +163,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\SpriteGraphicsPipline.h" />
     <ClInclude Include="Engine\TextureManager.h" />
     <ClInclude Include="Engine\ToonGraphicsPipline.h" />
-    <ClInclude Include="Engine\Triangle.h" />
     <ClInclude Include="Engine\Vector2.h" />
     <ClInclude Include="Engine\Vector3.h" />
     <ClInclude Include="Engine\Vector4.h" />
@@ -181,6 +179,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="GameScene.h" />
+    <ClInclude Include="MapChip.h" />
+    <ClInclude Include="ModelManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

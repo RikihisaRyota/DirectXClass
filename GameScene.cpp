@@ -5,9 +5,6 @@
 #include "TextureManager.h"
 #include "ImGuiManager.h"
 
-#include "Draw.h"
-#include "Sphere.h"
-
 GameScene::GameScene() {}
 
 GameScene::~GameScene() {}
@@ -18,7 +15,7 @@ void GameScene::Initialize() {
 	debugCamera_ = new DebugCamera();
 
 	// 入力
-	input_ = Input::GetInstans();
+	input_ = Input::GetInstance();
 
 	// カメラの初期化
 	viewProjection_.Initialize();
@@ -63,12 +60,6 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	DrawLine(Vector3(0.0f,0.0f,0.0f), Vector3(1.0f, 0.0f, 0.0f),viewProjection_,Vector4(1.0f,0.0f,0.0f,1.0f));
-	DrawLine(Vector3(1.0f, 0.0f, 0.0f), Vector3(1.0f, 1.0f, 0.0f),viewProjection_,Vector4(0.0f,1.0f,0.0f,1.0f));
-	DrawLine(Vector3(1.0f, 1.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f),viewProjection_,Vector4(0.0f,0.0f,1.0f,1.0f));
-	DrawLine(Vector3(0.0f, 1.0f, 0.0f), Vector3(0.0f, 0.0f, 0.0f),viewProjection_,Vector4(0.0f,0.0f,0.0f,1.0f));
-	
-	DrawSphere(Sphere({0.0f,0.0f,0.0f},1.0f), viewProjection_, Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 	
 	PrimitiveDrawer::Draw();
 	// 3Dオブジェクト描画後処理

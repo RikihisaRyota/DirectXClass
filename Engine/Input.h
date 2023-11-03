@@ -15,7 +15,7 @@
 /// </summary>
 class Input {
 public: // 静的メンバ関数
-	static Input* GetInstans();
+	static Input* GetInstance();
 public: // メンバ関数
 	/// <summary>
 	/// 初期化
