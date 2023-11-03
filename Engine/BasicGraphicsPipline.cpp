@@ -129,11 +129,11 @@ void BasicGraphicsPipline::CreateRasiterzerState() {
 void BasicGraphicsPipline::CreateShaderCompile() {
 	DXCCompilerInitialize();
 	//Shaderをコンパイルする
-	vertexShaderBlob_ = CompileShader(L"Lighting.VS.hlsl",
+	vertexShaderBlob_ = CompileShader(L"Resources/Shaders/Lighting.VS.hlsl",
 		L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(vertexShaderBlob_ != nullptr);
 
-	pixelShaderBlob_ = CompileShader(L"Lighting.PS.hlsl",
+	pixelShaderBlob_ = CompileShader(L"Resources/Shaders/Lighting.PS.hlsl",
 		L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(pixelShaderBlob_ != nullptr);
 }
