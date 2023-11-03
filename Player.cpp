@@ -11,6 +11,7 @@
 #include "MyMath.h"
 #include "TextureManager.h"
 #include "PlayerAttack.h"
+#include "Quaternion.h"
 
 void Player::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	// 基底クラス
@@ -75,10 +76,6 @@ void Player::Update() {
 	/*if (worldTransform_.at(0).translation_.y <= -30.0f) {
 		worldTransform_.at(0).translation_ = { 0.0f,10.0f,0.0f };
 	}*/
-	
-	// 転送
-	BaseCharacter::Update();
-	HitBoxUpdate();
 	ImGui::Begin("Player");
 	ImGui::Text("Jump : B or SPACE");
 	ImGui::Text("Dush : X or SHIFT");
@@ -107,6 +104,9 @@ void Player::BehaviorAttackInitialize() {
 
 void Player::BehaviorAttackUpdate() {
 	playerAttack_->Update();
+	// 転送
+	BaseCharacter::Update();
+	HitBoxUpdate();
 }
 
 void Player::BehaviorDashInitialize() {
@@ -142,6 +142,9 @@ void Player::BehaviorDashUpdate() {
 			0.5f, 0.0f,
 			static_cast<float>(workDash_.dashParameter_) / static_cast<float>(kDashTime));
 	}
+	// 転送
+	BaseCharacter::Update();
+	HitBoxUpdate();
 }
 
 void Player::HitBoxUpdate() {
@@ -445,6 +448,9 @@ void Player::GamePadInput() {
 	Jump();
 	// 重力
 	Gravity();
+	// 転送
+	BaseCharacter::Update();
+	HitBoxUpdate();
 }
 
 void Player::Move() {
@@ -556,19 +562,23 @@ void Player::ChackTranslation() {
 
 }
 void Player::PlayerRotate() {
+	/*Quaternion rotation = MakeRotateAxisAngleQuaternion(
+		Normalize(Vector3{ 1.0f,0.4f,-0.2f }), 0.45f);
+	Vector3 pointY = { 2.1f,-0.9f,1.3f };
+	pointY.Normalize();
+	Matrix4x4 rotateMatrix = MakeRotateMatrix(rotation);
+	Vector3 rotateByQuaternion = RotateVector(pointY,rotation);
+	Vector3 rotateByMatrix = Transform(pointY,rotateMatrix);*/
 	if (vector_ != Vector3(0.0f, 0.0f, 0.0f)) {
 		vector_.Normalize();
 	}
 	if (interRotate_ != Vector3(0.0f, 0.0f, 0.0f)) {
 		interRotate_.Normalize();
 	}
-	Vector3 rotate = Lerp(interRotate_, vector_, kTurn);
+	interRotate_ = Lerp(interRotate_, vector_, kTurn);
 	//  Y軸回り角度(θy)
 	Matrix4x4 rotateMatrix = DirectionToDirection(interRotate_, vector_);
-
-	worldTransform_.at(0).rotation_.y = MakeEulerAngle(rotateMatrix).y;
-	// プレイヤーの向いている方向
-	interRotate_ = rotate;
+	worldTransform_.at(0).SetRotateMatrix(rotateMatrix);
 }
 void Player::InitializeFloatGimmick() {
 	floatingParameter_ = 0.0f;
@@ -591,8 +601,6 @@ void Player::Motion() {
 	ArmLeft();
 	// 右腕
 	ArmRight();
-	// 転送
-	// UpdateMotionMatrix();
 }
 void Player::UpdateMotionMatrix() {}
 void Player::UpdateFloatGimmick() {

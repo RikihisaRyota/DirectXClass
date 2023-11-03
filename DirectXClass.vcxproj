@@ -204,6 +204,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerAttack.h" />
     <ClInclude Include="PrimitiveDrawer.h" />
+    <ClInclude Include="Quaternion.h" />
     <ClInclude Include="SafeDelete.h" />
     <ClInclude Include="Skydome.h" />
     <ClInclude Include="Sphere.h" />

@@ -78,3 +78,27 @@ void WorldTransform::Reset() {
 	// matWorld
 	matWorld_ = MakeIdentity4x4();
 }
+
+void WorldTransform::SetRotateMatrix(const Matrix4x4& rotateMatrix) {
+	Matrix4x4 matScale, matRot, matTrans;
+
+	// スケール、回転、平行移動行列の計算
+	matScale = MakeScaleMatrix(scale_);
+	matRot = MakeIdentity4x4();
+	matRot = rotateMatrix;
+	matTrans = MakeTranslateMatrix(translation_);
+
+	// ワールド行列の合成
+	matWorld_ = MakeIdentity4x4(); // 変形をリセット
+	matWorld_ *= matScale;          // ワールド行列にスケーリングを反映
+	matWorld_ *= matRot;            // ワールド行列に回転を反映
+	matWorld_ *= matTrans;          // ワールド行列に平行移動を反映
+
+	// もし親があれば
+	if (parent_) {
+		matWorld_ = Mul(matWorld_, parent_->matWorld_);
+	}
+
+	// 定数バッファに転送する
+	TransferMatrix();
+}

@@ -9,10 +9,23 @@
 #include "ViewProjection.h"
 #include "Vector4.h"
 #include "Vector2.h"
-
+#include "Quaternion.h"
 
 const double PI = 3.14159265359;
 
+Quaternion IdentityQuaternion();
+Quaternion Conjugation(const Quaternion& quaternion);
+Quaternion Normalize(const Quaternion& quaternion);
+Quaternion Inverse(const Quaternion& quaternion);
+Quaternion Multiply(const Quaternion& p1, const Quaternion& p2);
+float Norm(const Quaternion& quaternion);
+// 任意軸回転(Quaternion)
+Quaternion MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle);
+Quaternion MakeRotateQuaternion(const Vector3& from, const Vector3 to);
+// ベクトルをQuaternionで回転させる
+Vector3 RotateVector(const Vector3& vector, const Quaternion& quaternion);
+// Quaternionから回転行列
+Matrix4x4 MakeRotateMatrix(const Quaternion& quaternion);
 // ベクトル変換
 Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m);
 

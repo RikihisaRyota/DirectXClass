@@ -8,6 +8,146 @@
 
 #include "Vector3.h"
 
+Quaternion IdentityQuaternion() {
+	return Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+Quaternion Conjugation(const Quaternion& quaternion) {
+	return Quaternion(-quaternion.x, -quaternion.y, -quaternion.z, quaternion.w);
+}
+
+Quaternion Normalize(const Quaternion& quaternion) {
+	float length = std::sqrt(quaternion.x * quaternion.x + quaternion.y * quaternion.y + quaternion.z * quaternion.z + quaternion.w * quaternion.w);
+
+	if (length != 0.0f) {
+		float inversLength = 1.0f / length;
+		return Quaternion(quaternion.x * inversLength, quaternion.y * inversLength, quaternion.z * inversLength, quaternion.w * inversLength);
+	}
+	else {
+		return quaternion;
+	}
+}
+
+Quaternion Inverse(const Quaternion& quaternion) {
+	float length = Norm(quaternion);
+	length *= length;
+	Quaternion conjugate = Conjugation(quaternion);
+	Quaternion result{};
+	result.x = conjugate.x / length;
+	result.y = conjugate.y / length;
+	result.z = conjugate.z / length;
+	result.w = conjugate.w / length;
+	return result;
+}
+
+Quaternion Multiply(const Quaternion& p1, const Quaternion& p2) {
+	Quaternion result;
+	Vector3 qv = { p1.x, p1.y, p1.z };
+	Vector3 rv = { p2.x, p2.y, p2.z };
+
+	result.w = p1.w * p2.w - Dot(qv, rv);
+	Vector3 t = Cross(qv, rv) + (qv * p2.w) + (rv * p1.w);
+	result.x = t.x;
+	result.y = t.y;
+	result.z = t.z;
+	return result;
+}
+
+float Norm(const Quaternion& quaternion) {
+	return std::sqrt(
+		quaternion.x * quaternion.x +
+		quaternion.y * quaternion.y +
+		quaternion.z * quaternion.z +
+		quaternion.w * quaternion.w
+	);
+}
+
+Quaternion MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle) {
+	float halfAngle = angle * 0.5f;
+	float sinHalfAngle = std::sinf(halfAngle);
+	Vector3 normalizedAxis = Normalize(axis);
+
+	Quaternion result;
+	result.x = normalizedAxis.x * sinHalfAngle;
+	result.y = normalizedAxis.y * sinHalfAngle;
+	result.z = normalizedAxis.z * sinHalfAngle;
+	result.w = std::cosf(halfAngle);
+
+	return result;
+}
+
+Quaternion MakeRotateQuaternion(const Vector3& from, const Vector3 to) {
+	Vector3 cross = Cross(to, from);
+	float halfSin = cross.Length();
+	float halfCos = Dot(to, from);
+	Vector3 n{};
+	if (cross.Length() > 0) {
+		n = Normalize(cross);
+	}
+	else if (from.x != 0.0f || from.y != 0.0f) {
+		n.x = from.z;
+		n.y = 0.0f;
+		n.z = -from.x;
+
+	}
+	else if (from.x != 0.0f || from.y != 0.0f) {
+		n.x = from.y;
+		n.y = -from.x;
+		n.z = 0.0f;
+	}
+	Quaternion result;
+	result.x = n.x * std::sin(halfSin);
+	result.y = n.y * std::sin(halfSin);
+	result.z = n.z * std::sin(halfSin);
+	result.w = std::cos(halfCos);
+
+	return result;
+}
+
+Vector3 RotateVector(const Vector3& vector, const Quaternion& quaternion) {
+	Quaternion conjugate = Conjugation(quaternion);
+	Quaternion w = Multiply(Multiply(quaternion, Quaternion(vector.x, vector.y, vector.z, 0.0f)), conjugate);
+
+	return Vector3(w.x, w.y, w.z);
+}
+
+Matrix4x4 MakeRotateMatrix(const Quaternion& quaternion) {
+	Matrix4x4 result;
+
+	float xx = quaternion.x * quaternion.x;
+	float yy = quaternion.y * quaternion.y;
+	float zz = quaternion.z * quaternion.z;
+	float ww = quaternion.w * quaternion.w;
+	float xy = quaternion.x * quaternion.y;
+	float xz = quaternion.x * quaternion.z;
+	float yz = quaternion.y * quaternion.z;
+	float wx = quaternion.w * quaternion.x;
+	float wy = quaternion.w * quaternion.y;
+	float wz = quaternion.w * quaternion.z;
+
+	result.m[0][0] = ww + xx - yy - zz;
+	result.m[0][1] = 2.0f * (xy + wz);
+	result.m[0][2] = 2.0f * (xz - +wy);
+	result.m[0][3] = 0.0f;
+
+	result.m[1][0] = 2.0f * (xy - wz);
+	result.m[1][1] = ww - xx + yy - zz;
+	result.m[1][2] = 2.0f * (yz + wx);
+	result.m[1][3] = 0.0f;
+
+	result.m[2][0] = 2.0f * (xz + wy);
+	result.m[2][1] = 2.0f * (yz - wx);
+	result.m[2][2] = ww - xx - yy + zz;
+	result.m[2][3] = 0.0f;
+
+	result.m[3][0] = 0.0f;
+	result.m[3][1] = 0.0f;
+	result.m[3][2] = 0.0f;
+	result.m[3][3] = 1.0f;
+
+	return result;
+}
+
 Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
 	Vector3 result{
 		v.x * m.m[0][0] + v.y * m.m[1][0] + v.z * m.m[2][0],
@@ -428,11 +568,11 @@ Matrix4x4 MakeRotateXYZMatrix(const Vector3& rotation) {
 }
 
 Matrix4x4 MakeRotateMatrix(const Matrix4x4& matrix) {
-	Vector3 rotate_X = {matrix.m[0][0],matrix.m[0][1] ,matrix.m[0][2] };
+	Vector3 rotate_X = { matrix.m[0][0],matrix.m[0][1] ,matrix.m[0][2] };
 	rotate_X.Normalize();
-	Vector3 rotate_Y = {matrix.m[1][0],matrix.m[1][1] ,matrix.m[1][2] };
+	Vector3 rotate_Y = { matrix.m[1][0],matrix.m[1][1] ,matrix.m[1][2] };
 	rotate_Y.Normalize();
-	Vector3 rotate_Z = {matrix.m[2][0],matrix.m[2][1] ,matrix.m[2][2] };
+	Vector3 rotate_Z = { matrix.m[2][0],matrix.m[2][1] ,matrix.m[2][2] };
 	rotate_Z.Normalize();
 	Matrix4x4 result{};
 	result = MakeIdentity4x4();
@@ -443,7 +583,7 @@ Matrix4x4 MakeRotateMatrix(const Matrix4x4& matrix) {
 	result.m[1][0] = rotate_Y.x;
 	result.m[1][1] = rotate_Y.y;
 	result.m[1][2] = rotate_Y.z;
-	
+
 	result.m[2][0] = rotate_Z.x;
 	result.m[2][1] = rotate_Z.y;
 	result.m[2][2] = rotate_Z.z;
@@ -568,16 +708,17 @@ Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to) {
 		n.y = 0.0f;
 		n.z = -from.x;
 
-	}else if (from.x!=0.0f||from.y!=0.0f) {
+	}
+	else if (from.x != 0.0f || from.y != 0.0f) {
 		n.x = from.y;
 		n.y = -from.x;
 		n.z = 0.0f;
 	}
 	Matrix4x4 mat{};
 	mat = MakeIdentity4x4();
-	mat.m[0][0] = n.x * n.x * (1 - cos) + cos, mat.m[0][1] = n.x * n.y * (1 - cos) + n.z * sin, mat.m[0][2] = n.x * n.z * (1 - cos) - n.y * sin;
-	mat.m[1][0] = n.x * n.y * (1 - cos) - n.z * sin, mat.m[1][1] = n.y * n.y * (1 - cos) + cos, mat.m[1][2] = n.y * n.z * (1 - cos) + n.x * sin;
-	mat.m[2][0] = n.x * n.z * (1 - cos) + n.y * sin, mat.m[2][1] = n.y * n.z * (1 - cos) - n.x * sin, mat.m[2][2] = n.z * n.z * (1 - cos) + cos;
+	mat.m[0][0] = n.x * n.x * (1 - std::cos(cos)) + std::cos(cos), mat.m[0][1] = n.x * n.y * (1 - std::cos(cos)) + n.z * std::sin(sin), mat.m[0][2] = n.x * n.z * (1 - std::cos(cos)) - n.y * std::sin(sin);
+	mat.m[1][0] = n.x * n.y * (1 - std::cos(cos)) - n.z * std::sin(sin), mat.m[1][1] = n.y * n.y * (1 - std::cos(cos)) + std::cos(cos), mat.m[1][2] = n.y * n.z * (1 - std::cos(cos)) + n.x * std::sin(sin);
+	mat.m[2][0] = n.x * n.z * (1 - std::cos(cos)) + n.y * std::sin(sin), mat.m[2][1] = n.y * n.z * (1 - std::cos(cos)) - n.x * std::sin(sin), mat.m[2][2] = n.z * n.z * (1 - std::cos(cos)) + std::cos(cos);
 	return mat;
 }
 
@@ -793,7 +934,7 @@ Vector3 Cross(const Vector3& a, const Vector3& b) {
 }
 
 float Cross(const Vector2& v1, const Vector2& v2) {
-	return {v1.x*v2.y-v1.y-v2.x};
+	return { v1.x * v2.y - v1.y - v2.x };
 }
 
 AABB AABBAssignment(const AABB& aabb) {

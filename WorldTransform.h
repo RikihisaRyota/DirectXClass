@@ -50,4 +50,6 @@ struct WorldTransform {
 	/// メンバ変数の初期化
 	/// </summary>
 	void Reset();
+
+	void SetRotateMatrix(const Matrix4x4& rotateMatrix);
 };
