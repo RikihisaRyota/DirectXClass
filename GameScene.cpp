@@ -10,17 +10,21 @@ GameScene::GameScene() {}
 GameScene::~GameScene() {}
 
 void GameScene::Initialize() {
+#pragma region 
 	dxCommon_ = DirectXCommon::GetInstance();
 	// デバックカメラ
 	debugCamera_ = new DebugCamera();
-
 	// 入力
 	input_ = Input::GetInstance();
-
 	// カメラの初期化
 	viewProjection_.Initialize();
 	// 線
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection_);
+#pragma endregion
+
+
+	mapChip_ = std::make_unique<MapChip>();
+	mapChip_->LoadCSV("state_1");
 }
 
 void GameScene::Update() {

@@ -9,13 +9,14 @@
 #include "PrimitiveDrawer.h"
 #include "Model.h"
 #include "OBJ.h"
-
 #include "Pera.h"
-
 #include "SafeDelete.h"
 #include "PlaneRenderer.h"
 #include "SphereRenderer.h"
 #include "Sprite.h"
+
+
+#include "MapChip.h"
 
 class DirectXCommon;
 /// <summary>
@@ -61,4 +62,5 @@ private: // メンバ変数
 	/// <summary>
 	/// ゲーム用
 	/// </summary>
+	std::unique_ptr<MapChip> mapChip_;
 };
