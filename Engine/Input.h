@@ -1,19 +1,42 @@
 #pragma once
 
+#include "Vector2.h"
+#include <Windows.h>
+#include <array>
+#include <vector>
+#include <wrl.h>
+
+#include <XInput.h>
 #define DIRECTINPUT_VERSION 0x0800 // DirectInputのバージョン指定
 #include <dinput.h>
 
-#include <array>
-#include <Windows.h>
-#include <wrl.h>
-
-#include "Vector2.h"
-#include "WinApp.h"
+#pragma comment(lib, "dinput8.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "XInput.lib")
 
 /// <summary>
 /// 入力
 /// </summary>
 class Input {
+public:
+	enum class PadType {
+		DirectInput,
+		XInput,
+	};
+
+	// variantがC++17から
+	union State {
+		XINPUT_STATE xInput_;
+		DIJOYSTATE2 directInput_;
+	};
+	struct Joystick {
+		Microsoft::WRL::ComPtr<IDirectInputDevice8> device_;
+		int32_t deadZoneL_;
+		int32_t deadZoneR_;
+		PadType type_;
+		State state_;
+		State statePre_;
+	};
 public: // 静的メンバ関数
 	static Input* GetInstance();
 public: // メンバ関数
@@ -88,10 +111,46 @@ public: // メンバ関数
 	/// <param name=""></param>
 	/// <returns></returns>
 	Vector2 GetMouseMove() const;
+	/// <summary>
+	/// 現在のジョイスティック状態を取得する
+	/// </summary>
+	/// <param name="stickNo">ジョイスティック番号</param>
+	/// <param name="out">現在のジョイスティック状態</param>
+	/// <returns>正しく取得できたか</returns>
+	bool GetJoystickState(int32_t stickNo, DIJOYSTATE2& out) const;
+
+	/// <summary>
+	/// 前回のジョイスティック状態を取得する
+	/// </summary>
+	/// <param name="stickNo">ジョイスティック番号</param>
+	/// <param name="out">前回のジョイスティック状態</param>
+	/// <returns>正しく取得できたか</returns>
+	bool GetJoystickStatePrevious(int32_t stickNo, DIJOYSTATE2& out) const;
+
+	/// <summary>
+	/// 現在のジョイスティック状態を取得する
+	/// </summary>
+	/// <param name="stickNo">ジョイスティック番号</param>
+	/// <param name="out">現在のジョイスティック状態</param>
+	/// <returns>正しく取得できたか</returns>
+	bool GetJoystickState(int32_t stickNo, XINPUT_STATE& out) const;
+
+	/// <summary>
+	/// 前回のジョイスティック状態を取得する
+	/// </summary>
+	/// <param name="stickNo">ジョイスティック番号</param>
+	/// <param name="out">前回のジョイスティック状態</param>
+	/// <returns>正しく取得できたか</returns>
+	bool GetJoystickStatePrevious(int32_t stickNo, XINPUT_STATE& out) const;
+private: // メンバ変数
+	BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* instance, VOID* context);
+	BOOL CALLBACK EnumJoystickObjectsCallback(const DIDEVICEOBJECTINSTANCE* instance, VOID* context);
 private: // メンバ変数
 	Microsoft::WRL::ComPtr<IDirectInput8> dInput_;
 	Microsoft::WRL::ComPtr<IDirectInputDevice8> devKeyboard_;
 	Microsoft::WRL::ComPtr<IDirectInputDevice8> devMouse_;
+	std::vector<Joystick> devJoysticks_;
+
 	DIMOUSESTATE2 mouse_;
 	DIMOUSESTATE2 mousePre_;
 	std::array<BYTE, 256> key_;
