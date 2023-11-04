@@ -21,10 +21,21 @@ void GameScene::Initialize() {
 	// 線
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection_);
 #pragma endregion
-
-
+#pragma region 生成
+	blockManager_ = std::make_unique<BlockManager>();
 	mapChip_ = std::make_unique<MapChip>();
-	mapChip_->LoadCSV("state_1");
+
+#pragma endregion
+
+#pragma region 初期化
+	mapChip_->LoadCSV("stage_1");
+
+	blockManager_->SetMapChip(mapChip_.get());
+	blockManager_->Initialize();
+#pragma endregion
+
+
+
 }
 
 void GameScene::Update() {
@@ -64,7 +75,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	
+	blockManager_->Draw(viewProjection_);
 	PrimitiveDrawer::Draw();
 	// 3Dオブジェクト描画後処理
 	PlaneRenderer::PostDraw();

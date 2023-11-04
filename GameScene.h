@@ -15,7 +15,7 @@
 #include "SphereRenderer.h"
 #include "Sprite.h"
 
-
+#include "BlockManager.h"
 #include "MapChip.h"
 
 class DirectXCommon;
@@ -63,4 +63,5 @@ private: // メンバ変数
 	/// ゲーム用
 	/// </summary>
 	std::unique_ptr<MapChip> mapChip_;
+	std::unique_ptr<BlockManager> blockManager_;
 };

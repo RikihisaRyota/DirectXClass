@@ -143,6 +143,9 @@
     </ClCompile>
     <ClCompile Include="MapChip.cpp" />
     <ClCompile Include="ModelManager.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="BlockManager.cpp" />
+    <ClCompile Include="MapChipEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -294,6 +297,8 @@
     </ClInclude>
     <ClInclude Include="MapChip.h" />
     <ClInclude Include="ModelManager.h" />
+    <ClInclude Include="BlockManager.h" />
+    <ClInclude Include="MapChipEditor.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

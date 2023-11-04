@@ -12,8 +12,8 @@ MapChip::~MapChip() {}
 void MapChip::Initialize() {}
 
 void MapChip::Draw(const ViewProjection& viewProjection) {
-    for (uint32_t y = 0; y < kMaxHeight; y++) {
-        for (uint32_t x = 0; x < kMaxWidth; x++) {
+    for (uint32_t y = 0; y < kMaxHeightBlockNum; y++) {
+        for (uint32_t x = 0; x < kMaxWidthBlockNum; x++) {
 
         }
     }
@@ -21,7 +21,7 @@ void MapChip::Draw(const ViewProjection& viewProjection) {
 
 void MapChip::LoadCSV(std::string fileName) {
     // ファイル名をパスに追加
-    fileName = "Resources/CSV/" + fileName + ".csv";
+    fileName = "Resources/CSVs/" + fileName + ".csv";
 
     // 読み込むファイルを開く
     std::ifstream inputCSVFile(fileName);
