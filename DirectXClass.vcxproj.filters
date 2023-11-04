@@ -87,9 +87,6 @@
     <ClCompile Include="Engine\ImGuiManager.cpp">
       <Filter>engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Input.cpp">
-      <Filter>engine\base</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\TextureManager.cpp">
       <Filter>engine\base</Filter>
     </ClCompile>
@@ -146,6 +143,12 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="BlockManager.cpp" />
     <ClCompile Include="MapChipEditor.cpp" />
+    <ClCompile Include="Engine\Input.cpp">
+      <Filter>engine\base</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Draw.cpp">
+      <Filter>engine\base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -206,9 +209,6 @@
       <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\ConvertString.h">
-      <Filter>engine\base</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Input.h">
       <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\PrimitiveDrawer.h">
@@ -299,6 +299,12 @@
     <ClInclude Include="ModelManager.h" />
     <ClInclude Include="BlockManager.h" />
     <ClInclude Include="MapChipEditor.h" />
+    <ClInclude Include="Engine\Draw.h">
+      <Filter>engine\base</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Input.h">
+      <Filter>engine\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
