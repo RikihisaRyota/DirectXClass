@@ -3,7 +3,13 @@
 #include <cassert>
 #include <vector>
 
+
 #include "ImGuiManager.h"
+#include "Matrix4x4.h"
+#include "MyMath.h"
+#include "ViewProjection.h"
+#include "Vector2.h"
+#include "Vector3.h"
 #include "WinApp.h"
 
 // デバイス発見時に実行される
@@ -175,6 +181,57 @@ int32_t Input::GetWheel() const {
 
 Vector2 Input::GetMouseMove() const {
 	return {(float)mouse_.lX,(float)mouse_.lY};
+}
+
+Vector2 Input::GetMouseScreenPosition() const {
+	POINT cursorPos;
+	GetCursorPos(&cursorPos); // カーソルのスクリーン上の位置を取得
+	ScreenToClient(WinApp::GetInstance()->GetHwnd(), &cursorPos); // スクリーン座標をクライアント座標に変換
+
+	return Vector2(static_cast<float>(cursorPos.x), static_cast<float>(cursorPos.y));
+}
+
+Vector3 Input::GetMouseWorldPosition(float cameraDistance, const ViewProjection& viewProjection) const {
+	POINT cursorPos;
+	GetCursorPos(&cursorPos); // カーソルのスクリーン上の位置を取得
+	ScreenToClient(WinApp::GetInstance()->GetHwnd(), &cursorPos); // スクリーン座標をクライアント座標に変換
+
+	Vector2 screenPos (static_cast<float>(cursorPos.x), static_cast<float>(cursorPos.y));
+	// ビュー行列
+	Matrix4x4 matView = viewProjection.matView_;
+	// ビューポート行列
+	Matrix4x4 matViewProjection = viewProjection.matProjection_;
+	// ビューポート行列
+	Matrix4x4 matViewport =
+		MakeViewportMatrix(0, 0, WinApp::kWindowWidth, WinApp::kWindowHeight, 0, 1);
+	// ビュー行列とプロジェクション行列、ビューポート行列を合成する
+	Matrix4x4 matVPV = matView * matViewProjection * matViewport;
+
+	// 合成行列の逆行列を計算する
+	Matrix4x4 matInverseVPV = Inverse(matVPV);
+
+	// スクリーン座標
+	Vector3 posNear = Vector3(
+		static_cast<float>(screenPos.x), static_cast<float>(screenPos.y), 0.0f);
+
+	Vector3 posFar = Vector3(
+		static_cast<float>(screenPos.x), static_cast<float>(screenPos.y), 1.0f);
+
+	// スクリーン座標系からワールド座標系
+	posNear = Transform(posNear, matInverseVPV);
+	posFar = Transform(posFar, matInverseVPV);
+
+	// マウスレイの方向
+	Vector3 mouseDirection = posFar - posNear;
+
+	mouseDirection.Normalize();
+
+	// カメラから照準オブジェクトの距離
+	const float kDistanceTestObject = cameraDistance;
+
+	Vector3 reticlePos = posNear + (mouseDirection * kDistanceTestObject);
+
+	return Vector3(reticlePos.x, reticlePos.y, reticlePos.z);
 }
 
 bool Input::GetJoystickState(int32_t stickNo, DIJOYSTATE2& out) const {

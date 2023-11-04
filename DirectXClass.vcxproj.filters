@@ -305,6 +305,9 @@
     <ClInclude Include="Engine\Input.h">
       <Filter>engine\base</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Triangle.h">
+      <Filter>engine\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

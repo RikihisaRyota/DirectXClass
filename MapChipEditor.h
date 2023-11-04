@@ -1,19 +1,30 @@
 #pragma once
 
-#include "Input.h"
-#include "ViewProjection.h"
+#include <memory>
 
-class MapChip;
+#include "Input.h"
+#include "MapChip.h"
+#include "ViewProjection.h"
+#include "SphereRenderer.h"
+
 class MapChipEditor {
 public:
 	void Initialize();
 	void Update();
-	void Draw(const ViewProjection& viewProjection);
+	void Draw();
+
+	void SetViewProjection(ViewProjection* ViewProjection) { viewProjection_ = ViewProjection; }
 	void SetMapChip(MapChip* mapChip) { mapChip_ = mapChip; }
 private:
-	void FrameDraw(const ViewProjection& viewProjection);
+	void FrameDraw();
+	const uint32_t kMaxBlock_= uint32_t(MapChip::Blocks::kCount);
+	ViewProjection* viewProjection_;
 	MapChip* mapChip_;
 	Input* input_;
 	bool isDebug_;
+	uint32_t blockCount_;
+
+	std::unique_ptr< SphereRenderer> mouse_;
+	WorldTransform mouseWorldTransform_;
 };
 

@@ -10,9 +10,10 @@
 
 class BlockManager {
 public:
-	void SetMapChip(MapChip* mapChip) { mapChip_ = mapChip; }
 	void Initialize();
 	void Draw(const ViewProjection& viewProjection);
+
+	void SetMapChip(MapChip* mapChip) { mapChip_ = mapChip; }
 private:
 	MapChip* mapChip_;
 	std::vector<Model*> blockModels_[kMaxHeightBlockNum][kMaxWidthBlockNum];

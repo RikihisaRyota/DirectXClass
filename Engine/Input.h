@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Vector2.h"
 #include <Windows.h>
 #include <array>
 #include <vector>
@@ -14,6 +13,9 @@
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "XInput.lib")
 
+struct Vector2;
+struct Vector3;
+struct ViewProjection;
 /// <summary>
 /// 入力
 /// </summary>
@@ -111,6 +113,21 @@ public: // メンバ関数
 	/// <param name=""></param>
 	/// <returns></returns>
 	Vector2 GetMouseMove() const;
+
+	/// <summary>
+	/// マウスのスクリーン座標系を出力
+	/// </summary>
+	/// <returns></returns>
+	Vector2 GetMouseScreenPosition()const;
+
+	/// <summary>
+	/// マウスのワールド座標系を出力
+	/// zは0.0f
+	/// </summary>
+	/// <returns></returns>
+	Vector3 GetMouseWorldPosition(float cameraDistance,const ViewProjection& viewProjection)const;
+
+
 	/// <summary>
 	/// 現在のジョイスティック状態を取得する
 	/// </summary>

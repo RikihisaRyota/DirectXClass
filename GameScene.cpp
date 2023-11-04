@@ -24,11 +24,15 @@ void GameScene::Initialize() {
 #pragma region 生成
 	blockManager_ = std::make_unique<BlockManager>();
 	mapChip_ = std::make_unique<MapChip>();
+	mapChipEditor_ = std::make_unique<MapChipEditor>();
 
 #pragma endregion
 
 #pragma region 初期化
 	mapChip_->LoadCSV("stage_1");
+	mapChipEditor_->SetMapChip(mapChip_.get());
+	mapChipEditor_->SetViewProjection(&viewProjection_);
+	mapChipEditor_->Initialize();
 
 	blockManager_->SetMapChip(mapChip_.get());
 	blockManager_->Initialize();
@@ -39,8 +43,12 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
+	
+	
 	// デバックカメラ
 	debugCamera_->Update(&viewProjection_);
+	// マップチップエディター
+	mapChipEditor_->Update();
 }
 
 void GameScene::Draw() {
@@ -68,14 +76,12 @@ void GameScene::Draw() {
 	Model::PreDraw(commandList);
 	PrimitiveDrawer::PreDraw(commandList);
 	PlaneRenderer::PreDraw(commandList);
-
-
-
-
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	blockManager_->Draw(viewProjection_);
+
+	mapChipEditor_->Draw();
 	PrimitiveDrawer::Draw();
 	// 3Dオブジェクト描画後処理
 	PlaneRenderer::PostDraw();

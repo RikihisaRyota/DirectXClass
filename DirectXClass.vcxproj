@@ -169,6 +169,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\SpriteGraphicsPipline.h" />
     <ClInclude Include="Engine\TextureManager.h" />
     <ClInclude Include="Engine\ToonGraphicsPipline.h" />
+    <ClInclude Include="Engine\Triangle.h" />
     <ClInclude Include="Engine\Vector2.h" />
     <ClInclude Include="Engine\Vector3.h" />
     <ClInclude Include="Engine\Vector4.h" />
