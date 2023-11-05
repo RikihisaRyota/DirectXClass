@@ -67,16 +67,27 @@ void MapChipEditor::Update() {
 				screenMousePos.y >= 0.0f &&
 				screenMousePos.y <= 720.0f) {
 				mapChip_->SetBlocks(screenMousePos, blockCount_);
-				mapChip_->SaveCSV("stage_1");
+				mapChip_->SaveCSV();
 			}
 		}
 #ifdef _DEBUG
-		ImGui::ShowDemoWindow();
 		ImGui::Begin("Debug");
 		if (ImGui::TreeNode("MapChipEditor")) {
 			ImGui::Text("block:%d", blockCount_);
-			ImGui::BeginCombo();
-
+			// ドロップダウンメニューの表示
+			static const char* stage[] = { "stage_1", "stage_2", "stage_3", "stage_4","stage_5","stage_6","stage_7","stage_8" };
+			int currenStage = mapChip_->GetCurrentStage();
+			if (ImGui::BeginCombo("Stage", stage[currenStage])) {
+				for (int i = 0; i < IM_ARRAYSIZE(stage); i++) {
+					bool isSelected = (currenStage == i);
+					if (ImGui::Selectable(stage[i], isSelected)) {
+						currenStage = i;
+						mapChip_->SetCurrentStage(currenStage);
+						mapChip_->LoadCSV();
+					}
+				}
+				ImGui::EndCombo();
+			}
 			ImGui::TreePop();
 		}
 		ImGui::End();

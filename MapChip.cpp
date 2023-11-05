@@ -7,11 +7,18 @@
 #include "ModelManager.h"
 #include "MyMath.h"
 
-MapChip::MapChip() {}
-
-MapChip::~MapChip() {}
-
 void MapChip::Initialize() {
+	stageName_ = {
+		 "stage_1",
+		 "stage_2",
+		 "stage_3",
+		 "stage_4",
+		 "stage_5",
+		 "stage_6",
+		 "stage_7",
+		 "stage_8"
+	};
+
 	auto modelManager = ModelManager::GetInstance();
 	for (uint32_t y = 0; y < kMaxHeightBlockNum; y++) {
 		for (uint32_t x = 0; x < kMaxWidthBlockNum; x++) {
@@ -27,6 +34,14 @@ void MapChip::Initialize() {
 			}
 		}
 	}
+}
+
+void MapChip::LoadCSV() {
+	LoadCSV(stageName_.at(currentStage_));
+}
+
+void MapChip::LoadCSV(uint32_t stageNum) {
+	LoadCSV(stageName_.at(stageNum));
 }
 
 void MapChip::LoadCSV(std::string fileName) {
@@ -61,6 +76,14 @@ void MapChip::LoadCSV(std::string fileName) {
 	inputCSVFile.close();
 }
 
+void MapChip::SaveCSV() {
+	SaveCSV(stageName_.at(currentStage_));
+}
+
+void MapChip::SaveCSV(uint32_t stageNum) {
+	SaveCSV(stageName_.at(stageNum));
+}
+
 void MapChip::SaveCSV(std::string fileName) {
 	// ファイル名をパスに追加
 	fileName = "Resources/CSVs/" + fileName + ".csv";
@@ -85,12 +108,11 @@ void MapChip::SaveCSV(std::string fileName) {
 }
 
 void MapChip::Draw(const ViewProjection& viewProjection) {
-	const uint32_t WidthBlockNum = 38;
-	int32_t xMin = int32_t(int32_t(viewProjection.translation_.x) / kBlockSize - WidthBlockNum / 2);
+	int32_t xMin = int32_t(int32_t(viewProjection.translation_.x) / int32_t(kBlockSize)-int32_t(kMaxScreenWidthBlockNum) / 2)-1;
 	if (xMin < 0) {
 		xMin = 0;
 	}
-	int32_t xMax = int32_t(int32_t(viewProjection.translation_.x) / kBlockSize + WidthBlockNum / 2);
+	int32_t xMax = int32_t(int32_t(viewProjection.translation_.x) / int32_t(kBlockSize) + int32_t(kMaxScreenWidthBlockNum) / 2)+1;
 	if (xMax < 0) {
 		xMax = 0;
 	}
