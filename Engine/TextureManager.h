@@ -149,6 +149,7 @@ public: // メンバ関数
 	const D3D12_RESOURCE_DESC GetResoureDesc(uint32_t textureHandle);
 
 	void GetCPUGPUHandle(D3D12_CPU_DESCRIPTOR_HANDLE& cpu, D3D12_GPU_DESCRIPTOR_HANDLE& gpu, uint32_t descriptorSize);
+	
 private: // メンバ変数
 	// デバイス
 	static DirectXCommon* device_;

@@ -4,12 +4,30 @@
 #include <fstream>
 #include <string>
 
+#include "ModelManager.h"
+#include "MyMath.h"
 
 MapChip::MapChip() {}
 
 MapChip::~MapChip() {}
 
-void MapChip::Initialize() {}
+void MapChip::Initialize() {
+	auto modelManager = ModelManager::GetInstance();
+	for (uint32_t y = 0; y < kMaxHeightBlockNum; y++) {
+		for (uint32_t x = 0; x < kMaxWidthBlockNum; x++) {
+			for (size_t models = 0; models < modelManager->GetBlockModelSize(); models++) {
+				blockModels_[y][x].emplace_back(modelManager->GetBlockModel(models));
+				blockWorldTransform_[y][x].Initialize();
+				blockWorldTransform_[y][x].translation_ = Vector3(
+					float(x * kBlockSize) + float(kBlockSize) * 0.5f,
+					float((kMaxHeightBlockNum - y) * kBlockSize) + float(kBlockSize) * 0.5f,
+					0.0f
+				);
+				blockWorldTransform_[y][x].UpdateMatrix();
+			}
+		}
+	}
+}
 
 void MapChip::LoadCSV(std::string fileName) {
 	// ファイル名をパスに追加
@@ -66,6 +84,47 @@ void MapChip::SaveCSV(std::string fileName) {
 	outputCSVFile.close();
 }
 
+void MapChip::Draw(const ViewProjection& viewProjection) {
+	const uint32_t WidthBlockNum = 38;
+	int32_t xMin = int32_t(int32_t(viewProjection.translation_.x) / kBlockSize - WidthBlockNum / 2);
+	if (xMin < 0) {
+		xMin = 0;
+	}
+	int32_t xMax = int32_t(int32_t(viewProjection.translation_.x) / kBlockSize + WidthBlockNum / 2);
+	if (xMax < 0) {
+		xMax = 0;
+	}
+	for (int32_t y = 0; y < kMaxHeightBlockNum; y++) {
+		for (int32_t x = xMin; x < xMax; x++) {
+			auto blockType = map_[y][x];
+			switch (blockType) {
+			case static_cast<size_t>(MapChip::Blocks::kBlock):
+			{
+				blockModels_[y][x].at(static_cast<size_t>(MapChip::Blocks::kBlock) - 1)->Draw(blockWorldTransform_[y][x], viewProjection);
+			}
+			break;
+			case static_cast<size_t>(MapChip::Blocks::kRedBlock):
+			{
+				blockModels_[y][x].at(static_cast<size_t>(MapChip::Blocks::kRedBlock) - 1)->Draw(blockWorldTransform_[y][x], viewProjection);
+			}
+			break;
+			case static_cast<size_t>(MapChip::Blocks::kNone):
+			{
+
+			}
+			break;
+			default:
+				break;
+			}
+
+		}
+	}
+}
+
+Vector3 MapChip::GetBlocksCenterWorldPosition(uint32_t x, uint32_t y) {
+	return MakeTranslate(blockWorldTransform_[y][x].matWorld_);
+}
+
 bool MapChip::InRange(const Vector3& pos) {
 	if (pos.x < 0.0f || pos.x > float(kMaxWidth)) {
 		return false;
@@ -77,7 +136,16 @@ bool MapChip::InRange(const Vector3& pos) {
 }
 
 void MapChip::SetBlocks(const Vector3& pos, uint32_t blockType) {
-	uint32_t x = uint32_t(pos.x / float(kBlockSize));
-	uint32_t y = kMaxHeightBlockNum - uint32_t(pos.y / float(kBlockSize));
+	int32_t x = int32_t(pos.x / float(kBlockSize));
+	int32_t y = kMaxHeightBlockNum - int32_t(pos.y / float(kBlockSize));
 	map_[y][x] = blockType;
+}
+
+void MapChip::SetBlocks(const Vector2& pos, uint32_t blockType) {
+	uint32_t x = uint32_t(pos.x / kBlockScreenSize);
+	// カメラの初期値
+	float cameraPosX = 32.08f;
+	uint32_t difference = uint32_t((viewProjection_->translation_.x - cameraPosX) / float(kBlockSize));
+	uint32_t y = uint32_t(pos.y / kBlockScreenSize);
+	map_[y][x+difference] = blockType;
 }

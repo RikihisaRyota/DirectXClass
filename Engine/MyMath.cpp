@@ -7,6 +7,7 @@
 #include "PrimitiveDrawer.h"
 
 #include "Vector3.h"
+#include "Plane.h"
 
 Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
 	Vector3 result{
@@ -316,6 +317,10 @@ Matrix4x4 MakeIdentity4x4() {
 	mat.m[2][0] = 0.0f, mat.m[2][1] = 0.0f, mat.m[2][2] = 1.0f, mat.m[2][3] = 0.0f;
 	mat.m[3][0] = 0.0f, mat.m[3][1] = 0.0f, mat.m[3][2] = 0.0f, mat.m[3][3] = 1.0f;
 	return mat;
+}
+
+Vector3 MakeTranslate(const Matrix4x4& mat) {
+	return Vector3(mat.m[3][0], mat.m[3][1], mat.m[3][2]);
 }
 
 Matrix4x4 MakeTranslateMatrix(const Vector3& translate) {
@@ -877,4 +882,73 @@ bool SeparationAxis(const Vector3 axis, const OBB obb_1, const OBB obb_2) {// �
 		return true;
 	}
 	return false;
+}
+
+bool IsInsideFrustum(const Sphere& sphere, const ViewProjection& viewProjection) {
+	// カメラの視錐台を計算
+	ViewProjection view = viewProjection;
+	Matrix4x4 viewProjectionMatrix = view.matView_ * view.matProjection_;
+
+	// カメラの視錐台の平面を計算
+	Plane planes[6]{};
+	for (int i = 0; i < 6; i++) {
+		// カメラの視錐台の平面の法線ベクトルと距離を計算
+		switch (i) {
+		case 0: // 左平面
+			planes[i].normal_.x = viewProjectionMatrix.m[0][3] + viewProjectionMatrix.m[0][0];
+			planes[i].normal_.y = viewProjectionMatrix.m[1][3] + viewProjectionMatrix.m[1][0];
+			planes[i].normal_.z = viewProjectionMatrix.m[2][3] + viewProjectionMatrix.m[2][0];
+			planes[i].distance_ = viewProjectionMatrix.m[3][3] + viewProjectionMatrix.m[3][0];
+			break;
+		case 1: // 右平面
+			planes[i].normal_.x = viewProjectionMatrix.m[0][3] - viewProjectionMatrix.m[0][0];
+			planes[i].normal_.y = viewProjectionMatrix.m[1][3] - viewProjectionMatrix.m[1][0];
+			planes[i].normal_.z = viewProjectionMatrix.m[2][3] - viewProjectionMatrix.m[2][0];
+			planes[i].distance_ = viewProjectionMatrix.m[3][3] - viewProjectionMatrix.m[3][0];
+			break;
+		case 2: // 上平面
+			planes[i].normal_.x = viewProjectionMatrix.m[0][3] - viewProjectionMatrix.m[0][1];
+			planes[i].normal_.y = viewProjectionMatrix.m[1][3] - viewProjectionMatrix.m[1][1];
+			planes[i].normal_.z = viewProjectionMatrix.m[2][3] - viewProjectionMatrix.m[2][1];
+			planes[i].distance_ = viewProjectionMatrix.m[3][3] - viewProjectionMatrix.m[3][1];
+			break;
+		case 3: // 下平面
+			planes[i].normal_.x = viewProjectionMatrix.m[0][3] + viewProjectionMatrix.m[0][1];
+			planes[i].normal_.y = viewProjectionMatrix.m[1][3] + viewProjectionMatrix.m[1][1];
+			planes[i].normal_.z = viewProjectionMatrix.m[2][3] + viewProjectionMatrix.m[2][1];
+			planes[i].distance_ = viewProjectionMatrix.m[3][3] + viewProjectionMatrix.m[3][1];
+			break;
+		case 4: // 近平面
+			planes[i].normal_.x = viewProjectionMatrix.m[0][2];
+			planes[i].normal_.y = viewProjectionMatrix.m[1][2];
+			planes[i].normal_.z = viewProjectionMatrix.m[2][2];
+			planes[i].distance_ = viewProjectionMatrix.m[3][2];
+			break;
+		case 5: // 遠平面
+			planes[i].normal_.x = viewProjectionMatrix.m[0][3] - viewProjectionMatrix.m[0][2];
+			planes[i].normal_.y = viewProjectionMatrix.m[1][3] - viewProjectionMatrix.m[1][2];
+			planes[i].normal_.z = viewProjectionMatrix.m[2][3] - viewProjectionMatrix.m[2][2];
+			planes[i].distance_ = viewProjectionMatrix.m[3][3] - viewProjectionMatrix.m[3][2];
+			break;
+		}
+
+		// プレーンの法線ベクトルを正規化
+		float length = planes[i].normal_.Length();
+		planes[i].normal_ /= length;
+		planes[i].distance_ /= length;
+	}
+
+	// オブジェクトの中心を取得
+	Vector3 center = sphere.center_;
+
+	// オブジェクトの中心がすべての視錐台平面内にあるかどうかをチェック
+	for (int i = 0; i < 6; i++) {
+		if (Dot(planes[i].normal_, center) + planes[i].distance_ + sphere.radius_ < 0) {
+			// 中心が平面の裏側にある場合、視錐台外にあります
+			return false;
+		}
+	}
+
+	// すべての平面内に中心がある場合、オブジェクトは視錐台内にあります
+	return true;
 }

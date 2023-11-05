@@ -91,7 +91,7 @@ void DrawSphere(const Sphere& sphere, const ViewProjection& viewProjection, Vect
 }
 
 void DrawPlane(const Plane& plane, const ViewProjection& viewProjection, Vector4 color) {
-	Vector3 center = plane.normal_ * plane.distanse_; // 1
+	Vector3 center = plane.normal_ * plane.distance_; // 1
 	Vector3 perpendiculars[4];
 	perpendiculars[0] = Normalize(Perpendicular(plane.normal_)); // 2
 	perpendiculars[1] = {-perpendiculars[0].x, -perpendiculars[0].y, -perpendiculars[0].z};

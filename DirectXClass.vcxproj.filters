@@ -141,7 +141,6 @@
     <ClCompile Include="MapChip.cpp" />
     <ClCompile Include="ModelManager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="BlockManager.cpp" />
     <ClCompile Include="MapChipEditor.cpp" />
     <ClCompile Include="Engine\Input.cpp">
       <Filter>engine\base</Filter>
@@ -297,7 +296,6 @@
     </ClInclude>
     <ClInclude Include="MapChip.h" />
     <ClInclude Include="ModelManager.h" />
-    <ClInclude Include="BlockManager.h" />
     <ClInclude Include="MapChipEditor.h" />
     <ClInclude Include="Engine\Draw.h">
       <Filter>engine\base</Filter>

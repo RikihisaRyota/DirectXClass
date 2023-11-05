@@ -22,9 +22,6 @@ private:
 	MapChip* mapChip_;
 	Input* input_;
 	bool isDebug_;
-	uint32_t blockCount_;
-
-	std::unique_ptr< SphereRenderer> mouse_;
-	WorldTransform mouseWorldTransform_;
+	int32_t blockCount_;
 };
 

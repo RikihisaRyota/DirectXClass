@@ -21,8 +21,8 @@ void GameScene::Initialize() {
 	// 線
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection_);
 #pragma endregion
+	isDebug_ = false;
 #pragma region 生成
-	blockManager_ = std::make_unique<BlockManager>();
 	mapChip_ = std::make_unique<MapChip>();
 	mapChipEditor_ = std::make_unique<MapChipEditor>();
 
@@ -30,12 +30,11 @@ void GameScene::Initialize() {
 
 #pragma region 初期化
 	mapChip_->LoadCSV("stage_1");
+	mapChip_->SetViewProjection(&viewProjection_);
+	mapChip_->Initialize();
 	mapChipEditor_->SetMapChip(mapChip_.get());
 	mapChipEditor_->SetViewProjection(&viewProjection_);
 	mapChipEditor_->Initialize();
-
-	blockManager_->SetMapChip(mapChip_.get());
-	blockManager_->Initialize();
 #pragma endregion
 
 
@@ -43,12 +42,15 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
-	
-	
-	// デバックカメラ
-	debugCamera_->Update(&viewProjection_);
+	if (input_->TriggerKey(DIK_TAB)) {
+		isDebug_ ^= true;
+	}
 	// マップチップエディター
 	mapChipEditor_->Update();
+	if (!isDebug_) {
+		// デバックカメラ
+		debugCamera_->Update(&viewProjection_);
+	}
 }
 
 void GameScene::Draw() {
@@ -79,7 +81,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	blockManager_->Draw(viewProjection_);
+	mapChip_->Draw(viewProjection_);
 
 	mapChipEditor_->Draw();
 	PrimitiveDrawer::Draw();
@@ -102,7 +104,7 @@ void GameScene::Draw() {
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
 	Sprite::SetBlendState(Sprite::BlendState::kNormal);
-	
+
 	// スプライト描画後処理
 	Sprite::PostDraw();
 #pragma endregion

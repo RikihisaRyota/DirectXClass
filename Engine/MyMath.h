@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "AABB.h"
+#include "Sphere.h"
 #include "Matrix4x4.h"
 #include "OBB.h"
 #include "WorldTransform.h"
@@ -50,6 +51,7 @@ Matrix4x4 Transpose(const Matrix4x4& m);
 // 6,単位行列
 Matrix4x4 MakeIdentity4x4();
 
+Vector3 MakeTranslate(const Matrix4x4& mat);
 // 1,平行移動行列
 Matrix4x4 MakeTranslateMatrix(const Vector3& translate);
 // 2,拡大縮小行列
@@ -191,3 +193,5 @@ Vector3 CubicCatmullRom(
 void OBBIndex(const OBB& obb, std::vector<Vector3>& output_vertices);
 // 分離軸
 bool SeparationAxis(const Vector3 axis, const OBB obb_1, const OBB obb_2);
+// し錐台カリング
+bool IsInsideFrustum(const Sphere& sphere, const ViewProjection& viewProjection);

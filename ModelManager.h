@@ -18,6 +18,7 @@ public:
 	Model* GetModel(std::string modeName);
 	Model* GetBlockModel(size_t num) {return blockModels_[num];}
 	size_t GetBlockModelSize() {return blockModels_.size();}
+	uint32_t GetBlockTextureHandle(uint32_t num) { blockModels_.at(num)->GetMaterial(0)->GetTextureHandle(); }
 private:
 	std::map<std::string, Model*> models_;
 	std::vector<Model*> blockModels_;
