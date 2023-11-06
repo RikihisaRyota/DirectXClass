@@ -348,7 +348,6 @@ void DirectXCommon::CreateRenderTargets() {
 		// レンダーターゲットビューの生成
 		device_->CreateRenderTargetView(backBuffers_[i].Get(), &rtvDesc, rtvHandle);
 	}
-	GetCPUGPUHandle(srvCPUHandle_, srvGPUHandle_);
 }
 
 void DirectXCommon::CreateDepthBuffer() {
