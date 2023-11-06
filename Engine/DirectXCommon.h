@@ -116,6 +116,10 @@ private:// メンバ関数
 	/// フェンス生成
 	/// </summary>
 	void CreateFence();
+	/// <summary>
+	/// ポストエフェクト初期化
+	/// </summary>
+	void PostEffectInitialize();
 private: // メンバ関数
 	DirectXCommon() = default;
 	~DirectXCommon() = default;
@@ -163,6 +167,7 @@ private:// メンバ変数
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
 	D3D12_CPU_DESCRIPTOR_HANDLE srvCPUHandle_[2];
 	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle_[2];
+	std::unique_ptr<PostEffectGraphicsPipeline> postEffectPipeline_;
 	// 深度バッファ関連
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;

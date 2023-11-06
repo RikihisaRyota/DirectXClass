@@ -35,7 +35,8 @@ void DirectXCommon::Initialize(WinApp* winApp, int32_t backBufferWidth, int32_t 
 
 	// swapChainの生成
 	CreateSwapChain();
-
+	// ポストエフェクトパイプラインの初期化
+	PostEffectInitialize();
 	// レンダーターゲットの作成
 	CreateRenderTargets();
 
@@ -92,11 +93,11 @@ void DirectXCommon::PostDraw() {
 
 	commandList_->ResourceBarrier(1, &barrier);
 
-	commandList_->SetGraphicsRootSignature(postEffectPipeline_.get()->GetRootSignature());
+	/*commandList_->SetGraphicsRootSignature(postEffectPipeline_.get()->GetRootSignature());
 	commandList_->SetPipelineState(postEffectPipeline_.get()->GetPipelineState());
 	commandList_->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList_->SetGraphicsRootDescriptorTable(0, srvGPUHandle_[bbIndex]);
-	commandList_->DrawInstanced(4,1,0,0);
+	commandList_->DrawInstanced(4,1,0,0);*/
 
 	// リソースバリアの変更(コピー先->描画)
 	barrier = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -396,7 +397,12 @@ void DirectXCommon::CreateFence() {
 	);
 	assert(SUCCEEDED(hr));
 }
+void DirectXCommon::PostEffectInitialize() {
 
+	postEffectPipeline_ = std::make_unique<PostEffectGraphicsPipeline>();
+	PostEffectGraphicsPipeline::SetDevice(device_.Get());
+	postEffectPipeline_->InitializeGraphicsPipeline();
+}
 ComPtr<ID3D12Resource> DirectXCommon::CreateDepthStencilTextureResource(int32_t width, int32_t height) {
 	D3D12_RESOURCE_DESC resourceDesc{};
 	resourceDesc.Width = width;// Textureの幅
