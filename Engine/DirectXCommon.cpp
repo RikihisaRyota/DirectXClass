@@ -36,9 +36,6 @@ void DirectXCommon::Initialize(WinApp* winApp, int32_t backBufferWidth, int32_t 
 	// swapChainの生成
 	CreateSwapChain();
 
-	// ポストエフェクトパイプラインの初期化
-	PostEffectInitialize();
-
 	// レンダーターゲットの作成
 	CreateRenderTargets();
 
@@ -398,13 +395,6 @@ void DirectXCommon::CreateFence() {
 		IID_PPV_ARGS(&fence_)
 	);
 	assert(SUCCEEDED(hr));
-}
-
-void DirectXCommon::PostEffectInitialize() {
-
-	postEffectPipeline_ = std::make_unique<PostEffectGraphicsPipeline>();
-	PostEffectGraphicsPipeline::SetDevice(device_.Get());
-	postEffectPipeline_->InitializeGraphicsPipeline();
 }
 
 ComPtr<ID3D12Resource> DirectXCommon::CreateDepthStencilTextureResource(int32_t width, int32_t height) {
