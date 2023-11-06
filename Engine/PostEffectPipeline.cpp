@@ -1,5 +1,6 @@
 #include "PostEffectPipeline.h"
 
+#include <d3dx12.h>
 #include <cassert>
 
 #include "ConvertString.h"
@@ -56,7 +57,7 @@ void PostEffectGraphicsPipeline::CreateRootSignature() {
 	// シリアライズしてバイナリする
 	ComPtr<ID3DBlob> signatureBlob;
 	ComPtr<ID3DBlob> errorBlob;
-	hr = D3D12SerializeRootSignature(&descriptionRootSignature,
+	hr = D3D12SerializeRootSignature(&desc,
 		D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
 	if (FAILED(hr)) {
 		Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));

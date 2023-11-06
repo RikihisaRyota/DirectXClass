@@ -2,6 +2,8 @@
 #include <dxgi1_6.h>
 #include <d3dx12.h>
 
+#include <memory>
+
 #include "PostEffectPipeline.h"
 #include "WinApp.h"
 
@@ -111,6 +113,11 @@ private:// メンバ関数
 	/// </summary>
 	void CreateFence();
 
+	/// <summary>
+	/// ポストエフェクト初期化
+	/// </summary>
+	void PostEffectInitialize();
+
 private: // メンバ関数
 	DirectXCommon() = default;
 	~DirectXCommon() = default;
@@ -150,6 +157,7 @@ private:// メンバ変数
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap_;
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle_;
+	D3D12_CPU_DESCRIPTOR_HANDLE srvHandle_;
 	// 深度バッファ関連
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;
@@ -158,5 +166,5 @@ private:// メンバ変数
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
 	UINT64 fenceValue_ = 0;
 	// PostEffect
-	std::unique_ptr<PostEffectPipeline> postEffectPipeline_;
+	std::unique_ptr<PostEffectGraphicsPipeline> postEffectPipeline_;
 };

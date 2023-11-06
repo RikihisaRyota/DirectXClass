@@ -84,6 +84,19 @@ void DirectXCommon::PostDraw() {
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 		backBuffers_[bbIndex].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+	commandList_->ResourceBarrier(1, &barrier);
+
+	/*commandList_->SetGraphicsRootSignature(postEffectPipeline_.get()->GetRootSignature());
+	commandList_->SetPipelineState(postEffectPipeline_.get()->GetPipelineState());
+	commandList_->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	commandList_->SetGraphicsRootDescriptorTable(0, );*/
+
+	// リソースバリアの変更(コピー先->描画)
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		backBuffers_[bbIndex].Get(),
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 		D3D12_RESOURCE_STATE_PRESENT);
 
 	commandList_->ResourceBarrier(1, &barrier);
@@ -329,7 +342,7 @@ void DirectXCommon::CreateRenderTatgets() {
 		// レンダーターゲットビューの生成
 		device_->CreateRenderTargetView(backBuffers_[i].Get(), &rtvDesc, handle);
 	}
-	// マルチパスレンダリングの設定
+	//// マルチパスレンダリングの設定
 	//{
 	//	// 作成済みのヒープ情報を使ってもう一枚作る
 	//	auto heapDesc = rtvDescriptorHeapDesc;
@@ -419,6 +432,11 @@ void DirectXCommon::CreateFence() {
 		IID_PPV_ARGS(&fence_)
 	);
 	assert(SUCCEEDED(hr));
+}
+
+void DirectXCommon::PostEffectInitialize() {
+	postEffectPipeline_ = std::make_unique<PostEffectGraphicsPipeline>();
+	postEffectPipeline_->InitializeGraphicsPipeline();
 }
 
 ComPtr<ID3D12Resource> DirectXCommon::CreateDepthStencilTextureResource(int32_t width, int32_t height) {
