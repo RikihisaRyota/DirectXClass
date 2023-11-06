@@ -116,12 +116,6 @@ private:// メンバ関数
 	/// フェンス生成
 	/// </summary>
 	void CreateFence();
-
-	/// <summary>
-	/// ポストエフェクト初期化
-	/// </summary>
-	void PostEffectInitialize();
-
 private: // メンバ関数
 	DirectXCommon() = default;
 	~DirectXCommon() = default;
@@ -176,6 +170,4 @@ private:// メンバ変数
 	// 描画関連
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
 	UINT64 fenceValue_ = 0;
-	// PostEffect
-	std::unique_ptr<PostEffectGraphicsPipeline> postEffectPipeline_;
 };
