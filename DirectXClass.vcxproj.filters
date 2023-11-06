@@ -31,6 +31,9 @@
     <Filter Include="engine\scene">
       <UniqueIdentifier>{a6e1cd55-5481-4792-b29d-7ec4f475fe9b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine\shader">
+      <UniqueIdentifier>{1051ea7a-f4c8-4161-8f7b-3b54fbd78626}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="externals\imgui\imgui.cpp">
@@ -150,6 +153,9 @@
     </ClCompile>
     <ClCompile Include="Engine\ShaderCompiler.cpp">
       <Filter>engine\base</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\PostEffectPipeline.cpp">
+      <Filter>engine\graphicsPipeline</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -312,10 +318,98 @@
     <ClInclude Include="Engine\ShaderCompiler.h">
       <Filter>engine\base</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\PostEffectPipeline.h">
+      <Filter>engine\graphicsPipeline</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
       <Filter>imgui</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resources\Shaders\PostEffect.PS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PostEffect.VS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Sprite.PS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Sprite.VS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Toon.PS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Toon.VS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Basic.PS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Basic.VS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Lighting.PS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Lighting.VS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Line.PS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Line.VS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\OBJ.PS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\OBJ.VS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Particle.PS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Particle.VS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Pera.PS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Pera.VS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\Sprite.hlsli">
+      <Filter>engine\shader</Filter>
+    </None>
+    <None Include="Resources\Shaders\Triangle.hlsli">
+      <Filter>engine\shader</Filter>
+    </None>
+    <None Include="Resources\Shaders\VertexShaderOutput.hlsli">
+      <Filter>engine\shader</Filter>
+    </None>
+    <None Include="Resources\Shaders\Basic.hlsli">
+      <Filter>engine\shader</Filter>
+    </None>
+    <None Include="Resources\Shaders\Lighting.hlsli">
+      <Filter>engine\shader</Filter>
+    </None>
+    <None Include="Resources\Shaders\Line.hlsli">
+      <Filter>engine\shader</Filter>
+    </None>
+    <None Include="Resources\Shaders\OBJ.hlsli">
+      <Filter>engine\shader</Filter>
+    </None>
+    <None Include="Resources\Shaders\Particle.hlsli">
+      <Filter>engine\shader</Filter>
+    </None>
+    <None Include="Resources\Shaders\Pera.hlsli">
+      <Filter>engine\shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

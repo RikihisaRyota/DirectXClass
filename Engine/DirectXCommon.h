@@ -2,6 +2,7 @@
 #include <dxgi1_6.h>
 #include <d3dx12.h>
 
+#include "PostEffectPipeline.h"
 #include "WinApp.h"
 
 
@@ -156,5 +157,6 @@ private:// メンバ変数
 	// 描画関連
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
 	UINT64 fenceValue_ = 0;
-
+	// PostEffect
+	std::unique_ptr<PostEffectPipeline> postEffectPipeline_;
 };
