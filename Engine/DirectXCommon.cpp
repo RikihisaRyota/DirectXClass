@@ -36,8 +36,11 @@ void DirectXCommon::Initialize(WinApp* winApp, int32_t backBufferWidth, int32_t 
 	// swapChainの生成
 	CreateSwapChain();
 
+	// ポストエフェクトパイプラインの初期化
+	PostEffectInitialize();
+
 	// レンダーターゲットの作成
-	CreateRenderTatgets();
+	CreateRenderTargets();
 
 	// 深度バッファの生成
 	CreateDepthBuffer();
@@ -47,6 +50,10 @@ void DirectXCommon::Initialize(WinApp* winApp, int32_t backBufferWidth, int32_t 
 }
 
 void DirectXCommon::PreDraw() {
+	// セットするために呼び出すのは効率が悪い
+	ID3D12DescriptorHeap* ppHeaps[] = { srvDescriptorHeap_.Get() };
+	commandList_->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+
 	UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
 	// リソースバリアを変更(表示状態->描画対象)
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -88,10 +95,11 @@ void DirectXCommon::PostDraw() {
 
 	commandList_->ResourceBarrier(1, &barrier);
 
-	/*commandList_->SetGraphicsRootSignature(postEffectPipeline_.get()->GetRootSignature());
+	commandList_->SetGraphicsRootSignature(postEffectPipeline_.get()->GetRootSignature());
 	commandList_->SetPipelineState(postEffectPipeline_.get()->GetPipelineState());
 	commandList_->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	commandList_->SetGraphicsRootDescriptorTable(0, );*/
+	commandList_->SetGraphicsRootDescriptorTable(0, srvGPUHandle_);
+	commandList_->DrawInstanced(4,1,0,0);
 
 	// リソースバリアの変更(コピー先->描画)
 	barrier = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -306,8 +314,11 @@ void DirectXCommon::CreateSwapChain() {
 	assert(SUCCEEDED(hr));
 }
 
-void DirectXCommon::CreateRenderTatgets() {
+void DirectXCommon::CreateRenderTargets() {
 	HRESULT hr = S_FALSE;
+
+	// デスクリプタサイズを取得
+	descriptorHandleIncrementSize = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	DXGI_SWAP_CHAIN_DESC swcDesc = {};
 	hr = swapChain_->GetDesc(&swcDesc);
@@ -319,6 +330,13 @@ void DirectXCommon::CreateRenderTatgets() {
 	rtvDescriptorHeapDesc.NumDescriptors = swcDesc.BufferCount + 1;// ダブルバッファ用(マルチパスレンダリング用)
 	hr = device_->CreateDescriptorHeap(&rtvDescriptorHeapDesc, IID_PPV_ARGS(&rtvDescriptorHeap_));
 	assert(SUCCEEDED(hr));
+	// デスクリプタヒープを生成
+	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
+	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE; // シェーダから見えるように
+	descHeapDesc.NumDescriptors = kNumDescriptors; // シェーダーリソースビュー1つ
+	auto result = device_->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&srvDescriptorHeap_)); // 生成
+	assert(SUCCEEDED(result));
 
 	// 表裏の2つ分について
 	backBuffers_.resize(swcDesc.BufferCount);
@@ -329,81 +347,25 @@ void DirectXCommon::CreateRenderTatgets() {
 	// シェーダーの計算結果をSRGBに変換して書き込む
 	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//出力結果をSRGBに変換して書き込む
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;//2Dテクスチャとして書き込む
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
+	srvDesc.Texture2D.MipLevels = 1;
 	for (int i = 0; i < backBuffers_.size(); i++) {
 		// スワップチェーンからバッファを取得
 		hr = swapChain_->GetBuffer(i, IID_PPV_ARGS(&backBuffers_[i]));
 		assert(SUCCEEDED(hr));
 
 		// ディスクリプタヒープのハンドルを取得
-		CD3DX12_CPU_DESCRIPTOR_HANDLE handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 			rtvHandle_,
 			i,
 			device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
 		// レンダーターゲットビューの生成
-		device_->CreateRenderTargetView(backBuffers_[i].Get(), &rtvDesc, handle);
+		device_->CreateRenderTargetView(backBuffers_[i].Get(), &rtvDesc, rtvHandle);
 	}
-	//// マルチパスレンダリングの設定
-	//{
-	//	// 作成済みのヒープ情報を使ってもう一枚作る
-	//	auto heapDesc = rtvDescriptorHeapDesc;
-	//	// 使っているバックバッファの情報を利用する
-	//	auto& bbuff = backBuffers_[0];
-	//	auto resDesc = bbuff->GetDesc();
-
-	//	D3D12_HEAP_PROPERTIES heapProp =
-	//		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-
-	//	// レンダリング時のクリア値と同じ
-	//	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
-	//	D3D12_CLEAR_VALUE clearValue = CD3DX12_CLEAR_VALUE(
-	//		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, clearColor);
-
-	//	hr = device_->CreateCommittedResource(
-	//		&heapProp,
-	//		D3D12_HEAP_FLAG_NONE,
-	//		&resDesc,
-	//		D3D12_RESOURCE_STATE_COPY_SOURCE,
-	//		&clearValue,
-	//		IID_PPV_ARGS(peraResource_.ReleaseAndGetAddressOf())
-	//	);
-	//	assert(SUCCEEDED(hr));
-	//	// RTV用ヒープの作成
-	//	heapDesc.NumDescriptors = 1;
-	//	hr = device_->CreateDescriptorHeap(
-	//		&heapDesc,
-	//		IID_PPV_ARGS(peraRTVDescriptorHeap_.ReleaseAndGetAddressOf())
-	//	);
-	//	assert(SUCCEEDED(hr));
-	//	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-	//	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-	//	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	//	// レンダーターゲットビュー(RTV)の作成
-	//	device_->CreateRenderTargetView(
-	//		peraResource_.Get(),
-	//		&rtvDesc,
-	//		peraRTVDescriptorHeap_->GetCPUDescriptorHandleForHeapStart()
-	//	);
-	//	// SRV用ヒープの作成
-	//	heapDesc.NumDescriptors = 1;
-	//	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	//	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	//	hr = device_->CreateDescriptorHeap(
-	//		&heapDesc,
-	//		IID_PPV_ARGS(peraSRVDescriptorHeap_.ReleaseAndGetAddressOf())
-	//	);
-	//	assert(SUCCEEDED(hr));
-	//	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	//	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	//	srvDesc.Format = rtvDesc.Format;
-	//	srvDesc.Texture1D.MipLevels = 1;
-	//	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	//	// シェーダーリソースビュー(SRV)の作成
-	//	device_->CreateShaderResourceView(
-	//		peraResource_.Get(),
-	//		&srvDesc,
-	//		peraSRVDescriptorHeap_->GetCPUDescriptorHandleForHeapStart()
-	//	);
-	//}
+	GetCPUGPUHandle(srvCPUHandle_, srvGPUHandle_);
 }
 
 void DirectXCommon::CreateDepthBuffer() {
@@ -435,7 +397,9 @@ void DirectXCommon::CreateFence() {
 }
 
 void DirectXCommon::PostEffectInitialize() {
+
 	postEffectPipeline_ = std::make_unique<PostEffectGraphicsPipeline>();
+	PostEffectGraphicsPipeline::SetDevice(device_.Get());
 	postEffectPipeline_->InitializeGraphicsPipeline();
 }
 
@@ -483,7 +447,7 @@ Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DirectXCommon::CreateDescriptorHeap
 	return descriptorHeap;
 }
 
-void DirectXCommon::Release(){
+void DirectXCommon::Release() {
 	// Direct3D関連
 	// 描画関連
 	fence_.Reset();
@@ -495,6 +459,8 @@ void DirectXCommon::Release(){
 	for (auto& ite : backBuffers_) {
 		ite.Reset();
 	}
+	// シェーダーリソース
+	srvDescriptorHeap_.Reset();
 	// スワップチェーン関連
 	swapChain_.Reset();
 	// コマンド関連
@@ -504,4 +470,22 @@ void DirectXCommon::Release(){
 	// DXGI関連
 	device_.Reset();
 	dxgiFactory_.Reset();
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::GetCPUDescriptorHandle() {
+	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = srvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+	handleCPU.ptr += (descriptorHandleIncrementSize * numDescriptorsCount);
+	return handleCPU;
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE DirectXCommon::GetGPUDescriptorHandle() {
+	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = srvDescriptorHeap_->GetGPUDescriptorHandleForHeapStart();
+	handleGPU.ptr += (descriptorHandleIncrementSize * numDescriptorsCount);
+	return handleGPU;
+}
+
+void DirectXCommon::GetCPUGPUHandle(D3D12_CPU_DESCRIPTOR_HANDLE& cpu, D3D12_GPU_DESCRIPTOR_HANDLE& gpu) {
+	cpu = GetCPUDescriptorHandle();
+	gpu = GetGPUDescriptorHandle();
+	numDescriptorsCount++;
 }

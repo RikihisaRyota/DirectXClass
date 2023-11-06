@@ -50,11 +50,6 @@ public: // 静的メンバ関数
 	/// </summary>
 	static void Release();
 
-	/// <summary>
-	/// 描画前
-	/// </summary>
-	static void PreDraw();
-
 public: // 静的メンバ変数
 	// デスクリプターの数
 	static const size_t kNumDescriptors = 256;
@@ -121,45 +116,19 @@ public: // メンバ関数
 	/// <summary>
 	/// 解放
 	/// </summary>
+	/// 2023/11/6srvDiscripotrをDirextXCommonに移動したため使えない
 	void UnLoadInternal();
 
-	/// <summary>
-	/// GetCPUDescriptorHandle
-	/// </summary>
-	/// <param name="descriptorHeap">descriptorHeap</param>
-	/// <param name="descriptorSize">descriptorSize</param>
-	/// <param name="index">index</param>
-	/// <returns></returns>
-	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(uint32_t descriptorSize);
-
-	/// <summary>
-	/// GetCPUDescriptorHandle
-	/// </summary>
-	/// <param name="descriptorHeap">descriptorHeap</param>
-	/// <param name="descriptorSize">descriptorSize</param>
-	/// <param name="index">index</param>
-	/// <returns></returns>
-	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(uint32_t descriptorSize);
-
-	/// <summary>
 	/// リソース情報取得
 	/// </summary>
 	/// <param name="textureHandle">テクスチャハンドル</param>
 	/// <returns>リソース情報</returns>
 	const D3D12_RESOURCE_DESC GetResoureDesc(uint32_t textureHandle);
-
-	void GetCPUGPUHandle(D3D12_CPU_DESCRIPTOR_HANDLE& cpu, D3D12_GPU_DESCRIPTOR_HANDLE& gpu, uint32_t descriptorSize);
-	
 private: // メンバ変数
 	// デバイス
 	static DirectXCommon* device_;
-	// デスクリプタサイズ
-	UINT descriptorHandleIncrementSize = 0u;
-	// デスクリプタヒープ
-	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
 	// テクスチャコンテナ
 	std::array<Texture, kNumDescriptors> textures_;
 	std::array<bool, kNumDescriptors> useTable_;
-	// カウント
-	uint32_t kNumDescriptorsCount = 0u;
+	uint32_t textureCount_;
 };

@@ -69,18 +69,22 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	ID3D12DescriptorHeap* GetRTVDescriptorHeap() { return rtvDescriptorHeap_.Get(); }
+	ID3D12DescriptorHeap* GetSRVDescriptorHeap() { return srvDescriptorHeap_.Get(); }
 
 	/// <summary>
 	/// DSV
 	/// </summary>
 	/// <returns></returns>
 	D3D12_CPU_DESCRIPTOR_HANDLE GetDSVHandle() { return dpsHandle_; }
-
 	/// <summary>
 	/// リリース
 	/// </summary>
 	void Release();
-
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle();
+	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle();
+	void GetCPUGPUHandle(D3D12_CPU_DESCRIPTOR_HANDLE& cpu, D3D12_GPU_DESCRIPTOR_HANDLE& gpu);
+	uint32_t GetNumDescriptorsCount() {return numDescriptorsCount;}
+	
 private:// メンバ関数
 
 	/// <summary>
@@ -101,7 +105,7 @@ private:// メンバ関数
 	/// <summary>
 	/// レンダーターゲット生成
 	/// </summary>
-	void CreateRenderTatgets();
+	void CreateRenderTargets();
 
 	/// <summary>
 	///  深度バッファ生成
@@ -138,6 +142,8 @@ private: // メンバ関数
 	/// </summary>
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
 private:// メンバ変数
+	// デスクリプターの数
+	static const size_t kNumDescriptors = 256;
 	// ウィンドウズアプリケーション管理
 	WinApp* winApp_;
 
@@ -157,7 +163,12 @@ private:// メンバ変数
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap_;
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle_;
-	D3D12_CPU_DESCRIPTOR_HANDLE srvHandle_;
+	// デスクリプタサイズ
+	uint32_t numDescriptorsCount = 0u;
+	UINT descriptorHandleIncrementSize = 0u;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
+	D3D12_CPU_DESCRIPTOR_HANDLE srvCPUHandle_;
+	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle_;
 	// 深度バッファ関連
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;

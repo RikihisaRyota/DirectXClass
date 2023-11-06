@@ -9,7 +9,6 @@ using namespace Microsoft::WRL;
 
 // 静的メンバ変数の実体化
 DirectXCommon* TextureManager::device_ = nullptr;
-ComPtr<ID3D12DescriptorHeap> TextureManager::srvDescriptorHeap_;
 
 TextureManager* TextureManager::GetInstance() {
 	static TextureManager instance;
@@ -24,15 +23,7 @@ void TextureManager::Release() {
 	TextureManager::GetInstance()->UnLoadInternal();
 }
 
-void TextureManager::PreDraw() {
-	// セットするために呼び出すのは効率が悪い
-	ID3D12DescriptorHeap* ppHeaps[] = { srvDescriptorHeap_.Get() };
-
-	device_->GetCommandList()->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-}
-
 void TextureManager::UnLoadInternal() {
-	srvDescriptorHeap_.Reset();
 	// 全テクスチャを初期化
 	for (size_t i = 0; i < kNumDescriptors; i++) {
 		textures_[i].resource.Reset();
@@ -44,10 +35,15 @@ void TextureManager::UnLoadInternal() {
 }
 
 uint32_t TextureManager::LoadInternal(const std::string& filePath) {
+	for (uint32_t i = 0; i < textureCount_; i++) {
+		if (textures_[i].name == filePath) {
+			return i;
+		}
+	}
 	// どこが空いているか探す
 	for (uint32_t i = 0; i < kNumDescriptors; i++) {
 		if (!useTable_[i]) {
-
+			textureCount_ = i;
 			useTable_[i] = true;
 
 			// TextureデータをCPUにロード
@@ -72,7 +68,7 @@ uint32_t TextureManager::LoadInternal(const std::string& filePath) {
 			break;
 		}
 	}
-	return kNumDescriptorsCount-1;
+	return textureCount_;
 }
 
 DirectX::ScratchImage TextureManager::LoadTexture(const std::string& filePath) {
@@ -153,27 +149,12 @@ void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metada
 	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
 
 	// SRVを作成するDescriptorHeapの場所を決める
-	GetCPUGPUHandle(
-		textures_[kNumDescriptorsCount].cpuDescHandleSRV, 
-		textures_[kNumDescriptorsCount].gpuDescHandleSRV, 
-		descriptorHandleIncrementSize);
+	device_->GetCPUGPUHandle(
+		textures_[textureCount_].cpuDescHandleSRV,
+		textures_[textureCount_].gpuDescHandleSRV);
 	// SRVの生成
-	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[kNumDescriptorsCount - 1].cpuDescHandleSRV);
+	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[textureCount_].cpuDescHandleSRV);
 }
-
-//void TextureManager::CreateShaderResourceView(ID3D12Resource* textureResourec) {
-//	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-//	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-//	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-//	srvDesc.Texture1D.MipLevels = 1;
-//	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-//	// SRVを作成するDescriptorHeapの場所を決める
-//	textures_[static_cast<int>(TextureHandle::PERA)].cpuDescHandleSRV = GetCPUDescriptorHandle(descriptorHandleIncrementSize);
-//	textures_[static_cast<int>(TextureHandle::PERA)].gpuDescHandleSRV = GetGPUDescriptorHandle(descriptorHandleIncrementSize);
-//
-//	// SRVの生成
-//	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[static_cast<int>(TextureHandle::PERA)].cpuDescHandleSRV);
-//}
 
 void TextureManager::SetGraphicsRootDescriptorTable(ID3D12GraphicsCommandList* commandList, UINT rootParamIndex, uint32_t textureHandle) {
 	// シェーダリソースビューをセット
@@ -190,18 +171,6 @@ void TextureManager::Initialize(DirectXCommon* device) {
 
 	device_ = device;
 
-	// デスクリプタサイズを取得
-	descriptorHandleIncrementSize =
-		device_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-	// デスクリプタヒープを生成
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE; // シェーダから見えるように
-	descHeapDesc.NumDescriptors = kNumDescriptors; // シェーダーリソースビュー1つ
-	result = device_->GetDevice()->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&srvDescriptorHeap_)); // 生成
-	assert(SUCCEEDED(result));
-
 	// 全テクスチャを初期化
 	for (size_t i = 0; i < kNumDescriptors; i++) {
 		textures_[i].resource.Reset();
@@ -211,28 +180,30 @@ void TextureManager::Initialize(DirectXCommon* device) {
 		useTable_[i] = false;
 	}
 	// 初期テクスチャ
+	textureCount_ = 0;
 	const int InitialTexture = 2;
 	std::string filePath[InitialTexture]{};
 	filePath[0] = ("Resources/Textures/white1x1.png");
 	filePath[1] = ("Resources/Textures/toon.png");
 	for (uint32_t i = 0; i < InitialTexture; i++) {
 		useTable_[i] = true;
+		textureCount_ = i;
 
 		// TextureデータをCPUにロード
 		DirectX::ScratchImage mipImage = LoadTexture(filePath[i]);
 
-		textures_[kNumDescriptorsCount].name = filePath[i];
+		textures_[textureCount_].name = filePath[i];
 
 		const DirectX::TexMetadata& metadata = mipImage.GetMetadata();
 
 		// TextureResourceの設定
-		textures_[kNumDescriptorsCount].resource = CreateTextureResourec(metadata);
+		textures_[textureCount_].resource = CreateTextureResourec(metadata);
 
 		// TextureResourceをTextureデータに転送
-		UploadTextureData(textures_[kNumDescriptorsCount].resource.Get(), mipImage);
+		UploadTextureData(textures_[textureCount_].resource.Get(), mipImage);
 
 		// SRVの作成
-		CreateShaderResourceView(metadata, textures_[kNumDescriptorsCount].resource.Get(),i);
+		CreateShaderResourceView(metadata, textures_[textureCount_].resource.Get(),i);
 
 		// 解放
 		mipImage.Release();
@@ -240,27 +211,8 @@ void TextureManager::Initialize(DirectXCommon* device) {
 
 }
 
-
-D3D12_CPU_DESCRIPTOR_HANDLE TextureManager::GetCPUDescriptorHandle(uint32_t descriptorSize) {
-	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = srvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
-	handleCPU.ptr += (descriptorSize * kNumDescriptorsCount);
-	return handleCPU;
-}
-
-D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetGPUDescriptorHandle(uint32_t descriptorSize) {
-	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = srvDescriptorHeap_->GetGPUDescriptorHandleForHeapStart();
-	handleGPU.ptr += (descriptorSize * kNumDescriptorsCount);
-	return handleGPU;
-}
-
 const D3D12_RESOURCE_DESC TextureManager::GetResoureDesc(uint32_t textureHandle) {
 	assert(textureHandle < textures_.size());
 	Texture& texture = textures_.at(textureHandle);
 	return texture.resource->GetDesc();
-}
-
-void TextureManager::GetCPUGPUHandle(D3D12_CPU_DESCRIPTOR_HANDLE& cpu, D3D12_GPU_DESCRIPTOR_HANDLE& gpu, uint32_t descriptorSize) {
-	cpu = GetCPUDescriptorHandle(descriptorSize);
-	gpu = GetGPUDescriptorHandle(descriptorSize);
-	kNumDescriptorsCount++;
 }

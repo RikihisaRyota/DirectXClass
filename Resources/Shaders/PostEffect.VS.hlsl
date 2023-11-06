@@ -7,11 +7,14 @@ struct VertexShaderInput
 
 struct VertexShaderOutPut
 {
-    float4 position : POSITION0;
+    float4 position : SV_POSITION;
     float2 texcoord : TEXCOORD0;
 };
 
-float4 main(VertexShaderInput input) : SV_POSITION
+VertexShaderOutPut main(VertexShaderInput input)
 {
-    return input;
+    VertexShaderOutPut output;
+    output.position = input.position;
+    output.texcoord = input.texcoord;
+    return output;
 }

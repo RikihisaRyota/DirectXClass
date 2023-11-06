@@ -76,6 +76,7 @@ void PostEffectGraphicsPipeline::CreateInputLayout() {
 	 "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,
 	 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
 	};
+
 	inputLayout_[1] =
 	{// uv座標(1行で書いたほうが見やすい)
 	 "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,
@@ -125,7 +126,7 @@ void PostEffectGraphicsPipeline::CreatePSO() {
 	// RootSignature
 	graphicPipelineStateDesc.pRootSignature = rootSignature_.Get();
 
-	// InputLayout(Descを書かない方法)
+	// InputLayout
 	graphicPipelineStateDesc.InputLayout.pInputElementDescs = inputLayout_;
 	graphicPipelineStateDesc.InputLayout.NumElements = _countof(inputLayout_);
 

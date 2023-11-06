@@ -4,7 +4,7 @@
 #include "ImGuiManager.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
-#include "ShaderCompiler.h"
+#include "./Engine/ShaderCompiler.h"
 
 #include <dxgidebug.h>
 #include <cassert>
@@ -19,6 +19,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	win = WinApp::GetInstance();
 	win->CreateGameWindow(L"DirectXClass");
 
+	// ShderCompiler
+	ShaderCompiler::Initialize();
+
 	// DirectXの初期化処理
 	DirectXCommon* dxCommon = nullptr;
 	dxCommon = DirectXCommon::GetInstance();
@@ -29,8 +32,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	input = Input::GetInstance();
 	input->Initialize();
 
-	// ShderCompiler
-	ShaderCompiler::Initialize();
 
 	// テクスチャマネージャの初期化
 	TextureManager::GetInstance()->Initialize(dxCommon);
@@ -51,7 +52,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//ParticleGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
 	// PostEffectPipeLine
-	PostEffectGraphicsPipeline::SetDevice(dxCommon->GetDevice());
+	//PostEffectGraphicsPipeline::SetDevice(dxCommon->GetDevice());
 
 	// Planeの静的初期化
 	PlaneRenderer::SetDevice(dxCommon->GetDevice());
@@ -119,8 +120,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		gameScene->Update();
 		// ImGui受付終了
 		imguiManager->End();
-		// テクスチャマネージャーの描画準備
-		TextureManager::GetInstance()->PreDraw();
 		// 描画開始
 		dxCommon->PreDraw();
 		// ゲームシーンの描画
