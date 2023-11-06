@@ -92,6 +92,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="Engine\Audio.cpp" />
     <ClCompile Include="Engine\BasicGraphicsPipline.cpp" />
+    <ClCompile Include="Engine\ShaderCompiler.cpp" />
     <ClCompile Include="Engine\ConvertString.cpp" />
     <ClCompile Include="Engine\CubeRenderer.cpp" />
     <ClCompile Include="Engine\DebugCamera.cpp" />
@@ -138,6 +139,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\BasicGraphicsPipline.h" />
     <ClInclude Include="Engine\cDirectionalLight.h" />
     <ClInclude Include="Engine\cMaterial.h" />
+    <ClInclude Include="Engine\ShaderCompiler.h" />
     <ClInclude Include="Engine\ConvertString.h" />
     <ClInclude Include="Engine\CubeRenderer.h" />
     <ClInclude Include="Engine\cVertexPos.h" />

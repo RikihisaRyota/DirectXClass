@@ -148,6 +148,9 @@
     <ClCompile Include="Engine\Draw.cpp">
       <Filter>engine\base</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\ShaderCompiler.cpp">
+      <Filter>engine\base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -305,6 +308,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Triangle.h">
       <Filter>engine\math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ShaderCompiler.h">
+      <Filter>engine\base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

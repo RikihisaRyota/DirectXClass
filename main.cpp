@@ -4,6 +4,7 @@
 #include "ImGuiManager.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
+#include "ShaderCompiler.h"
 
 #include <dxgidebug.h>
 #include <cassert>
@@ -27,6 +28,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Input* input = nullptr;
 	input = Input::GetInstance();
 	input->Initialize();
+
+	// ShderCompiler
+	ShaderCompiler::Initialize();
 
 	// テクスチャマネージャの初期化
 	TextureManager::GetInstance()->Initialize(dxCommon);

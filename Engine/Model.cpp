@@ -71,7 +71,7 @@ void Model::BasicDraw(const WorldTransform& worldTransform, const ViewProjection
 	cmdList_->SetGraphicsRootSignature(basicGraphicsPipline_->GetRootSignature());
 
 	// パイプラインステートの設定
-	cmdList_->SetPipelineState(basicGraphicsPipline_->GetPipelineStatee());
+	cmdList_->SetPipelineState(basicGraphicsPipline_->GetPipelineState());
 
 	// プリミティブ形状を設定
 	cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

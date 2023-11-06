@@ -133,7 +133,7 @@ void PrimitiveDrawer::BasicDraw() {
 		cmdList_->SetGraphicsRootSignature(lineGraphicsPipline_->GetRootSignature());
 
 		// パイプラインステートの設定
-		cmdList_->SetPipelineState(lineGraphicsPipline_->GetPipelineStatee());
+		cmdList_->SetPipelineState(lineGraphicsPipline_->GetPipelineState());
 
 		// プリミティブ形状を設定
 		cmdList_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);

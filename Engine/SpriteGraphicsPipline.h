@@ -28,7 +28,7 @@ public:
 	void InitializeGraphicsPipeline();
 public:
 	ID3D12RootSignature* GetRootSignature() { return rootSignature_.Get(); }
-	ID3D12PipelineState* GetPipelineStatee() { return pipelineState_.Get(); }
+	ID3D12PipelineState* GetPipelineState() { return pipelineState_.Get(); }
 private:
 	void CreateState();
 	void CreateRootsignature();
@@ -39,23 +39,6 @@ private:
 	void CreateDepthStencil();
 
 	void CreatePSO();
-	/// <summary>
-	/// DXCの初期化
-	/// </summary>
-	void DXCCompilerInitialize();
-	/// <summary>
-	/// CompileShader関数
-	/// </summary>
-	IDxcBlob* CompileShader(
-		//ConpilerするShaderファイルへのパス
-		const std::wstring& filePath,
-		//Compilerに使用するProfile
-		const wchar_t* profile,
-		//初期化で生成したのもを3つ
-		IDxcUtils* dxcUtils,
-		IDxcCompiler3* dxcCompiler,
-		IDxcIncludeHandler* includeHandler
-	);
 private:
 	// デバイス
 	static ID3D12Device* sDevice;
@@ -74,8 +57,4 @@ private:
 	Microsoft::WRL::ComPtr<IDxcBlob> pixelShaderBlob_ = nullptr;
 	// パイプラインステートオブジェクト
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState_ = nullptr;
-	// dxcCompierを初期化
-	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_ = nullptr;
-	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_ = nullptr;
-	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_ = nullptr;
 };
