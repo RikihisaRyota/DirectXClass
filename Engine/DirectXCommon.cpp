@@ -95,11 +95,11 @@ void DirectXCommon::PostDraw() {
 
 	commandList_->ResourceBarrier(1, &barrier);
 
-	/*commandList_->SetGraphicsRootSignature(postEffectPipeline_.get()->GetRootSignature());
+	commandList_->SetGraphicsRootSignature(postEffectPipeline_.get()->GetRootSignature());
 	commandList_->SetPipelineState(postEffectPipeline_.get()->GetPipelineState());
 	commandList_->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList_->SetGraphicsRootDescriptorTable(0, srvGPUHandle_[bbIndex]);
-	commandList_->DrawInstanced(4,1,0,0);*/
+	commandList_->DrawInstanced(4,1,0,0);
 
 	// リソースバリアの変更(コピー先->描画)
 	barrier = CD3DX12_RESOURCE_BARRIER::Transition(
