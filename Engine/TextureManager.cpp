@@ -35,7 +35,7 @@ void TextureManager::UnLoadInternal() {
 }
 
 uint32_t TextureManager::LoadInternal(const std::string& filePath) {
-	for (uint32_t i = 0; i < textureCount_; i++) {
+	for (uint32_t i = 0; i <= textureCount_; i++) {
 		if (textures_[i].name == filePath) {
 			return i;
 		}
