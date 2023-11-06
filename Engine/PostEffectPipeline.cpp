@@ -160,6 +160,7 @@ void PostEffectGraphicsPipeline::CreatePSO() {
 
 	// どのように画面に色を打ち込むのか設定（気にしなくてもよい）
 	graphicPipelineStateDesc.SampleDesc.Count = 1;
+	graphicPipelineStateDesc.SampleDesc.Quality = 0;
 	graphicPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
 	// グラフィックスパイプラインの生成

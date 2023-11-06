@@ -167,8 +167,8 @@ private:// メンバ変数
 	uint32_t numDescriptorsCount = 0u;
 	UINT descriptorHandleIncrementSize = 0u;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
-	D3D12_CPU_DESCRIPTOR_HANDLE srvCPUHandle_;
-	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle_;
+	D3D12_CPU_DESCRIPTOR_HANDLE srvCPUHandle_[2];
+	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle_[2];
 	// 深度バッファ関連
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;

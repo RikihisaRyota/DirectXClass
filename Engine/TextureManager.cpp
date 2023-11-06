@@ -35,7 +35,7 @@ void TextureManager::UnLoadInternal() {
 }
 
 uint32_t TextureManager::LoadInternal(const std::string& filePath) {
-	for (uint32_t i = 0; i < textureCount_; i++) {
+	for (uint32_t i = 0; i <= textureCount_; i++) {
 		if (textures_[i].name == filePath) {
 			return i;
 		}
@@ -140,7 +140,7 @@ void TextureManager::UploadTextureData(ID3D12Resource* texture, const DirectX::S
 	}
 }
 
-void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResourec,uint32_t count) {
+void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metadata, ID3D12Resource* textureResource,uint32_t count) {
 	// metaDataを基にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = metadata.format;
@@ -153,7 +153,7 @@ void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metada
 		textures_[textureCount_].cpuDescHandleSRV,
 		textures_[textureCount_].gpuDescHandleSRV);
 	// SRVの生成
-	device_->GetDevice()->CreateShaderResourceView(textureResourec, &srvDesc, textures_[textureCount_].cpuDescHandleSRV);
+	device_->GetDevice()->CreateShaderResourceView(textureResource, &srvDesc, textures_[textureCount_].cpuDescHandleSRV);
 }
 
 void TextureManager::SetGraphicsRootDescriptorTable(ID3D12GraphicsCommandList* commandList, UINT rootParamIndex, uint32_t textureHandle) {

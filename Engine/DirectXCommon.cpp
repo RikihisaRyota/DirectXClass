@@ -95,11 +95,11 @@ void DirectXCommon::PostDraw() {
 
 	commandList_->ResourceBarrier(1, &barrier);
 
-	commandList_->SetGraphicsRootSignature(postEffectPipeline_.get()->GetRootSignature());
+	/*commandList_->SetGraphicsRootSignature(postEffectPipeline_.get()->GetRootSignature());
 	commandList_->SetPipelineState(postEffectPipeline_.get()->GetPipelineState());
 	commandList_->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	commandList_->SetGraphicsRootDescriptorTable(0, srvGPUHandle_);
-	commandList_->DrawInstanced(4,1,0,0);
+	commandList_->SetGraphicsRootDescriptorTable(0, srvGPUHandle_[bbIndex]);
+	commandList_->DrawInstanced(4,1,0,0);*/
 
 	// リソースバリアの変更(コピー先->描画)
 	barrier = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -324,34 +324,36 @@ void DirectXCommon::CreateRenderTargets() {
 	hr = swapChain_->GetDesc(&swcDesc);
 	assert(SUCCEEDED(hr));
 
-	// デスクリプタヒープの生成
+	// デスクリプタヒープの生成（RTV用）
 	D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapDesc{};
-	rtvDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;// レンダーターゲットビュー用
-	rtvDescriptorHeapDesc.NumDescriptors = swcDesc.BufferCount + 1;// ダブルバッファ用(マルチパスレンダリング用)
+	rtvDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+	rtvDescriptorHeapDesc.NumDescriptors = swcDesc.BufferCount;
 	hr = device_->CreateDescriptorHeap(&rtvDescriptorHeapDesc, IID_PPV_ARGS(&rtvDescriptorHeap_));
 	assert(SUCCEEDED(hr));
-	// デスクリプタヒープを生成
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc = {};
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE; // シェーダから見えるように
-	descHeapDesc.NumDescriptors = kNumDescriptors; // シェーダーリソースビュー1つ
-	auto result = device_->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&srvDescriptorHeap_)); // 生成
-	assert(SUCCEEDED(result));
+	
+	// デスクリプタヒープの生成 (SRV用)
+	D3D12_DESCRIPTOR_HEAP_DESC srvDescriptorHeapDesc{};
+	srvDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	srvDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	srvDescriptorHeapDesc.NumDescriptors = swcDesc.BufferCount;
+	hr = device_->CreateDescriptorHeap(&srvDescriptorHeapDesc, IID_PPV_ARGS(&srvDescriptorHeap_));
+	assert(SUCCEEDED(hr));
 
-	// 表裏の2つ分について
-	backBuffers_.resize(swcDesc.BufferCount);
-	// rtvHandle
-	rtvHandle_ = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
 	// レンダーターゲットビューの設定
-	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
-	// シェーダーの計算結果をSRGBに変換して書き込む
-	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;//出力結果をSRGBに変換して書き込む
-	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;//2Dテクスチャとして書き込む
+    D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
+    rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+    rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+	// シェーダーリソースビューの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
+	// 表裏の2つ分について
+	backBuffers_.resize(swcDesc.BufferCount);
+	
+	// rtvHandle
+	rtvHandle_ = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
 	for (int i = 0; i < backBuffers_.size(); i++) {
 		// スワップチェーンからバッファを取得
 		hr = swapChain_->GetBuffer(i, IID_PPV_ARGS(&backBuffers_[i]));
@@ -362,10 +364,12 @@ void DirectXCommon::CreateRenderTargets() {
 			rtvHandle_,
 			i,
 			device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
+		// ディスクリプタヒープのハンドルを取得
+		//GetCPUGPUHandle(srvCPUHandle_[i], srvGPUHandle_[i]);
 		// レンダーターゲットビューの生成
 		device_->CreateRenderTargetView(backBuffers_[i].Get(), &rtvDesc, rtvHandle);
+		//device_->CreateShaderResourceView(backBuffers_[i].Get(),&srvDesc, srvCPUHandle_[i]);
 	}
-	GetCPUGPUHandle(srvCPUHandle_, srvGPUHandle_);
 }
 
 void DirectXCommon::CreateDepthBuffer() {

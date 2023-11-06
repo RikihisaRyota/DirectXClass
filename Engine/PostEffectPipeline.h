@@ -47,7 +47,7 @@ private:
 	// ルートシグネチャ
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_ = nullptr;
 	// インプットレイアウト
-	D3D12_INPUT_ELEMENT_DESC inputLayout_[3];
+	D3D12_INPUT_ELEMENT_DESC inputLayout_[2];
 	// ブレンドステート
 	D3D12_BLEND_DESC blendDesc_{};
 	// ラスタライザーステート
