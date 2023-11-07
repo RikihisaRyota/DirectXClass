@@ -42,9 +42,8 @@ public:
 private:
 	// DirectX基盤インスタンス（借りてくる）
 	DirectXCommon* dxCommon_ = nullptr;
-	// SRV用ヒープ
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap_;
-
+	D3D12_CPU_DESCRIPTOR_HANDLE srvCPUHandle_;
+	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle_;
 private:
 	ImGuiManager() = default;
 	~ImGuiManager() = default;

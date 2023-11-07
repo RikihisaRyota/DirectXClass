@@ -16,6 +16,18 @@ public:// 静的メンバ関数
 	/// <returns></returns>
 	static DirectXCommon* GetInstance();
 
+private:
+	struct Buffer {
+		Microsoft::WRL::ComPtr<ID3D12Resource> buffer{};
+
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle{};
+		
+		D3D12_CPU_DESCRIPTOR_HANDLE srvCPUHandle{};
+		D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle{};
+
+		D3D12_CPU_DESCRIPTOR_HANDLE dpsCPUHandle{};
+	};
+
 public:
 	/// <summary>
 	/// 初期化
@@ -62,8 +74,6 @@ public:
 	/// <returns>バックバッファ</returns>
 	size_t GetBackBufferCount()const { return backBuffers_.size(); }
 
-	ID3D12Resource* GetBackBuff()const { return backBuffers_[0].Get(); }
-
 	/// <summary>
 	/// RTV
 	/// </summary>
@@ -75,15 +85,17 @@ public:
 	/// DSV
 	/// </summary>
 	/// <returns></returns>
-	D3D12_CPU_DESCRIPTOR_HANDLE GetDSVHandle() { return dpsHandle_; }
+	D3D12_CPU_DESCRIPTOR_HANDLE GetDSVHandle() { return depthBuffer_->dpsCPUHandle; }
 	/// <summary>
 	/// リリース
 	/// </summary>
 	void Release();
-	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle();
-	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle();
-	void GetCPUGPUHandle(D3D12_CPU_DESCRIPTOR_HANDLE& cpu, D3D12_GPU_DESCRIPTOR_HANDLE& gpu);
-	uint32_t GetNumDescriptorsCount() {return numDescriptorsCount;}
+	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle();
+	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUDescriptorHandle();
+	void GetSRVCPUGPUHandle(D3D12_CPU_DESCRIPTOR_HANDLE& cpu, D3D12_GPU_DESCRIPTOR_HANDLE& gpu);
+	uint32_t GetSRVDescriptorsCount() {return numSRVDescriptorsCount;}
+	D3D12_CPU_DESCRIPTOR_HANDLE GetRTVCPUDescriptorHandle();
+	uint32_t GetRTVDescriptorsCount() { return numRTVDescriptorsCount; }
 	
 private:// メンバ関数
 
@@ -126,6 +138,8 @@ private: // メンバ関数
 	DirectXCommon(const DirectXCommon&) = delete;
 	const DirectXCommon& operator=(const DirectXCommon&) = delete;
 
+	void WaitForGPU();
+
 	/// <summary>
 	/// CreateDepthStencilTexture関数
 	/// </summary>
@@ -139,6 +153,8 @@ private: // メンバ関数
 	/// CreateDescriptorHeap
 	/// </summary>
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(UINT size);
 private:// メンバ変数
 	// デスクリプターの数
 	static const size_t kNumDescriptors = 256;
@@ -159,19 +175,23 @@ private:// メンバ変数
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain_;
 	// レンダーターゲット関連
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap_;
-	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle_;
+	std::vector<Buffer*> backBuffers_;
+	uint32_t numRTVDescriptorsCount = 0u;
+	// いったん描画する
+	Buffer* temporaryBuffer_;
+	// 頂点バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertBuff_;
+	// 頂点バッファビュー
+	D3D12_VERTEX_BUFFER_VIEW vbView_{};
 	// デスクリプタサイズ
-	uint32_t numDescriptorsCount = 0u;
-	UINT descriptorHandleIncrementSize = 0u;
+	uint32_t numSRVDescriptorsCount = 0u;
+	UINT SRVDescriptorHandleIncrementSize = 0u;
+	UINT RTVDescriptorHandleIncrementSize = 0u;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
-	D3D12_CPU_DESCRIPTOR_HANDLE srvCPUHandle_[2];
-	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle_[2];
-	std::unique_ptr<PostEffectGraphicsPipeline> postEffectPipeline_;
+	PostEffectGraphicsPipeline* postEffectPipeline_;
 	// 深度バッファ関連
-	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
+	Buffer* depthBuffer_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;
-	D3D12_CPU_DESCRIPTOR_HANDLE dpsHandle_;
 	// 描画関連
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
 	UINT64 fenceValue_ = 0;

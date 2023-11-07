@@ -17,6 +17,8 @@ PixelShaderOutPut main(VertexShaderInput input)
 {
     PixelShaderOutPut output;
     output.color = tex.Sample(smp, input.texcoord);
+    output.color.rgb = float3(0.0f,0.0f,0.0f);
+    
     return output;
 
 }

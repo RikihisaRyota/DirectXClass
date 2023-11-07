@@ -149,7 +149,7 @@ void TextureManager::CreateShaderResourceView(const DirectX::TexMetadata& metada
 	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
 
 	// SRVを作成するDescriptorHeapの場所を決める
-	device_->GetCPUGPUHandle(
+	device_->GetSRVCPUGPUHandle(
 		textures_[textureCount_].cpuDescHandleSRV,
 		textures_[textureCount_].gpuDescHandleSRV);
 	// SRVの生成
