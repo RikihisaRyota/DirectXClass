@@ -118,6 +118,39 @@ void DirectXCommon::PostDraw() {
 		D3D12_RESOURCE_STATE_PRESENT);
 
 	commandList_->ResourceBarrier(2, barrier);
+}
+
+void DirectXCommon::PreUIDraw() {
+	UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
+	// リソースバリアを変更(表示状態->描画対象)
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		backBuffers_[bbIndex]->buffer.Get(),
+		D3D12_RESOURCE_STATE_PRESENT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
+	// TransitionBarrierを張る
+	commandList_->ResourceBarrier(1, &barrier);
+	commandList_->OMSetRenderTargets(1, &backBuffers_[bbIndex]->rtvHandle, false, &depthBuffer_->dpsCPUHandle);
+
+	// ビューポートの設定
+	CD3DX12_VIEWPORT viewport =
+		CD3DX12_VIEWPORT(0.0f, 0.0f, WinApp::kWindowWidth, WinApp::kWindowHeight);
+	commandList_->RSSetViewports(1, &viewport);
+	// シザリング矩形の設定
+	CD3DX12_RECT rect = CD3DX12_RECT(0, 0, WinApp::kWindowWidth, WinApp::kWindowHeight);
+	commandList_->RSSetScissorRects(1, &rect);
+}
+
+void DirectXCommon::PostUIDraw() {
+	HRESULT hr = S_FALSE;
+	UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
+
+	// リソースバリアの変更(コピー先->描画)
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		backBuffers_[bbIndex]->buffer.Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PRESENT);
+
+	commandList_->ResourceBarrier(1, &barrier);
 
 	WaitForGPU();
 }

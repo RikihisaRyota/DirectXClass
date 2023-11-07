@@ -52,10 +52,6 @@ void ImGuiManager::End() {
 
 void ImGuiManager::Draw() {
 	ID3D12GraphicsCommandList* commandList = dxCommon_->GetCommandList();
-
-	// デスクリプタヒープの配列をセットするコマンド
-	ID3D12DescriptorHeap* ppHeaps[] = { dxCommon_->GetSRVDescriptorHeap() };
-	commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 	// 描画コマンドを発行
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
 	

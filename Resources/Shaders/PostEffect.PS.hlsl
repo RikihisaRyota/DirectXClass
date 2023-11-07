@@ -19,7 +19,7 @@ PixelShaderOutPut main(VertexShaderInput input)
     PixelShaderOutPut output;
     float2 samplePoint = input.texcoord;
     output.color = tex.Sample(smp, samplePoint);
-    //samplePoint.x += 0.01;
-    //output.color.r = tex.Sample(smp, samplePoint).r;
+    samplePoint.x += 0.01;
+    output.color.r = tex.Sample(smp, samplePoint).r;
     return output;
 }

@@ -45,6 +45,9 @@ public:
 	/// </summary>
 	void PostDraw();
 
+	void PreUIDraw();
+	void PostUIDraw();
+
 	/// <summary>
 	/// レンダーターゲットのクリア
 	/// </summary>

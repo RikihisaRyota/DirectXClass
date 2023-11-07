@@ -124,10 +124,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		dxCommon->PreDraw();
 		// ゲームシーンの描画
 		gameScene->Draw();
-		// ImGui描画
-		imguiManager->Draw();
 		// 描画終わり
 		dxCommon->PostDraw();
+		// UI
+		dxCommon->PreUIDraw();
+		// ImGui描画
+		imguiManager->Draw();
+		dxCommon->PostUIDraw();
 	}
 
 	// ゲームシーン解放
