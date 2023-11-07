@@ -103,7 +103,8 @@ void DirectXCommon::PostDraw() {
 	commandList_->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList_->SetGraphicsRootDescriptorTable(0, temporaryBuffer_->srvGPUHandle);
 	commandList_->IASetVertexBuffers(0, 1, &vbView_);
-	commandList_->DrawInstanced(4, 1, 0, 0);
+	commandList_->IASetIndexBuffer(&ibView_);
+	commandList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
 
 	// リソースバリアの変更
 	barrier[0] = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -342,15 +343,18 @@ void DirectXCommon::CreateRenderTargets() {
 	CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 	// リソース設定
 	CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-		DXGI_FORMAT_R8G8B8A8_UNORM, 
-		WinApp::kWindowWidth, 
-		WinApp::kWindowHeight, 
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		WinApp::kWindowWidth,
+		WinApp::kWindowHeight,
 		1, 0, 1, 0,
-		D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, 
+		D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET,
 		D3D12_TEXTURE_LAYOUT_UNKNOWN, 0);
-
+	// レンダリング時のクリア値と同じ
+	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
+	D3D12_CLEAR_VALUE clearValue = CD3DX12_CLEAR_VALUE(
+		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, clearColor);
 	device_->CreateCommittedResource(
-		&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+		&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_PRESENT, &clearValue,
 		IID_PPV_ARGS(&temporaryBuffer_->buffer));
 	assert(SUCCEEDED(result));
 	GetSRVCPUGPUHandle(temporaryBuffer_->srvCPUHandle, temporaryBuffer_->srvGPUHandle);
@@ -364,11 +368,16 @@ void DirectXCommon::CreateRenderTargets() {
 		Vector4 position{};
 		Vector2 texcord{};
 	};
-	std::vector<VertexPos> vertices {
+	std::vector<VertexPos> vertices{
 		{{-1.0f, -1.0f, -1.0f, 1.0f},{0.0f, 1.0f}}, // 左下
 		{{-1.0f, +1.0f, -1.0f, 1.0f},{0.0f, 0.0f}}, // 左上
 		{{+1.0f, -1.0f, -1.0f, 1.0f},{1.0f, 1.0f}}, // 右下
 		{{+1.0f, +1.0f, -1.0f, 1.0f},{1.0f, 0.0f}}, // 右上
+	};
+
+	indices_ = {
+		0,  1,  3,
+		3,  2,  0,
 	};
 	UINT sizeVB = static_cast<UINT>(sizeof(VertexPos) * vertices.size());
 	vertBuff_ = CreateBuffer(sizeVB);
@@ -386,6 +395,22 @@ void DirectXCommon::CreateRenderTargets() {
 	vbView_.BufferLocation = vertBuff_->GetGPUVirtualAddress();
 	vbView_.SizeInBytes = sizeVB;
 	vbView_.StrideInBytes = sizeof(vertices[0]);
+
+	// インデックスデータのサイズ
+	UINT sizeIB = static_cast<UINT>(sizeof(uint16_t) * indices_.size());
+	idxBuff_ = CreateBuffer(sizeIB);
+	// インデックスバッファへのデータ転送
+	uint16_t* indexMap = nullptr;
+	result = idxBuff_->Map(0, nullptr, reinterpret_cast<void**>(&indexMap));
+	if (SUCCEEDED(result)) {
+		std::copy(indices_.begin(), indices_.end(), indexMap);
+		idxBuff_->Unmap(0, nullptr);
+	}
+
+	// インデックスバッファビューの作成
+	ibView_.BufferLocation = idxBuff_->GetGPUVirtualAddress();
+	ibView_.Format = DXGI_FORMAT_R16_UINT;
+	ibView_.SizeInBytes = sizeIB; // 修正: インデックスバッファのバイトサイズを代入
 }
 
 void DirectXCommon::CreateDepthBuffer() {
@@ -501,12 +526,16 @@ void DirectXCommon::Release() {
 	fence_.Reset();
 	// 深度バッファ関連
 	depthBuffer_->buffer.Reset();
+	delete depthBuffer_;
 	dsvHeap_.Reset();
 	// レンダーターゲット関連
 	rtvDescriptorHeap_.Reset();
 	for (auto& ite : backBuffers_) {
 		ite->buffer.Reset();
 	}
+	// 頂点バッファ
+	vertBuff_.Reset();
+	idxBuff_.Reset();
 	// シェーダーリソース
 	srvDescriptorHeap_.Reset();
 	// スワップチェーン関連
@@ -514,6 +543,7 @@ void DirectXCommon::Release() {
 	// ポストエフェクト
 	delete postEffectPipeline_;
 	temporaryBuffer_->buffer.Reset();
+	delete temporaryBuffer_;
 	// コマンド関連
 	commandQueue_.Reset();
 	commandAllocator_.Reset();

@@ -183,6 +183,11 @@ private:// メンバ変数
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertBuff_;
 	// 頂点バッファビュー
 	D3D12_VERTEX_BUFFER_VIEW vbView_{};
+	// インデックスバッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> idxBuff_;
+	// インデックスバッファビュー
+	D3D12_INDEX_BUFFER_VIEW ibView_{};
+	std::vector<uint16_t> indices_;
 	// デスクリプタサイズ
 	uint32_t numSRVDescriptorsCount = 0u;
 	UINT SRVDescriptorHandleIncrementSize = 0u;

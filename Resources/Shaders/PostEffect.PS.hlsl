@@ -13,12 +13,13 @@ struct PixelShaderOutPut
     float4 color : SV_TARGET0;
 };
 
+
 PixelShaderOutPut main(VertexShaderInput input)
 {
     PixelShaderOutPut output;
-    output.color = tex.Sample(smp, input.texcoord);
-    output.color.rgb = float3(0.0f,0.0f,0.0f);
-    
+    float2 samplePoint = input.texcoord;
+    output.color = tex.Sample(smp, samplePoint);
+    //samplePoint.x += 0.01;
+    //output.color.r = tex.Sample(smp, samplePoint).r;
     return output;
-
 }
