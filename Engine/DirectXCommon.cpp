@@ -122,9 +122,6 @@ void DirectXCommon::PostDraw() {
 }
 
 void DirectXCommon::ClearRenderTarget() {
-	//これから書き込むバックバッファのインデックスを取得
-	UINT backBufferIndex = swapChain_->GetCurrentBackBufferIndex();
-
 	// 全画面のクリア
 	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
 	commandList_->ClearRenderTargetView(temporaryBuffer_->rtvHandle, clearColor, 0, nullptr);
@@ -547,7 +544,7 @@ void DirectXCommon::GetSRVCPUGPUHandle(D3D12_CPU_DESCRIPTOR_HANDLE& cpu, D3D12_G
 D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::GetRTVCPUDescriptorHandle() {
 	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
 	handleCPU.ptr += (RTVDescriptorHandleIncrementSize * numRTVDescriptorsCount);
-	RTVDescriptorHandleIncrementSize++;
+	numRTVDescriptorsCount++;
 	return handleCPU;
 
 }
