@@ -17,8 +17,11 @@ Quaternion IdentityQuaternion();
 Quaternion Conjugation(const Quaternion& quaternion);
 Quaternion Normalize(const Quaternion& quaternion);
 Quaternion Inverse(const Quaternion& quaternion);
+Quaternion Add(const Quaternion& p1, const Quaternion& p2);
 Quaternion Multiply(const Quaternion& p1, const Quaternion& p2);
+Quaternion Multiply(const Quaternion& p1,float scalar);
 float Norm(const Quaternion& quaternion);
+Quaternion Slerp(const Quaternion& q0, const Quaternion& q1,float t);
 // 任意軸回転(Quaternion)
 Quaternion MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle);
 Quaternion MakeRotateQuaternion(const Vector3& from, const Vector3 to);
@@ -39,6 +42,7 @@ Vector3 Slerp(const Vector3& start, const Vector3& end, float t);
 float Distance(const Vector3& v1, const Vector3& v2);
 
 float Dot(const Vector3& a, const Vector3& b);
+float Dot(const Quaternion& p1, const Quaternion& p2);
 
 Vector3 Subtract(const Vector3& v1, const Vector3& v2);
 

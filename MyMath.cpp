@@ -40,6 +40,10 @@ Quaternion Inverse(const Quaternion& quaternion) {
 	return result;
 }
 
+Quaternion Add(const Quaternion& p1, const Quaternion& p2) {
+	return Quaternion(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z, p1.w + p2.w);
+}
+
 Quaternion Multiply(const Quaternion& p1, const Quaternion& p2) {
 	Quaternion result;
 	Vector3 qv = { p1.x, p1.y, p1.z };
@@ -53,6 +57,10 @@ Quaternion Multiply(const Quaternion& p1, const Quaternion& p2) {
 	return result;
 }
 
+Quaternion Multiply(const Quaternion& p1, float scalar) {
+	return Quaternion(p1.x * scalar, p1.y * scalar, p1.z * scalar, p1.w * scalar);
+}
+
 float Norm(const Quaternion& quaternion) {
 	return std::sqrt(
 		quaternion.x * quaternion.x +
@@ -62,10 +70,34 @@ float Norm(const Quaternion& quaternion) {
 	);
 }
 
+Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
+	float cos = Dot(q0, q1);
+	Quaternion from{};
+	if (cos < 0) {
+		from.x = -q0.x;
+		from.y = -q0.y;
+		from.z = -q0.z;
+		from.w = -q0.w;
+		cos *= -1.0f;
+	}
+	else {
+		from = q0;
+	}
+	float theta = std::acos(cos);
+	Quaternion result{};
+	result = Add(Multiply(from, std::sin((1.0f - t) * theta) / std::sin(theta)), Multiply(q1, std::sin(t*theta)/std::sin(theta)));
+	return result;
+}
 Quaternion MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle) {
 	float halfAngle = angle * 0.5f;
 	float sinHalfAngle = std::sinf(halfAngle);
-	Vector3 normalizedAxis = Normalize(axis);
+	Vector3 normalizedAxis;
+	if (axis.Length() > 0) {
+		normalizedAxis = Normalize(axis);
+	}
+	else {
+		normalizedAxis = axis;
+	}
 
 	Quaternion result;
 	result.x = normalizedAxis.x * sinHalfAngle;
@@ -77,9 +109,9 @@ Quaternion MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle) {
 }
 
 Quaternion MakeRotateQuaternion(const Vector3& from, const Vector3 to) {
-	Vector3 cross = Cross(to, from);
-	float halfSin = cross.Length();
-	float halfCos = Dot(to, from);
+	Vector3 cross = Cross(from, to);
+	float halfSin = cross.Length() * 0.5f;
+	float halfCos = Dot(from, to) * 0.5f;
 	Vector3 n{};
 	if (cross.Length() > 0) {
 		n = Normalize(cross);
@@ -90,7 +122,7 @@ Quaternion MakeRotateQuaternion(const Vector3& from, const Vector3 to) {
 		n.z = -from.x;
 
 	}
-	else if (from.x != 0.0f || from.y != 0.0f) {
+	else if (from.x != 0.0f || from.z != 0.0f) {
 		n.x = from.y;
 		n.y = -from.x;
 		n.z = 0.0f;
@@ -229,6 +261,10 @@ float Distance(const Vector3& v1, const Vector3& v2) {
 }
 
 float Dot(const Vector3& a, const Vector3& b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+
+float Dot(const Quaternion& p1, const Quaternion& p2) {
+	return  p1.x * p2.x + p1.y * p2.y + p1.z * p2.z + p1.w * p2.w;
+}
 
 Vector3 Subtract(const Vector3& v1, const Vector3& v2) {
 	return { (v1.x - v2.x), (v1.y - v2.y), (v1.z - v2.z) };
@@ -709,7 +745,7 @@ Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to) {
 		n.z = -from.x;
 
 	}
-	else if (from.x != 0.0f || from.y != 0.0f) {
+	else if (from.x != 0.0f || from.z != 0.0f) {
 		n.x = from.y;
 		n.y = -from.x;
 		n.z = 0.0f;

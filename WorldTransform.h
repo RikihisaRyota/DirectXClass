@@ -1,6 +1,7 @@
 #pragma once
 #include "Matrix4x4.h"
 #include "Vector3.h"
+#include "Quaternion.h"
 #include <d3d12.h>
 #include <wrl.h>
 
@@ -18,7 +19,7 @@ struct WorldTransform {
 	Vector3 scale_ = { 1.0f,1.0f,1.0f };
 	// rotatition
 	Vector3 rotation_ = { 0.0f,0.0f,0.0f };
-	Quaternion quaternion = {};
+	Quaternion quaternion_{};
 	// translation
 	Vector3 translation_ = { 0.0f,0.0f,0.0f };
 	// matWorld
@@ -52,6 +53,5 @@ struct WorldTransform {
 	/// </summary>
 	void Reset();
 
-	void SetRotateMatrix(const Matrix4x4& rotateMatrix);
-	void MakeMatWorld(const Matrix4x4& rotateMatrix);
+	void UpdateQuaternion();
 };

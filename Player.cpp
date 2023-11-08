@@ -248,7 +248,7 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 			worldTransform_.at(0).rotation_,
 			worldTransform_.at(0).translation_
 		);
-		worldTransform_.at(0).SetRotateMatrix(DirectionToDirection(interRotate_, vector_));
+		//worldTransform_.at(0).SetRotateMatrix(DirectionToDirection(interRotate_, vector_));
 		// 振れているブロック
 		Matrix4x4 stageMatrix = worldTransform.matWorld_;
 		// プレイヤーをブロックのローカル座標系に直す
@@ -258,7 +258,7 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 		worldTransform_.at(0).translation_ = MakeTranslateMatrix(localPlayerMatrix);
 		// 回転は行列で行う
 		//  Y軸回り角度(θy)
-		worldTransform_.at(0).SetRotateMatrix(MakeRotateMatrix(localPlayerMatrix));
+		//worldTransform_.at(0).SetRotateMatrix(MakeRotateMatrix(localPlayerMatrix));
 		for (size_t i = 0; i < worldTransform_.size(); i++) {
 			worldTransform_Motion_.at(i).UpdateMatrix();
 			for (size_t model = 0; model < worldTransforms_Parts_.at(i).size(); model++) {
@@ -315,7 +315,7 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 			worldTransform_.at(0).rotation_,
 			worldTransform_.at(0).translation_
 		);
-		worldTransform_.at(0).MakeMatWorld(DirectionToDirection(interRotate_, vector_));
+		//worldTransform_.at(0).MakeMatWorld(DirectionToDirection(interRotate_, vector_));
 		// 振れているブロック
 		Matrix4x4 stageMatrix = worldTransform.matWorld_;
 		// プレイヤーをブロックのローカル座標系に直す
@@ -325,7 +325,7 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 		// 回転は行列で行う
 		worldTransform_.at(0).translation_ = MakeTranslateMatrix(localPlayerMatrix);
 		//  Y軸回り角度(θy)
-		worldTransform_.at(0).SetRotateMatrix(MakeRotateMatrix(localPlayerMatrix));
+		//worldTransform_.at(0).SetRotateMatrix(MakeRotateMatrix(localPlayerMatrix));
 		for (size_t i = 0; i < worldTransform_.size(); i++) {
 			worldTransform_Motion_.at(i).UpdateMatrix();
 			for (size_t model = 0; model < worldTransforms_Parts_.at(i).size(); model++) {
@@ -591,20 +591,31 @@ void Player::PlayerRotate() {
 	if (interRotate_ != Vector3(0.0f, 0.0f, 0.0f)) {
 		interRotate_.Normalize();
 	}
-	Vector3  intermediateRotate = Lerp(interRotate_, vector_, kTurn);
+	interRotate_ = Lerp(interRotate_, vector_, kTurn);
+	// test
+	Quaternion rotation = MakeRotateAxisAngleQuaternion(
+		Normalize(Vector3{ 1.0f,0.4f,-0.2f }), 0.45f
+	);
+
 	//  Y軸回り角度(θy)
 	worldTransform_.at(0).rotation_.y = std::atan2(interRotate_.x, interRotate_.z);
 	worldTransform_.at(0).UpdateMatrix();
-	Matrix4x4 rotateMatrix = DirectionToDirection(intermediateRotate, interRotate_);
-	worldTransform_.at(0).SetRotateMatrix(rotateMatrix);
+	Vector3 axis = Cross(interRotate_, vector_);
+	if (axis.Length() > 0.0f) {
+		axis.Normalize();
+	}
+	float angle = std::acos(Dot(interRotate_, vector_));
+	worldTransform_.at(0).quaternion_ = MakeRotateAxisAngleQuaternion(axis, angle);
+	worldTransform_.at(0).UpdateQuaternion();
+
 	for (size_t i = 0; i < worldTransform_.size(); i++) {
 		worldTransform_Motion_.at(i).UpdateMatrix();
 		for (size_t model = 0; model < worldTransforms_Parts_.at(i).size(); model++) {
 			worldTransforms_Parts_.at(i).at(model).UpdateMatrix();
 		}
 	}
-	interRotate_ = intermediateRotate;
 }
+
 void Player::InitializeFloatGimmick() {
 	floatingParameter_ = 0.0f;
 	worldTransform_Motion_.at(0).rotation_ = { 0.0f, 0.0f, 0.0f };
