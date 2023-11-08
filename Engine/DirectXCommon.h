@@ -156,8 +156,6 @@ private: // メンバ関数
 	/// CreateDescriptorHeap
 	/// </summary>
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(UINT size);
 private:// メンバ変数
 	// デスクリプターの数
 	static const size_t kNumDescriptors = 256;
@@ -180,23 +178,12 @@ private:// メンバ変数
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap_;
 	std::vector<Buffer*> backBuffers_;
 	uint32_t numRTVDescriptorsCount = 0u;
-	// いったん描画する
-	Buffer* temporaryBuffer_;
-	// 頂点バッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertBuff_;
-	// 頂点バッファビュー
-	D3D12_VERTEX_BUFFER_VIEW vbView_{};
-	// インデックスバッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> idxBuff_;
-	// インデックスバッファビュー
-	D3D12_INDEX_BUFFER_VIEW ibView_{};
-	std::vector<uint16_t> indices_;
 	// デスクリプタサイズ
 	uint32_t numSRVDescriptorsCount = 0u;
 	UINT SRVDescriptorHandleIncrementSize = 0u;
 	UINT RTVDescriptorHandleIncrementSize = 0u;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
-	std::unique_ptr<PostEffect> postEffect_;
+	PostEffect* postEffect_;
 	// 深度バッファ関連
 	Buffer* depthBuffer_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;

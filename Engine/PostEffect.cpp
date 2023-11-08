@@ -7,15 +7,22 @@
 using namespace Microsoft::WRL;
 
 void PostEffect::Initialize() {
+	// パイプライン生成
 	postEffectPipeline_ = std::make_unique<PostEffectGraphicsPipeline>();
 	PostEffectGraphicsPipeline::SetDevice(DirectXCommon::GetInstance()->GetDevice());
 	postEffectPipeline_->InitializeGraphicsPipeline();
 	// バッファー
-
+	temporaryBuffer_ = new Buffer();
+	CreateResource();
 }
 
 void PostEffect::Update() {
-
+	count_ += 1.0f;
+	time_ = count_ / countMax_;
+	if (count_ >= countMax_) {
+		count_ = 0.0f;
+	}
+	SetCommandList();
 }
 
 void PostEffect::Shutdown() {
@@ -24,6 +31,7 @@ void PostEffect::Shutdown() {
 	vertices_.clear();
 	vertBuff_.Reset();
 	temporaryBuffer_->buffer.Reset();
+	delete temporaryBuffer_;
 }
 
 void PostEffect::CreateResource() {
@@ -54,6 +62,7 @@ void PostEffect::CreateResource() {
 	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
 	D3D12_CLEAR_VALUE clearValue = CD3DX12_CLEAR_VALUE(
 		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, clearColor);
+
 	auto result = device->CreateCommittedResource(
 		&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_PRESENT, &clearValue,
 		IID_PPV_ARGS(&temporaryBuffer_->buffer));
@@ -106,6 +115,13 @@ void PostEffect::CreateResource() {
 	ibView_.BufferLocation = idxBuff_->GetGPUVirtualAddress();
 	ibView_.Format = DXGI_FORMAT_R16_UINT;
 	ibView_.SizeInBytes = sizeIB; // 修正: インデックスバッファのバイトサイズを代入
+#pragma region ConstantBuffer
+	timeBuff_ = CreateBuffer(sizeof(float));
+	timeBuff_->Map(0, nullptr, reinterpret_cast<void**>(&time_));
+	time_ = 0.0f; 
+	count_ = 0.0f;
+	countMax_ = 120.0f;
+#pragma endregion
 }
 
 void PostEffect::SetCommandList() {
@@ -113,9 +129,12 @@ void PostEffect::SetCommandList() {
 	commandList->SetGraphicsRootSignature(postEffectPipeline_->GetRootSignature());
 	commandList->SetPipelineState(postEffectPipeline_->GetPipelineState());
 	commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	commandList->SetGraphicsRootDescriptorTable(0, temporaryBuffer_->srvGPUHandle);
 	commandList->IASetVertexBuffers(0, 1, &vbView_);
 	commandList->IASetIndexBuffer(&ibView_);
+	// Time
+	commandList->SetGraphicsRootConstantBufferView(PostEffectGraphicsPipeline::ROOT_PARAMETER_TYP::TIME, timeBuff_->GetGPUVirtualAddress());
+	// 描画したやつ
+	commandList->SetGraphicsRootDescriptorTable(PostEffectGraphicsPipeline::ROOT_PARAMETER_TYP::TEXTURE, temporaryBuffer_->srvGPUHandle);
 	commandList->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
 }
 ComPtr<ID3D12Resource> PostEffect::CreateBuffer(UINT size) {

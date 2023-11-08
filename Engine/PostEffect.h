@@ -22,9 +22,6 @@ private:
 		Vector2 texcord{};
 	};
 
-	struct Time {
-		float time;
-	};
 public:
 	void Initialize();
 	void Update();
@@ -40,7 +37,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(UINT size);
 	std::unique_ptr<PostEffectGraphicsPipeline> postEffectPipeline_;
 	// 描画用バッファ
-	std::unique_ptr<Buffer> temporaryBuffer_;
+	Buffer* temporaryBuffer_;
 
 	// 頂点バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertBuff_;
@@ -52,5 +49,13 @@ private:
 	// インデックスバッファビュー
 	D3D12_INDEX_BUFFER_VIEW ibView_{};
 	std::vector<uint16_t> indices_;
+#pragma region ConstantBuffer
+	// 時間
+	Microsoft::WRL::ComPtr<ID3D12Resource> timeBuff_;
+	// マテリアル
+	float time_;
+	float count_;
+	float countMax_;
+#pragma endregion
 };
 

@@ -36,9 +36,6 @@ void DirectXCommon::Initialize(WinApp* winApp, int32_t backBufferWidth, int32_t 
 	// swapChainの生成
 	CreateSwapChain();
 
-	// ポストエフェクトパイプラインの初期化
-	PostEffectInitialize();
-
 	// レンダーターゲットの作成
 	CreateRenderTargets();
 
@@ -47,6 +44,9 @@ void DirectXCommon::Initialize(WinApp* winApp, int32_t backBufferWidth, int32_t 
 
 	// フェンス生成
 	CreateFence();
+
+	// ポストエフェクトの初期化
+	PostEffectInitialize();
 }
 
 void DirectXCommon::PreDraw() {
@@ -57,13 +57,13 @@ void DirectXCommon::PreDraw() {
 	UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
 	// リソースバリアを変更(表示状態->描画対象)
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		temporaryBuffer_->buffer.Get(),
+		postEffect_->GetBuffer(),
 		D3D12_RESOURCE_STATE_PRESENT,
 		D3D12_RESOURCE_STATE_RENDER_TARGET);
 	// TransitionBarrierを張る
 	commandList_->ResourceBarrier(1, &barrier);
-
-	commandList_->OMSetRenderTargets(1, &temporaryBuffer_->rtvHandle, false, &depthBuffer_->dpsCPUHandle);
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = postEffect_->GetRTVHandle();
+	commandList_->OMSetRenderTargets(1, &rtvHandle, false, &depthBuffer_->dpsCPUHandle);
 
 	// 全画面クリア
 	ClearRenderTarget();
@@ -86,7 +86,7 @@ void DirectXCommon::PostDraw() {
 	// リソースバリアの変更
 	CD3DX12_RESOURCE_BARRIER barrier[2];
 	barrier[0] = CD3DX12_RESOURCE_BARRIER::Transition(
-		temporaryBuffer_->buffer.Get(),
+		postEffect_->GetBuffer(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
@@ -97,18 +97,12 @@ void DirectXCommon::PostDraw() {
 
 	commandList_->ResourceBarrier(2, barrier);
 	commandList_->OMSetRenderTargets(1, &backBuffers_[bbIndex]->rtvHandle, false, &depthBuffer_->dpsCPUHandle);
-
-	commandList_->SetGraphicsRootSignature(postEffect_->GetRootSignature());
-	commandList_->SetPipelineState(postEffect_->GetPipelineState());
-	commandList_->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	commandList_->SetGraphicsRootDescriptorTable(0, temporaryBuffer_->srvGPUHandle);
-	commandList_->IASetVertexBuffers(0, 1, &vbView_);
-	commandList_->IASetIndexBuffer(&ibView_);
-	commandList_->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
+	
+	postEffect_->Update();
 
 	// リソースバリアの変更
 	barrier[0] = CD3DX12_RESOURCE_BARRIER::Transition(
-		temporaryBuffer_->buffer.Get(),
+		postEffect_->GetBuffer(),
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 		D3D12_RESOURCE_STATE_PRESENT);
 
@@ -158,7 +152,7 @@ void DirectXCommon::PostUIDraw() {
 void DirectXCommon::ClearRenderTarget() {
 	// 全画面のクリア
 	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
-	commandList_->ClearRenderTargetView(temporaryBuffer_->rtvHandle, clearColor, 0, nullptr);
+	commandList_->ClearRenderTargetView(postEffect_->GetRTVHandle(), clearColor, 0, nullptr);
 }
 
 void DirectXCommon::ClearDepthBuffer() {
@@ -327,8 +321,6 @@ void DirectXCommon::CreateRenderTargets() {
 	// デスクリプタサイズを取得
 	RTVDescriptorHandleIncrementSize = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	SRVDescriptorHandleIncrementSize = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	// バッファーにnew
-	temporaryBuffer_ = new Buffer();
 	depthBuffer_ = new Buffer();
 
 	DXGI_SWAP_CHAIN_DESC swcDesc = {};
@@ -370,80 +362,6 @@ void DirectXCommon::CreateRenderTargets() {
 		// レンダーターゲットビューの生成
 		device_->CreateRenderTargetView(backBuffers_[i]->buffer.Get(), &rtvDesc, backBuffers_[i]->rtvHandle);
 	}
-
-	// temporaryBuffer_の生成
-	// ヒーププロパティ
-	CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-	// リソース設定
-	CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		WinApp::kWindowWidth,
-		WinApp::kWindowHeight,
-		1, 0, 1, 0,
-		D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET,
-		D3D12_TEXTURE_LAYOUT_UNKNOWN, 0);
-	// レンダリング時のクリア値と同じ
-	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
-	D3D12_CLEAR_VALUE clearValue = CD3DX12_CLEAR_VALUE(
-		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, clearColor);
-	device_->CreateCommittedResource(
-		&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_PRESENT, &clearValue,
-		IID_PPV_ARGS(&temporaryBuffer_->buffer));
-	assert(SUCCEEDED(result));
-	GetSRVCPUGPUHandle(temporaryBuffer_->srvCPUHandle, temporaryBuffer_->srvGPUHandle);
-	temporaryBuffer_->rtvHandle = GetRTVCPUDescriptorHandle();
-	device_->CreateShaderResourceView(temporaryBuffer_->buffer.Get(), &srvDesc, temporaryBuffer_->srvCPUHandle);
-	device_->CreateRenderTargetView(temporaryBuffer_->buffer.Get(), &rtvDesc, temporaryBuffer_->rtvHandle);
-
-	// VertexBuffer
-	// 頂点データのサイズ
-	struct VertexPos {
-		Vector4 position{};
-		Vector2 texcord{};
-	};
-	std::vector<VertexPos> vertices{
-		{{-1.0f, -1.0f, -1.0f, 1.0f},{0.0f, 1.0f}}, // 左下
-		{{-1.0f, +1.0f, -1.0f, 1.0f},{0.0f, 0.0f}}, // 左上
-		{{+1.0f, -1.0f, -1.0f, 1.0f},{1.0f, 1.0f}}, // 右下
-		{{+1.0f, +1.0f, -1.0f, 1.0f},{1.0f, 0.0f}}, // 右上
-	};
-
-	indices_ = {
-		0,  1,  3,
-		3,  2,  0,
-	};
-	UINT sizeVB = static_cast<UINT>(sizeof(VertexPos) * vertices.size());
-	vertBuff_ = CreateBuffer(sizeVB);
-	assert(SUCCEEDED(result));
-	// 頂点バッファへのデータ転送
-	{
-		VertexPos* vertMap = nullptr;
-		result = vertBuff_->Map(0, nullptr, reinterpret_cast<void**>(&vertMap));
-		if (SUCCEEDED(result)) {
-			std::copy(vertices.begin(), vertices.end(), vertMap);
-			vertBuff_->Unmap(0, nullptr);
-		}
-	}
-	// 頂点バッファビューの作成
-	vbView_.BufferLocation = vertBuff_->GetGPUVirtualAddress();
-	vbView_.SizeInBytes = sizeVB;
-	vbView_.StrideInBytes = sizeof(vertices[0]);
-
-	// インデックスデータのサイズ
-	UINT sizeIB = static_cast<UINT>(sizeof(uint16_t) * indices_.size());
-	idxBuff_ = CreateBuffer(sizeIB);
-	// インデックスバッファへのデータ転送
-	uint16_t* indexMap = nullptr;
-	result = idxBuff_->Map(0, nullptr, reinterpret_cast<void**>(&indexMap));
-	if (SUCCEEDED(result)) {
-		std::copy(indices_.begin(), indices_.end(), indexMap);
-		idxBuff_->Unmap(0, nullptr);
-	}
-
-	// インデックスバッファビューの作成
-	ibView_.BufferLocation = idxBuff_->GetGPUVirtualAddress();
-	ibView_.Format = DXGI_FORMAT_R16_UINT;
-	ibView_.SizeInBytes = sizeIB; // 修正: インデックスバッファのバイトサイズを代入
 }
 
 void DirectXCommon::CreateDepthBuffer() {
@@ -475,7 +393,7 @@ void DirectXCommon::CreateFence() {
 }
 
 void DirectXCommon::PostEffectInitialize() {
-	postEffect_ = std::make_unique<PostEffect>();
+	postEffect_ = new PostEffect();
 	postEffect_->Initialize();
 }
 
@@ -565,16 +483,13 @@ void DirectXCommon::Release() {
 	for (auto& ite : backBuffers_) {
 		ite->buffer.Reset();
 	}
-	// 頂点バッファ
-	vertBuff_.Reset();
-	idxBuff_.Reset();
 	// シェーダーリソース
 	srvDescriptorHeap_.Reset();
 	// スワップチェーン関連
 	swapChain_.Reset();
 	// ポストエフェクト
-	temporaryBuffer_->buffer.Reset();
-	delete temporaryBuffer_;
+	postEffect_->Shutdown();
+	delete postEffect_;
 	// コマンド関連
 	commandQueue_.Reset();
 	commandAllocator_.Reset();
@@ -608,20 +523,4 @@ D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::GetRTVCPUDescriptorHandle() {
 	numRTVDescriptorsCount++;
 	return handleCPU;
 
-}
-
-ComPtr<ID3D12Resource> DirectXCommon::CreateBuffer(UINT size) {
-	HRESULT result = S_FALSE;
-	// ヒーププロパティ
-	CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	// リソース設定
-	CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(size);
-
-	// バッファ生成
-	ComPtr<ID3D12Resource> buffer;
-	result = device_->CreateCommittedResource(
-		&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
-		IID_PPV_ARGS(&buffer));
-	assert(SUCCEEDED(result));
-	return buffer;
 }
