@@ -19,7 +19,11 @@ private:
 
 	struct VertexPos {
 		Vector4 position{};
-		Vector2 texcord{};
+		Vector2 texcoord{};
+	};
+
+	struct Time {
+		float time;
 	};
 
 public:
@@ -52,8 +56,7 @@ private:
 #pragma region ConstantBuffer
 	// 時間
 	Microsoft::WRL::ComPtr<ID3D12Resource> timeBuff_;
-	// マテリアル
-	float time_;
+	Time* time_;
 	float count_;
 	float countMax_;
 #pragma endregion

@@ -37,12 +37,31 @@ PixelShaderOutPut main(VertexShaderInput input)
     // 白黒
     //float averageColor = (output.color.r + output.color.g + output.color.b) / 3.0f;
     //output.color.rgb = (averageColor, averageColor, averageColor);
-    // RGBずらし
-    //float2 samplePoint = input.texcoord;
-    //samplePoint.x += 0.01;
-    //output.color.r = tex.Sample(smp, samplePoint).r;
+    // ノイズ
+    //float noise = Random(input.texcoord*gTime.time) - 0.5f;
+    //output.color.rgb += float3(noise, noise, noise);
     
-    //float noise = Random(input.texcoord * gTime.time) - 0.5f;
-    //output.color.rgb = float3(noise, noise, noise);
+    // ゆがませる
+    static const float Distortion = 0.05f;
+    float2 samplePoint = input.texcoord;
+    samplePoint -= float2(0.5f, 0.5f);
+    float distPower = pow(length(samplePoint), Distortion);
+    samplePoint *= float2(distPower, distPower);
+    samplePoint += float2(0.5f, 0.5f);
+    output.color = tex.Sample(smp, samplePoint);
+    // RGBずらし
+    samplePoint = input.texcoord;
+    samplePoint.x += 0.001;
+    output.color.r = tex.Sample(smp, samplePoint).r;
+    // 走査線
+    float sinv = sin(input.texcoord.y * 2 + gTime.time * -0.1);
+    float steped = step(0.99, sinv * sinv);
+    output.color.rgb -= (1 - steped) * abs(sin(input.texcoord.y * 50.0 + gTime.time * 1.0)) * 0.05;
+    output.color.rgb -= (1 - steped) * abs(sin(input.texcoord.y * 100.0 - gTime.time * 2.0)) * 0.08;
+    output.color.rgb += steped * 0.1;
+    // ビネット
+    float vignette = length(float2(0.5, 0.5) - input.texcoord);
+    vignette = clamp(vignette - 0.2, 0, 1);
+    output.color.rgb -= vignette;
     return output;
 }

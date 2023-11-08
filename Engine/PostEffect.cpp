@@ -18,10 +18,10 @@ void PostEffect::Initialize() {
 
 void PostEffect::Update() {
 	count_ += 1.0f;
-	time_ = count_ / countMax_;
-	if (count_ >= countMax_) {
+	time_->time = count_ / countMax_;
+	/*if (count_ >= countMax_) {
 		count_ = 0.0f;
-	}
+	}*/
 	SetCommandList();
 }
 
@@ -116,9 +116,9 @@ void PostEffect::CreateResource() {
 	ibView_.Format = DXGI_FORMAT_R16_UINT;
 	ibView_.SizeInBytes = sizeIB; // 修正: インデックスバッファのバイトサイズを代入
 #pragma region ConstantBuffer
-	timeBuff_ = CreateBuffer(sizeof(float));
+	timeBuff_ = CreateBuffer(sizeof(Time));
 	timeBuff_->Map(0, nullptr, reinterpret_cast<void**>(&time_));
-	time_ = 0.0f; 
+	time_->time = 0.0f; 
 	count_ = 0.0f;
 	countMax_ = 120.0f;
 #pragma endregion
@@ -133,6 +133,7 @@ void PostEffect::SetCommandList() {
 	commandList->IASetIndexBuffer(&ibView_);
 	// Time
 	commandList->SetGraphicsRootConstantBufferView(PostEffectGraphicsPipeline::ROOT_PARAMETER_TYP::TIME, timeBuff_->GetGPUVirtualAddress());
+	
 	// 描画したやつ
 	commandList->SetGraphicsRootDescriptorTable(PostEffectGraphicsPipeline::ROOT_PARAMETER_TYP::TEXTURE, temporaryBuffer_->srvGPUHandle);
 	commandList->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
