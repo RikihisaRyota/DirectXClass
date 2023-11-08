@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include "PostEffectPipeline.h"
+#include "PostEffect.h"
 #include "WinApp.h"
 
 
@@ -196,7 +196,7 @@ private:// メンバ変数
 	UINT SRVDescriptorHandleIncrementSize = 0u;
 	UINT RTVDescriptorHandleIncrementSize = 0u;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
-	PostEffectGraphicsPipeline* postEffectPipeline_;
+	std::unique_ptr<PostEffect> postEffect_;
 	// 深度バッファ関連
 	Buffer* depthBuffer_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;

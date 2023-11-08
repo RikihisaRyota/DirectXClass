@@ -34,8 +34,9 @@ void PostEffectGraphicsPipeline::CreateRootSignature() {
 	CD3DX12_DESCRIPTOR_RANGE ranges[1]{};
 	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 
-	CD3DX12_ROOT_PARAMETER rootParameters[1]{};
-	rootParameters[0].InitAsDescriptorTable(_countof(ranges), ranges);
+	CD3DX12_ROOT_PARAMETER rootParameters[ROOT_PARAMETER_TYP::COUNT]{};
+	rootParameters[ROOT_PARAMETER_TYP::TIME].InitAsConstantBufferView(ROOT_PARAMETER_TYP::TIME);
+	rootParameters[ROOT_PARAMETER_TYP::TEXTURE].InitAsDescriptorTable(_countof(ranges), ranges);
 
 	CD3DX12_STATIC_SAMPLER_DESC staticSampler(
 		0,

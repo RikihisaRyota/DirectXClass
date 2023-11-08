@@ -157,6 +157,9 @@
     <ClCompile Include="Engine\PostEffectPipeline.cpp">
       <Filter>engine\graphicsPipeline</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\PostEffect.cpp">
+      <Filter>engine\base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -320,6 +323,9 @@
     </ClInclude>
     <ClInclude Include="Engine\PostEffectPipeline.h">
       <Filter>engine\graphicsPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\PostEffect.h">
+      <Filter>engine\base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

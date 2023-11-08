@@ -98,8 +98,8 @@ void DirectXCommon::PostDraw() {
 	commandList_->ResourceBarrier(2, barrier);
 	commandList_->OMSetRenderTargets(1, &backBuffers_[bbIndex]->rtvHandle, false, &depthBuffer_->dpsCPUHandle);
 
-	commandList_->SetGraphicsRootSignature(postEffectPipeline_->GetRootSignature());
-	commandList_->SetPipelineState(postEffectPipeline_->GetPipelineState());
+	commandList_->SetGraphicsRootSignature(postEffect_->GetRootSignature());
+	commandList_->SetPipelineState(postEffect_->GetPipelineState());
 	commandList_->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList_->SetGraphicsRootDescriptorTable(0, temporaryBuffer_->srvGPUHandle);
 	commandList_->IASetVertexBuffers(0, 1, &vbView_);
@@ -475,9 +475,8 @@ void DirectXCommon::CreateFence() {
 }
 
 void DirectXCommon::PostEffectInitialize() {
-	postEffectPipeline_ = new PostEffectGraphicsPipeline();
-	PostEffectGraphicsPipeline::SetDevice(device_.Get());
-	postEffectPipeline_->InitializeGraphicsPipeline();
+	postEffect_ = std::make_unique<PostEffect>();
+	postEffect_->Initialize();
 }
 
 void DirectXCommon::WaitForGPU() {
@@ -574,7 +573,6 @@ void DirectXCommon::Release() {
 	// スワップチェーン関連
 	swapChain_.Reset();
 	// ポストエフェクト
-	delete postEffectPipeline_;
 	temporaryBuffer_->buffer.Reset();
 	delete temporaryBuffer_;
 	// コマンド関連

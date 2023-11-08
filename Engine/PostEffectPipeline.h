@@ -10,11 +10,8 @@
 
 class PostEffectGraphicsPipeline {
 public:
-	enum class ROOT_PARAMETER_TYP {
-		WORLDTRANSFORM,
-		VIEWPROJECTION,
-		MATERIAL,
-		LIGHTING,
+	enum ROOT_PARAMETER_TYP {
+		TIME,
 		TEXTURE,
 		COUNT,
 	};
