@@ -18,6 +18,7 @@ struct WorldTransform {
 	Vector3 scale_ = { 1.0f,1.0f,1.0f };
 	// rotatition
 	Vector3 rotation_ = { 0.0f,0.0f,0.0f };
+	Quaternion quaternion = {};
 	// translation
 	Vector3 translation_ = { 0.0f,0.0f,0.0f };
 	// matWorld
@@ -52,4 +53,5 @@ struct WorldTransform {
 	void Reset();
 
 	void SetRotateMatrix(const Matrix4x4& rotateMatrix);
+	void MakeMatWorld(const Matrix4x4& rotateMatrix);
 };

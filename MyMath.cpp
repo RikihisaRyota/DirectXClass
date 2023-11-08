@@ -696,9 +696,9 @@ Matrix4x4 MakeRotateAxisAngle(const Vector3& axis, float angle) {
 }
 
 Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to) {
-	Vector3 cross = Cross(to, from);
+	Vector3 cross = Cross(from, to);
 	float sin = cross.Length();
-	float cos = Dot(to, from);
+	float cos = Dot(from, to);
 	Vector3 n{};
 	if (cross.Length() > 0) {
 		n = Normalize(cross);
@@ -716,9 +716,9 @@ Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to) {
 	}
 	Matrix4x4 mat{};
 	mat = MakeIdentity4x4();
-	mat.m[0][0] = n.x * n.x * (1 - std::cos(cos)) + std::cos(cos), mat.m[0][1] = n.x * n.y * (1 - std::cos(cos)) + n.z * std::sin(sin), mat.m[0][2] = n.x * n.z * (1 - std::cos(cos)) - n.y * std::sin(sin);
-	mat.m[1][0] = n.x * n.y * (1 - std::cos(cos)) - n.z * std::sin(sin), mat.m[1][1] = n.y * n.y * (1 - std::cos(cos)) + std::cos(cos), mat.m[1][2] = n.y * n.z * (1 - std::cos(cos)) + n.x * std::sin(sin);
-	mat.m[2][0] = n.x * n.z * (1 - std::cos(cos)) + n.y * std::sin(sin), mat.m[2][1] = n.y * n.z * (1 - std::cos(cos)) - n.x * std::sin(sin), mat.m[2][2] = n.z * n.z * (1 - std::cos(cos)) + std::cos(cos);
+	mat.m[0][0] = n.x * n.x * (1.0f - cos) + cos, mat.m[0][1] = n.x * n.y * (1.0f - cos) + n.z * sin, mat.m[0][2] = n.x * n.z * (1.0f - cos) - n.y * sin;
+	mat.m[1][0] = n.x * n.y * (1.0f - cos) - n.z * sin, mat.m[1][1] = n.y * n.y * (1.0f - cos) + cos, mat.m[1][2] = n.y * n.z * (1.0f - cos) + n.x * sin;
+	mat.m[2][0] = n.x * n.z * (1.0f - cos) + n.y * sin, mat.m[2][1] = n.y * n.z * (1.0f - cos) - n.x * sin, mat.m[2][2] = n.z * n.z * (1.0f - cos) + cos;
 	return mat;
 }
 
