@@ -30,7 +30,7 @@ float Random(float2 coord)
 PixelShaderOutPut main(VertexShaderInput input)
 {
     PixelShaderOutPut output;
-    
+    float2 samplePoint = input.texcoord;
     output.color = tex.Sample(smp, input.texcoord);
     // 反転
     //output.color.rgb = (1.0f - output.color.r, 1.0f - output.color.g, 1.0f - output.color.b);
@@ -38,11 +38,10 @@ PixelShaderOutPut main(VertexShaderInput input)
     //float averageColor = (output.color.r + output.color.g + output.color.b) / 3.0f;
     //output.color.rgb = (averageColor, averageColor, averageColor);
     // ノイズ
-    //float noise = Random(input.texcoord*gTime.time) - 0.5f;
-    //output.color.rgb += float3(noise, noise, noise);
+    float noise = Random(input.texcoord*gTime.time) - 0.5f;
+    output.color.rgb += float3(noise, noise, noise);
     // ゆがませる
     static const float Distortion = 0.05f;
-    float2 samplePoint = input.texcoord;
     samplePoint -= float2(0.5f, 0.5f);
     float distPower = pow(length(samplePoint), Distortion);
     samplePoint *= float2(distPower, distPower);
