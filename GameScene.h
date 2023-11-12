@@ -67,4 +67,5 @@ private: // メンバ変数
 	/// </summary>
 	std::unique_ptr<MapChip> mapChip_;
 	std::unique_ptr<MapChipEditor> mapChipEditor_;
+	std::unique_ptr<Sprite> backGround_;
 };

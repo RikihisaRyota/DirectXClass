@@ -23,12 +23,17 @@ void GameScene::Initialize() {
 #pragma endregion
 	isDebug_ = false;
 #pragma region 生成
+	backGround_ = std::make_unique<Sprite>();
+
 	mapChip_ = std::make_unique<MapChip>();
 	mapChipEditor_ = std::make_unique<MapChipEditor>();
 
 #pragma endregion
 
 #pragma region 初期化
+	backGround_.reset(Sprite::Create(0, {0.0f,0.0f},{0.0f,0.0f,0.0f,1.0f}));
+	backGround_->SetSize({1280.0f,720.0f});
+
 	mapChip_->LoadCSV("stage_1");
 	mapChip_->SetViewProjection(&viewProjection_);
 	mapChip_->Initialize();
@@ -65,6 +70,8 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに背景スプライトの描画処理を追加できる
 	/// </summary>
+	backGround_->Draw();
+
 
 	// スプライト描画後処理
 	Sprite::PostDraw();
