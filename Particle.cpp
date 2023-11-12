@@ -42,7 +42,7 @@ Particle* Particle::Create(uint32_t IsLighting, bool IsToon) {
 }
 
 void Particle::Draw(const ViewProjection& viewProjection, uint32_t textureHadle) {
-	BasicDraw( viewProjection, textureHadle);
+	BasicDraw(viewProjection, textureHadle);
 }
 
 void Particle::SetMaterial(const cMaterial& material) {
