@@ -47,6 +47,9 @@ void DirectXCommon::Initialize(WinApp* winApp, int32_t backBufferWidth, int32_t 
 
 	// ポストエフェクトの初期化
 	PostEffectInitialize();
+
+	// ガウシアンブラーの初期化
+	GaussianBlurInitialize();
 }
 
 void DirectXCommon::PreDraw() {
@@ -57,7 +60,7 @@ void DirectXCommon::PreDraw() {
 	UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
 	// リソースバリアを変更(表示状態->描画対象)
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		postEffect_->GetBuffer(),
+		postEffect_->GetBufferResource(),
 		D3D12_RESOURCE_STATE_PRESENT,
 		D3D12_RESOURCE_STATE_RENDER_TARGET);
 	// TransitionBarrierを張る
@@ -83,10 +86,12 @@ void DirectXCommon::PostDraw() {
 	HRESULT hr = S_FALSE;
 	UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
 
+	gaussianBlur_->Update();
+
 	// リソースバリアの変更
 	CD3DX12_RESOURCE_BARRIER barrier[2];
 	barrier[0] = CD3DX12_RESOURCE_BARRIER::Transition(
-		postEffect_->GetBuffer(),
+		postEffect_->GetBufferResource(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
@@ -102,7 +107,7 @@ void DirectXCommon::PostDraw() {
 
 	// リソースバリアの変更
 	barrier[0] = CD3DX12_RESOURCE_BARRIER::Transition(
-		postEffect_->GetBuffer(),
+		postEffect_->GetBufferResource(),
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 		D3D12_RESOURCE_STATE_PRESENT);
 
@@ -330,7 +335,7 @@ void DirectXCommon::CreateRenderTargets() {
 	// デスクリプタヒープの生成
 	D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapDesc{};
 	rtvDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;// レンダーターゲットビュー用
-	rtvDescriptorHeapDesc.NumDescriptors = swcDesc.BufferCount + 1;// ダブルバッファ用(マルチパスレンダリング用)
+	rtvDescriptorHeapDesc.NumDescriptors = swcDesc.BufferCount + 3;
 	hr = device_->CreateDescriptorHeap(&rtvDescriptorHeapDesc, IID_PPV_ARGS(&rtvDescriptorHeap_));
 	assert(SUCCEEDED(hr));
 	// デスクリプタヒープを生成
@@ -395,6 +400,11 @@ void DirectXCommon::CreateFence() {
 void DirectXCommon::PostEffectInitialize() {
 	postEffect_ = new PostEffect();
 	postEffect_->Initialize();
+}
+
+void DirectXCommon::GaussianBlurInitialize() {
+	gaussianBlur_ = new GaussianBlur();
+	gaussianBlur_->Initialize(postEffect_->GetBuffer(), depthBuffer_,postEffect_->GetPostEffectPipeline());
 }
 
 void DirectXCommon::WaitForGPU() {
@@ -490,6 +500,9 @@ void DirectXCommon::Release() {
 	// ポストエフェクト
 	postEffect_->Shutdown();
 	delete postEffect_;
+	// ガウシアンブラー
+	gaussianBlur_->Shutdown();
+	delete gaussianBlur_;
 	// コマンド関連
 	commandQueue_.Reset();
 	commandAllocator_.Reset();

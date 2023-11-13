@@ -86,7 +86,6 @@ void PostEffect::CreateResource() {
 	};
 	UINT sizeVB = static_cast<UINT>(sizeof(VertexPos) * vertices_.size());
 	vertBuff_ = CreateBuffer(sizeVB);
-	assert(SUCCEEDED(result));
 	// 頂点バッファへのデータ転送
 	{
 		VertexPos* vertMap = nullptr;

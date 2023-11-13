@@ -4,6 +4,8 @@
 
 #include <memory>
 
+#include "cBuffer.h"
+#include "GaussianBlur.h"
 #include "PostEffect.h"
 #include "WinApp.h"
 
@@ -15,19 +17,6 @@ public:// 静的メンバ関数
 	/// </summary>
 	/// <returns></returns>
 	static DirectXCommon* GetInstance();
-
-private:
-	struct Buffer {
-		Microsoft::WRL::ComPtr<ID3D12Resource> buffer{};
-
-		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle{};
-		
-		D3D12_CPU_DESCRIPTOR_HANDLE srvCPUHandle{};
-		D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle{};
-
-		D3D12_CPU_DESCRIPTOR_HANDLE dpsCPUHandle{};
-	};
-
 public:
 	/// <summary>
 	/// 初期化
@@ -51,8 +40,7 @@ public:
 	/// <summary>
 	/// レンダーターゲットのクリア
 	/// </summary>
-	void ClearRenderTarget(
-	);
+	void ClearRenderTarget();
 
 	/// <summary>
 	/// 深度バッファのクリア
@@ -135,6 +123,11 @@ private:// メンバ関数
 	/// ポストエフェクト初期化
 	/// </summary>
 	void PostEffectInitialize();
+	
+	/// <summary>
+	/// ガウシアンブラー初期化
+	/// </summary>
+	void GaussianBlurInitialize();
 private: // メンバ関数
 	DirectXCommon() = default;
 	~DirectXCommon() = default;
@@ -183,7 +176,10 @@ private:// メンバ変数
 	UINT SRVDescriptorHandleIncrementSize = 0u;
 	UINT RTVDescriptorHandleIncrementSize = 0u;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
+	// ポストエフェクト
 	PostEffect* postEffect_;
+	// ガウシアンブラー
+	GaussianBlur* gaussianBlur_;
 	// 深度バッファ関連
 	Buffer* depthBuffer_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;

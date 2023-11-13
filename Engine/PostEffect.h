@@ -4,19 +4,10 @@
 
 #include <memory>
 
+#include "cBuffer.h"
 #include "PostEffectPipeline.h"
 
 class PostEffect {
-private:
-	struct Buffer {
-		Microsoft::WRL::ComPtr<ID3D12Resource> buffer{};
-
-		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle{};
-
-		D3D12_CPU_DESCRIPTOR_HANDLE srvCPUHandle{};
-		D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle{};
-	};
-
 	struct VertexPos {
 		Vector4 position{};
 		Vector2 texcoord{};
@@ -33,7 +24,9 @@ public:
 
 	ID3D12RootSignature* GetRootSignature() { return postEffectPipeline_->GetRootSignature(); }
 	ID3D12PipelineState* GetPipelineState() { return postEffectPipeline_->GetPipelineState(); }
-	ID3D12Resource* GetBuffer(){return temporaryBuffer_->buffer.Get();}
+	PostEffectGraphicsPipeline* GetPostEffectPipeline() { return postEffectPipeline_.get(); }
+	ID3D12Resource* GetBufferResource(){return temporaryBuffer_->buffer.Get();}
+	Buffer* GetBuffer() { return temporaryBuffer_; }
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRTVHandle() { return temporaryBuffer_->rtvHandle; }
 private:
 	void CreateResource();

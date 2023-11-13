@@ -4,20 +4,18 @@
 #include <wrl.h>
 #include <dxcapi.h>
 
-#include "cVertexPos.h"
-
 #pragma comment(lib,"dxcompiler.lib")
 
 class VerticalBlurPipeline {
 public:
 	enum ROOT_PARAMETER_TYP {
-		TIME,
+		PRAM,
 		TEXTURE,
 		COUNT,
 	};
 public:
 	/// <summary>
-	/// ƒOƒ‰ƒtƒBƒbƒNƒpƒCƒvƒ‰ƒCƒ“ì¬
+	/// ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ä½œæˆ
 	/// </summary>
 	void InitializeGraphicsPipeline();
 public:
@@ -34,20 +32,20 @@ private:
 
 	void CreatePSO();
 private:
-	// ƒ‹[ƒgƒVƒOƒlƒ`ƒƒ
+	// ãƒ«ãƒ¼ãƒˆã‚·ã‚°ãƒãƒãƒ£
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_ = nullptr;
-	// ƒCƒ“ƒvƒbƒgƒŒƒCƒAƒEƒg
+	// ã‚¤ãƒ³ãƒ—ãƒƒãƒˆãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆ
 	D3D12_INPUT_ELEMENT_DESC inputLayout_[2];
-	// ƒuƒŒƒ“ƒhƒXƒe[ƒg
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆ
 	D3D12_BLEND_DESC blendDesc_{};
-	// ƒ‰ƒXƒ^ƒ‰ƒCƒU[ƒXƒe[ƒg
+	// ãƒ©ã‚¹ã‚¿ãƒ©ã‚¤ã‚¶ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆ
 	D3D12_RASTERIZER_DESC rasterizerDesc_{};
-	// ƒfƒvƒXƒXƒeƒ“ƒVƒ‹ƒXƒe[ƒg
+	// ãƒ‡ãƒ—ã‚¹ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ã‚¹ãƒ†ãƒ¼ãƒˆ
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc_{};
-	// ƒRƒ“ƒpƒCƒ‹ƒVƒF[ƒ_[
+	// ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	Microsoft::WRL::ComPtr<IDxcBlob> vertexShaderBlob_ = nullptr;
 	Microsoft::WRL::ComPtr<IDxcBlob> pixelShaderBlob_ = nullptr;
-	// ƒpƒCƒvƒ‰ƒCƒ“ƒXƒe[ƒgƒIƒuƒWƒFƒNƒg
+	// ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚¹ãƒ†ãƒ¼ãƒˆã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState_ = nullptr;
 
 };

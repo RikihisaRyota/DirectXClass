@@ -166,7 +166,6 @@
     <ClCompile Include="Engine\VerticalBlurPipeline.cpp">
       <Filter>engine\graphicsPipeline</Filter>
     </ClCompile>
-    <ClCompile Include="HorizontalBlurPipeline.cpp" />
     <ClCompile Include="Engine\HorizontalBlurPipeline.cpp">
       <Filter>engine\graphicsPipeline</Filter>
     </ClCompile>
@@ -343,9 +342,11 @@
     <ClInclude Include="Engine\VerticalBlurPipeline.h">
       <Filter>engine\graphicsPipeline</Filter>
     </ClInclude>
-    <ClInclude Include="HorizontalBlurPipeline.h" />
     <ClInclude Include="Engine\HorizontalBlurPipeline.h">
       <Filter>engine\graphicsPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\cBuffer.h">
+      <Filter>engine\base\constantBuffer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -408,6 +409,18 @@
     <FxCompile Include="Resources\Shaders\Pera.VS.hlsl">
       <Filter>engine\shader</Filter>
     </FxCompile>
+    <FxCompile Include="Resources\Shaders\VerticalBlur.PS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\VerticalBlur.VS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\HorizontalBlur.PS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\HorizontalBlur.VS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\Sprite.hlsli">
@@ -435,6 +448,12 @@
       <Filter>engine\shader</Filter>
     </None>
     <None Include="Resources\Shaders\Pera.hlsli">
+      <Filter>engine\shader</Filter>
+    </None>
+    <None Include="Resources\Shaders\VerticalBlur.hlsli">
+      <Filter>engine\shader</Filter>
+    </None>
+    <None Include="Resources\Shaders\HorizontalBlur.hlsli">
       <Filter>engine\shader</Filter>
     </None>
   </ItemGroup>

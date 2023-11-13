@@ -27,9 +27,9 @@ void VerticalBlurPipeline::CreateRootSignature() {
 	CD3DX12_DESCRIPTOR_RANGE ranges[1]{};
 	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 
-	CD3DX12_ROOT_PARAMETER rootParameters[ROOT_PARAMETER_TYP::COUNT]{};
-	rootParameters[ROOT_PARAMETER_TYP::TIME].InitAsConstantBufferView(ROOT_PARAMETER_TYP::TIME, 0);
-	rootParameters[ROOT_PARAMETER_TYP::TEXTURE].InitAsDescriptorTable(_countof(ranges), ranges);
+	CD3DX12_ROOT_PARAMETER rootParameters[VerticalBlurPipeline::ROOT_PARAMETER_TYP::COUNT]{};
+	rootParameters[VerticalBlurPipeline::ROOT_PARAMETER_TYP::PRAM].InitAsConstantBufferView(VerticalBlurPipeline::ROOT_PARAMETER_TYP::PRAM, 0);
+	rootParameters[VerticalBlurPipeline::ROOT_PARAMETER_TYP::TEXTURE].InitAsDescriptorTable(_countof(ranges), ranges);
 
 	CD3DX12_STATIC_SAMPLER_DESC staticSampler(
 		0,
@@ -48,7 +48,7 @@ void VerticalBlurPipeline::CreateRootSignature() {
 	desc.NumStaticSamplers = 1;
 	desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-	// ÉVÉäÉAÉâÉCÉYÇµÇƒÉoÉCÉiÉäÇ∑ÇÈ
+	// „Ç∑„É™„Ç¢„É©„Ç§„Ç∫„Åó„Å¶„Éê„Ç§„Éä„É™„Åô„Çã
 	ComPtr<ID3DBlob> signatureBlob;
 	ComPtr<ID3DBlob> errorBlob;
 	hr = D3D12SerializeRootSignature(&desc,
@@ -57,7 +57,7 @@ void VerticalBlurPipeline::CreateRootSignature() {
 		Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
 		assert(false);
 	}
-	// ÉoÉCÉiÉäÇå≥Ç…RootSignatureÇê∂ê¨
+	// „Éê„Ç§„Éä„É™„ÇíÂÖÉ„Å´RootSignature„ÇíÁîüÊàê
 	hr = DirectXCommon::GetInstance()->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(),
 		signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
 	assert(SUCCEEDED(hr));
@@ -66,55 +66,55 @@ void VerticalBlurPipeline::CreateRootSignature() {
 void VerticalBlurPipeline::CreateInputLayout() {
 	//InputLayout
 	inputLayout_[0] =
-	{// xyzç¿ïW(1çsÇ≈èëÇ¢ÇΩÇŸÇ§Ç™å©Ç‚Ç∑Ç¢)
+	{// xyzÂ∫ßÊ®ô(1Ë°å„ÅßÊõ∏„ÅÑ„Åü„Åª„ÅÜ„ÅåË¶ã„ÇÑ„Åô„ÅÑ)
 	 "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,
 	 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
 	};
 
 	inputLayout_[1] =
-	{// uvç¿ïW(1çsÇ≈èëÇ¢ÇΩÇŸÇ§Ç™å©Ç‚Ç∑Ç¢)
+	{// uvÂ∫ßÊ®ô(1Ë°å„ÅßÊõ∏„ÅÑ„Åü„Åª„ÅÜ„ÅåË¶ã„ÇÑ„Åô„ÅÑ)
 	 "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT,
 	 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0
 	};
 }
 
 void VerticalBlurPipeline::CreateBlendState() {
-	//ëSÇƒÇÃêFóvëfÇèëÇ´çûÇﬁ
+	//ÂÖ®„Å¶„ÅÆËâ≤Ë¶ÅÁ¥†„ÇíÊõ∏„ÅçËæº„ÇÄ
 	blendDesc_.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 }
 
 void VerticalBlurPipeline::CreateRasterizerState() {
-	//ó†ñ ÅiéûåvâÒÇËÅjÇï\é¶ÇµÇ»Ç¢
+	//Ë£èÈù¢ÔºàÊôÇË®àÂõû„ÇäÔºâ„ÇíË°®Á§∫„Åó„Å™„ÅÑ
 	rasterizerDesc_.CullMode = D3D12_CULL_MODE_BACK;
-	//éOäpå`ÇÃíÜÇìhÇËÇ¬Ç‘Ç∑
+	//‰∏âËßíÂΩ¢„ÅÆ‰∏≠„ÇíÂ°ó„Çä„Å§„Å∂„Åô
 	rasterizerDesc_.FillMode = D3D12_FILL_MODE_SOLID;
 }
 
 void VerticalBlurPipeline::CreateShaderCompile() {
-	//ShaderÇÉRÉìÉpÉCÉãÇ∑ÇÈ
+	//Shader„Çí„Ç≥„É≥„Éë„Ç§„É´„Åô„Çã
 	vertexShaderBlob_ = ShaderCompiler::Compile(
-		L"Resources/Shaders/PostEffect.VS.hlsl",
+		L"Resources/Shaders/VerticalBlur.VS.hlsl",
 		L"vs_6_0");
 	assert(vertexShaderBlob_ != nullptr);
 
 	pixelShaderBlob_ = ShaderCompiler::Compile(
-		L"Resources/Shaders/PostEffect.PS.hlsl",
+		L"Resources/Shaders/VerticalBlur.PS.hlsl",
 		L"ps_6_0");
 	assert(pixelShaderBlob_ != nullptr);
 }
 
 void VerticalBlurPipeline::CreateDepthStencil() {
-	// DepthÇÃã@î\ÇóLå¯âªÇ∑ÇÈ
+	// Depth„ÅÆÊ©üËÉΩ„ÇíÊúâÂäπÂåñ„Åô„Çã
 	depthStencilDesc_.DepthEnable = true;
-	// èëÇ´çûÇ›ÇÇ∑ÇÈ
+	// Êõ∏„ÅçËæº„Åø„Çí„Åô„Çã
 	depthStencilDesc_.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	// î‰ärä÷êîÇÕLessEqualÅBÇ¬Ç‹ÇËÅAãﬂÇØÇÍÇŒï`âÊÇ≥ÇÍÇÈ
+	// ÊØîËºÉÈñ¢Êï∞„ÅØLessEqual„ÄÇ„Å§„Åæ„Çä„ÄÅËøë„Åë„Çå„Å∞ÊèèÁîª„Åï„Çå„Çã
 	depthStencilDesc_.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 }
 
 void VerticalBlurPipeline::CreatePSO() {
 	HRESULT hr = S_FALSE;
-	//PSOê∂ê¨
+	//PSOÁîüÊàê
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicPipelineStateDesc{};
 
 	// RootSignature
@@ -140,24 +140,24 @@ void VerticalBlurPipeline::CreatePSO() {
 	// Rasterizer
 	graphicPipelineStateDesc.RasterizerState = rasterizerDesc_;
 
-	// DepthStencilÇÃê›íË
+	// DepthStencil„ÅÆË®≠ÂÆö
 	graphicPipelineStateDesc.DepthStencilState = depthStencilDesc_;
 	graphicPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
-	// èëÇ´çûÇﬁRTVÇÃèÓïÒ
+	// Êõ∏„ÅçËæº„ÇÄRTV„ÅÆÊÉÖÂ†±
 	graphicPipelineStateDesc.NumRenderTargets = 1;
 	graphicPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 
-	// óòópÇ∑ÇÈÇ∆É|ÉçÉWÅiå`èÛÅjÇÃÉ^ÉCÉvÅAéOäpå`
+	// Âà©Áî®„Åô„Çã„Å®„Éù„É≠„Ç∏ÔºàÂΩ¢Áä∂Ôºâ„ÅÆ„Çø„Ç§„Éó„ÄÅ‰∏âËßíÂΩ¢
 	graphicPipelineStateDesc.PrimitiveTopologyType =
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
-	// Ç«ÇÃÇÊÇ§Ç…âÊñ Ç…êFÇë≈ÇøçûÇﬁÇÃÇ©ê›íËÅiãCÇ…ÇµÇ»Ç≠ÇƒÇ‡ÇÊÇ¢Åj
+	// „Å©„ÅÆ„Çà„ÅÜ„Å´ÁîªÈù¢„Å´Ëâ≤„ÇíÊâì„Å°Ëæº„ÇÄ„ÅÆ„ÅãË®≠ÂÆöÔºàÊ∞ó„Å´„Åó„Å™„Åè„Å¶„ÇÇ„Çà„ÅÑÔºâ
 	graphicPipelineStateDesc.SampleDesc.Count = 1;
 	graphicPipelineStateDesc.SampleDesc.Quality = 0;
 	graphicPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
-	// ÉOÉâÉtÉBÉbÉNÉXÉpÉCÉvÉâÉCÉìÇÃê∂ê¨
+	// „Ç∞„É©„Éï„Ç£„ÉÉ„ÇØ„Çπ„Éë„Ç§„Éó„É©„Ç§„É≥„ÅÆÁîüÊàê
 	hr = DirectXCommon::GetInstance()->GetDevice()->CreateGraphicsPipelineState(&graphicPipelineStateDesc, IID_PPV_ARGS(&pipelineState_));
 	assert(SUCCEEDED(hr));
 }
