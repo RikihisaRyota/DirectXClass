@@ -202,7 +202,7 @@ private: // 定数系
 	// ジャンプ
 	const float kJumpPower = 0.2f;
 	// ダッシュの時間<frame>
-	const uint32_t kDashTime = 15;
+	int32_t kDashTime=15;
 	// ダッシュのクールタイム
 	const int32_t kDash_CoolTime_ = 30;
 	// 摩擦

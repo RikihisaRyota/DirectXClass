@@ -62,6 +62,8 @@ private:
 
 	void Reset();
 
+	void GetGlobalVariables();
+
 private:
 	// 回転速度
 	const float kRotateSpeedX = 0.000001f;
@@ -90,4 +92,6 @@ private: // メンバ変数
 	Vector2 destinationAngle_;
 	// ターゲットカメラ
 	bool IsTargetCamera_ = false;
+
+	float interpolationLate=0.2f;
 };

@@ -1,8 +1,9 @@
 {
     "Player": {
+        "dashTime": 16,
         "position": [
             0.0,
-            12.0,
+            20.0,
             0.0
         ]
     }

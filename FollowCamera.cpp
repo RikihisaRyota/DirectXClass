@@ -1,5 +1,6 @@
 #include "FollowCamera.h"
 
+#include "GlobalVariables.h"
 #include "ImGuiManager.h"
 #include "MyMath.h"
 #include "Input.h"
@@ -13,14 +14,17 @@ void FollowCamera::Intialize() {
 	
 	destinationAngle_.x = viewProjection_.rotation_.x;
 	destinationAngle_.y = viewProjection_.rotation_.y;
+
+	GlobalVariables* globalVariables = nullptr;
+	globalVariables = GlobalVariables::GetInstance();
+	const char* groupName = "Camera";
+	globalVariables->AddItem(groupName, "dashTime", interpolationLate);
 }
 
 void FollowCamera::Update() {
 	// 追従者がいれば
 	if (target_) {
-		// 追従座標の補間
-		const float kInterpolationLate = 0.2f;
-		interTarget_ = Lerp(interTarget_, MakeTranslateMatrix(target_->matWorld_), 0.1f);
+		interTarget_ = Lerp(interTarget_, MakeTranslateMatrix(target_->matWorld_), interpolationLate);
 		// 追従対象者からカメラまでのオフセット
 		offset_ = offsetInitialize_;
 		// ゲームパットのカメラ処理
@@ -147,7 +151,7 @@ void FollowCamera::Keyboard() {
 void FollowCamera::RotateUpdate() {
 	// 最短角度補間
 	viewProjection_.rotation_.y =
-	    LenpShortAngle(viewProjection_.rotation_.y, destinationAngle_.y, 0.1f);
+	    LenpShortAngle(viewProjection_.rotation_.y, destinationAngle_.y, interpolationLate);
 	// 回転行列生成
 	Matrix4x4 rotate =
 	    Mul(MakeRotateXMatrix(viewProjection_.rotation_.x),
@@ -172,4 +176,11 @@ void FollowCamera::Reset() {
 	// 追従対象からオフセット
 	Vector3 offset = OffSet();
 	viewProjection_.translation_ = interTarget_ + offset;
+}
+
+void FollowCamera::GetGlobalVariables() {
+	GlobalVariables* globalVariables = nullptr;
+	globalVariables = GlobalVariables::GetInstance();
+	const char* groupName = "Camera";
+	globalVariables->LoadFiles();
 }

@@ -33,6 +33,12 @@ void Player::Initialize(std::vector<std::unique_ptr<Model>> model) {
 	IsDash_ = false;
 	// 浮遊アニメーションの初期化
 	InitializeFloatGimmick();
+
+	GlobalVariables* globalVariables = nullptr;
+	globalVariables = GlobalVariables::GetInstance();
+	const char* groupName = "Player";
+	globalVariables->AddItem(groupName, "dashTime", kDashTime);
+
 #pragma region 当たり判定
 	HitBoxInitialize(kCollisionAttributePlayer);
 #pragma endregion
@@ -73,9 +79,6 @@ void Player::Update() {
 	if (Input::GetInstance()->TriggerKey(DIK_R)) {
 		GetGlobalVariables();
 	}
-	/*if (worldTransform_.at(0).translation_.y <= -30.0f) {
-		worldTransform_.at(0).translation_ = { 0.0f,10.0f,0.0f };
-	}*/
 	ImGui::Begin("Player");
 	ImGui::Text("Jump : B or SPACE");
 	ImGui::Text("Dush : X or SHIFT");
@@ -126,7 +129,7 @@ void Player::BehaviorDashUpdate() {
 	worldTransform_.at(0).translation_ += velocity_;
 
 	// 基底の時間経過で通常行動に戻る
-	if (++workDash_.dashParameter_ >= kDashTime) {
+	if (++workDash_.dashParameter_ >= uint32_t(kDashTime)) {
 		behaviorRequest_ = Behavior::kRoot;
 	}
 
@@ -189,6 +192,7 @@ void Player::GetGlobalVariables() {
 	const char* groupName = "Player";
 	globalVariables->LoadFiles();
 	worldTransform_.at(0).translation_ = globalVariables->GetValue<Vector3>(groupName, "position");
+	kDashTime= globalVariables->GetValue<int>(groupName, "dashTime");
 	// 転送
 	BaseCharacter::Update();
 }
@@ -248,15 +252,15 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 			worldTransform_.at(0).rotation_,
 			worldTransform_.at(0).translation_
 		);
-		//worldTransform_.at(0).SetRotateMatrix(DirectionToDirection(interRotate_, vector_));
+		//worldTransform_.at(0).MakeMatWorld(DirectionToDirection(interRotate_, vector_));
 		// 振れているブロック
 		Matrix4x4 stageMatrix = worldTransform.matWorld_;
 		// プレイヤーをブロックのローカル座標系に直す
 		Matrix4x4 localPlayerMatrix = worldTransform_.at(0).matWorld_ * Inverse(stageMatrix);
 		// ローカル座標系に変換
 		worldTransform_.at(0).scale_ = MakeScale(localPlayerMatrix);
-		worldTransform_.at(0).translation_ = MakeTranslateMatrix(localPlayerMatrix);
 		// 回転は行列で行う
+		worldTransform_.at(0).translation_ = MakeTranslateMatrix(localPlayerMatrix);
 		//  Y軸回り角度(θy)
 		//worldTransform_.at(0).SetRotateMatrix(MakeRotateMatrix(localPlayerMatrix));
 		for (size_t i = 0; i < worldTransform_.size(); i++) {
@@ -265,6 +269,10 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 				worldTransforms_Parts_.at(i).at(model).UpdateMatrix();
 			}
 		}
+		HitBoxUpdate();
+		// 回転は行列で行う
+		//  Y軸回り角度(θy)
+		BaseCharacter::Update();
 		HitBoxUpdate();
 		break;
 	}
@@ -439,15 +447,19 @@ void Player::GamePadInput() {
 	// プレイヤー移動
 	Move();
 	// 攻撃開始
-	if (Input::GetInstance()->TriggerKey(DIK_Q) ||
-		(Input::GetInstance()->GetJoystickState(0, joyState) &&
-			(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_Y))) {
+	if (((Input::GetInstance()->IsControllerConnected() && ((
+		Input::GetInstance()->GetJoystickState(0, joyState) &&
+		(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_Y)))) ||
+		Input::GetInstance()->TriggerKey(DIK_Q)
+		)) {
 		behaviorRequest_ = Behavior::kAttack;
 		playerAttack_->SetBehavior(PlayerAttack::Behavior::kChargeAttack);
 	}
-	if (Input::GetInstance()->TriggerKey(DIK_E) ||
-		(Input::GetInstance()->GetJoystickState(0, joyState) &&
-			(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_B))) {
+	if (((Input::GetInstance()->IsControllerConnected() && ((
+		Input::GetInstance()->GetJoystickState(0, joyState) &&
+		(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_B)))) ||
+		Input::GetInstance()->TriggerKey(DIK_E)
+		)) {
 		behaviorRequest_ = Behavior::kAttack;
 		playerAttack_->SetBehavior(PlayerAttack::Behavior::kTripleAttack);
 	}
@@ -541,9 +553,9 @@ void Player::Jump() {
 }
 void Player::Gravity() {
 	velocity_ = vector_ * kSpeed;
-	//if (acceleration_.y >= -0.5f) {
-	//	acceleration_.y -= kGravity;
-	//}
+	if (acceleration_.y >= -0.5f) {
+		acceleration_.y -= kGravity;
+	}
 	velocity_ += acceleration_;
 	worldTransform_.at(0).translation_ += velocity_;
 	if (MakeTranslateMatrix(worldTransform_.at(0).matWorld_).y <= -30.0f) {
@@ -600,7 +612,7 @@ void Player::PlayerRotate() {
 	//  Y軸回り角度(θy)
 	worldTransform_.at(0).rotation_.y = std::atan2(interRotate_.x, interRotate_.z);
 	worldTransform_.at(0).UpdateMatrix();
-	Vector3 axis = Cross(interRotate_, vector_);
+	/*Vector3 axis = Cross(interRotate_, vector_);
 	if (axis.Length() > 0.0f) {
 		axis.Normalize();
 	}
@@ -613,7 +625,7 @@ void Player::PlayerRotate() {
 		for (size_t model = 0; model < worldTransforms_Parts_.at(i).size(); model++) {
 			worldTransforms_Parts_.at(i).at(model).UpdateMatrix();
 		}
-	}
+	}*/
 }
 
 void Player::InitializeFloatGimmick() {

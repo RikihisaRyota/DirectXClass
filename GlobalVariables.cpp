@@ -50,7 +50,7 @@ void GlobalVariables::Update() {
 			} else if (std::holds_alternative<float>(item)) {
 				float* ptr = std::get_if<float>(&item);
 				ImGui::DragFloat(
-				    itemName.c_str(), ptr,1.0f);
+				    itemName.c_str(), ptr,0.1f);
 			} else if (std::holds_alternative<Vector3>(item)) {
 				Vector3* ptr = std::get_if<Vector3>(&item);
 				ImGui::DragFloat3(itemName.c_str(), reinterpret_cast<float*>(ptr),1.0f);

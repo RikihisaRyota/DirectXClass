@@ -163,9 +163,11 @@ void PlayerAttack::ChageAttackUpdate() {
 	worldTransform_.at(0) = player_->GetWorldTransform();
 	// チャージ中
 	if (chargeFlag_) {
-		if (Input::GetInstance()->PushKey(DIK_Q) ||
-			(Input::GetInstance()->GetJoystickState(0, joyState) &&
-				(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_Y))) {
+		if (((Input::GetInstance()->IsControllerConnected() && ((
+			Input::GetInstance()->GetJoystickState(0, joyState) &&
+			(joyState.Gamepad.wButtons & XINPUT_GAMEPAD_Y)))) ||
+			Input::GetInstance()->PushKey(DIK_Q)
+			)) {
 			// パーティクル
 			ChargeParticleCreate(MakeTranslateMatrix(worldTransform_.at(0).matWorld_));
 			// チャージ中は攻撃判定なし

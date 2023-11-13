@@ -59,7 +59,7 @@ public:
 	//// 値のゲット(Vector3)
 	//Vector3 GetValue(const std::string& groupName, const std::string& key) const;
 	// 項目の追加(int)
-	void AddItem(const std::string& groupName, const std::string& key, int32_t value);
+	void AddItem(const std::string& groupName, const std::string& key, int value);
 	// 項目の追加(float)
 	void AddItem(const std::string& groupName, const std::string& key, float value);
 	// 項目の追加(vector3)
