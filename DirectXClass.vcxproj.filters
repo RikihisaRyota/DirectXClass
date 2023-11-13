@@ -160,6 +160,16 @@
     <ClCompile Include="Engine\PostEffect.cpp">
       <Filter>engine\base</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\GaussianBlur.cpp">
+      <Filter>engine\base</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\VerticalBlurPipeline.cpp">
+      <Filter>engine\graphicsPipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="HorizontalBlurPipeline.cpp" />
+    <ClCompile Include="Engine\HorizontalBlurPipeline.cpp">
+      <Filter>engine\graphicsPipeline</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -326,6 +336,16 @@
     </ClInclude>
     <ClInclude Include="Engine\PostEffect.h">
       <Filter>engine\base</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\GaussianBlur.h">
+      <Filter>engine\base</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\VerticalBlurPipeline.h">
+      <Filter>engine\graphicsPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="HorizontalBlurPipeline.h" />
+    <ClInclude Include="Engine\HorizontalBlurPipeline.h">
+      <Filter>engine\graphicsPipeline</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

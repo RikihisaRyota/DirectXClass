@@ -92,6 +92,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="Engine\Audio.cpp" />
     <ClCompile Include="Engine\BasicGraphicsPipline.cpp" />
+    <ClCompile Include="Engine\GaussianBlur.cpp" />
+    <ClCompile Include="Engine\HorizontalBlurPipeline.cpp" />
+    <ClCompile Include="Engine\VerticalBlurPipeline.cpp" />
     <ClCompile Include="Engine\PostEffect.cpp" />
     <ClCompile Include="Engine\PostEffectPipeline.cpp" />
     <ClCompile Include="Engine\ShaderCompiler.cpp" />
@@ -130,6 +133,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="GameScene.cpp" />
+    <ClCompile Include="HorizontalBlurPipeline.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MapChip.cpp" />
     <ClCompile Include="MapChipEditor.cpp" />
@@ -141,6 +145,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\BasicGraphicsPipline.h" />
     <ClInclude Include="Engine\cDirectionalLight.h" />
     <ClInclude Include="Engine\cMaterial.h" />
+    <ClInclude Include="Engine\GaussianBlur.h" />
+    <ClInclude Include="Engine\HorizontalBlurPipeline.h" />
+    <ClInclude Include="Engine\VerticalBlurPipeline.h" />
     <ClInclude Include="Engine\PostEffect.h" />
     <ClInclude Include="Engine\PostEffectPipeline.h" />
     <ClInclude Include="Engine\ShaderCompiler.h" />
@@ -190,6 +197,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="GameScene.h" />
+    <ClInclude Include="HorizontalBlurPipeline.h" />
     <ClInclude Include="MapChip.h" />
     <ClInclude Include="MapChipEditor.h" />
     <ClInclude Include="ModelManager.h" />
