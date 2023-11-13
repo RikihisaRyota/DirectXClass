@@ -254,23 +254,14 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 		);
 		//worldTransform_.at(0).MakeMatWorld(DirectionToDirection(interRotate_, vector_));
 		// 振れているブロック
-		Matrix4x4 stageMatrix = worldTransform.matWorld_;
+		Matrix4x4 stageMatrix = worldTransform_.at(0).parent_->matWorld_;
 		// プレイヤーをブロックのローカル座標系に直す
 		Matrix4x4 localPlayerMatrix = worldTransform_.at(0).matWorld_ * Inverse(stageMatrix);
 		// ローカル座標系に変換
 		worldTransform_.at(0).scale_ = MakeScale(localPlayerMatrix);
+		worldTransform_.at(0).rotation_ = MakeEulerAngle(MakeRotateMatrix(localPlayerMatrix));
 		// 回転は行列で行う
 		worldTransform_.at(0).translation_ = MakeTranslateMatrix(localPlayerMatrix);
-		//  Y軸回り角度(θy)
-		//worldTransform_.at(0).SetRotateMatrix(MakeRotateMatrix(localPlayerMatrix));
-		for (size_t i = 0; i < worldTransform_.size(); i++) {
-			worldTransform_Motion_.at(i).UpdateMatrix();
-			for (size_t model = 0; model < worldTransforms_Parts_.at(i).size(); model++) {
-				worldTransforms_Parts_.at(i).at(model).UpdateMatrix();
-			}
-		}
-		HitBoxUpdate();
-		// 回転は行列で行う
 		//  Y軸回り角度(θy)
 		BaseCharacter::Update();
 		HitBoxUpdate();
