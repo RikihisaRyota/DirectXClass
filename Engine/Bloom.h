@@ -12,6 +12,7 @@
 #include "Vector4.h"
 
 class Bloom {
+public:
 	struct VertexPos {
 		Vector4 position{};
 		Vector2 texcoord{};

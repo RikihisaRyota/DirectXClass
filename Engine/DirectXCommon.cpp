@@ -525,7 +525,7 @@ void DirectXCommon::Release() {
 	delete postEffect_;
 	// ガウシアンブラー
 	bloom_->Shutdown();
-	delete gaussianBlur_;
+	delete bloom_;
 	// コマンド関連
 	commandQueue_.Reset();
 	commandAllocator_.Reset();
