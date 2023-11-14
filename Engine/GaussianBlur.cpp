@@ -162,7 +162,7 @@ void GaussianBlur::SetCommandList() {
 	commandList->ResourceBarrier(3, barrier);
 	commandList->OMSetRenderTargets(1, &buffer_.at(kVerticalBlur)->rtvHandle, false, &depthBuffer_->dpsCPUHandle);
 	ClearRenderTarget(buffer_.at(kVerticalBlur)->rtvHandle);
-
+	ClearDepthBuffer(depthBuffer_->dpsCPUHandle);
 	// ビューポートの設定
 	CD3DX12_VIEWPORT viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, WinApp::kWindowWidth, WinApp::kWindowHeight);
 	commandList->RSSetViewports(1, &viewport);
@@ -197,7 +197,7 @@ void GaussianBlur::SetCommandList() {
 	commandList->ResourceBarrier(3, barrier);
 	commandList->OMSetRenderTargets(1, &buffer_.at(kHorizontalBlur)->rtvHandle, false, &depthBuffer_->dpsCPUHandle);
 	ClearRenderTarget(buffer_.at(kHorizontalBlur)->rtvHandle);
-
+	ClearDepthBuffer(depthBuffer_->dpsCPUHandle);
 	// ビューポートの設定
 	viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, WinApp::kWindowWidth, WinApp::kWindowHeight);
 	commandList->RSSetViewports(1, &viewport);
@@ -232,6 +232,7 @@ void GaussianBlur::SetCommandList() {
 
 	commandList->OMSetRenderTargets(1, &originalBuffer_->rtvHandle, false, &depthBuffer_->dpsCPUHandle);
 	ClearRenderTarget(originalBuffer_->rtvHandle);
+	ClearDepthBuffer(depthBuffer_->dpsCPUHandle);
 	// ビューポートの設定
 	viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, WinApp::kWindowWidth, WinApp::kWindowHeight);
 	commandList->RSSetViewports(1, &viewport);
@@ -244,7 +245,6 @@ void GaussianBlur::SetCommandList() {
 	commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList->IASetVertexBuffers(0, 1, &vbView_);
 	commandList->IASetIndexBuffer(&ibView_);
-	// ここが違う
 	commandList->SetGraphicsRootConstantBufferView(PostEffectGraphicsPipeline::ROOT_PARAMETER_TYP::TIME, postEffect_->GetTime()->GetGPUVirtualAddress());
 	commandList->SetGraphicsRootDescriptorTable(PostEffectGraphicsPipeline::ROOT_PARAMETER_TYP::TEXTURE, buffer_.at(kHorizontalBlur)->srvGPUHandle);
 	commandList->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);

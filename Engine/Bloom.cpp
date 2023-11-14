@@ -8,8 +8,10 @@ using namespace Microsoft::WRL;
 
 void Bloom::Initialize(Buffer* original, Buffer* depth, PostEffect* postEffect) {
 	// パイプライン生成
-	bloomPipeline_ = std::make_unique<BloomPipeline>();
+	bloomPipeline_ = new BloomPipeline();
 	bloomPipeline_->InitializeGraphicsPipeline();
+	preBloomPipeline_ = new PreBloomPipeline();
+	preBloomPipeline_->InitializeGraphicsPipeline();
 	// バッファー
 	temporaryBuffer_ = new Buffer();
 	originalBuffer_ = original;
@@ -20,6 +22,42 @@ void Bloom::Initialize(Buffer* original, Buffer* depth, PostEffect* postEffect) 
 }
 
 void Bloom::Update() {
+	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList();
+	// リソースバリアの変更
+	CD3DX12_RESOURCE_BARRIER barrier[2];
+	barrier[0] = CD3DX12_RESOURCE_BARRIER::Transition(
+		temporaryBuffer_->buffer.Get(),
+		D3D12_RESOURCE_STATE_PRESENT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
+	barrier[1] = CD3DX12_RESOURCE_BARRIER::Transition(
+		originalBuffer_->buffer.Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	commandList->ResourceBarrier(2, barrier);
+	commandList->OMSetRenderTargets(1, &temporaryBuffer_->rtvHandle, false, &originalDepthBuffer_->dpsCPUHandle);
+
+	ClearRenderTarget(temporaryBuffer_->rtvHandle);
+	ClearDepthBuffer(originalDepthBuffer_->dpsCPUHandle);
+
+	commandList->SetGraphicsRootSignature(preBloomPipeline_->GetRootSignature());
+	commandList->SetPipelineState(preBloomPipeline_->GetPipelineState());
+	commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	commandList->IASetVertexBuffers(0, 1, &vbView_);
+	commandList->IASetIndexBuffer(&ibView_);
+	commandList->SetGraphicsRootDescriptorTable(BloomPipeline::ROOT_PARAMETER_TYP::TEXTURE, originalBuffer_->srvGPUHandle);
+	commandList->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
+
+	// リソースバリアの変更
+	barrier[0] = CD3DX12_RESOURCE_BARRIER::Transition(
+		temporaryBuffer_->buffer.Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PRESENT);
+	barrier[1] = CD3DX12_RESOURCE_BARRIER::Transition(
+		originalBuffer_->buffer.Get(),
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
+	commandList->ResourceBarrier(2, barrier);
+
 	for (size_t i = 0; i < 5; i++) {
 		gaussianBlur_->Update();
 	}
@@ -28,12 +66,26 @@ void Bloom::Update() {
 
 void Bloom::Shutdown() {
 	gaussianBlur_->Shutdown();
+	delete gaussianBlur_;
 	indices_.clear();
 	idxBuff_.Reset();
 	vertices_.clear();
 	vertBuff_.Reset();
 	temporaryBuffer_->buffer.Reset();
 	delete temporaryBuffer_;
+	delete bloomPipeline_;
+	delete preBloomPipeline_;
+}
+
+void Bloom::ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE handle) {
+	// 全画面のクリア
+	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
+	DirectXCommon::GetInstance()->GetCommandList()->ClearRenderTargetView(handle, clearColor, 0, nullptr);
+}
+
+void Bloom::ClearDepthBuffer(D3D12_CPU_DESCRIPTOR_HANDLE handle) {
+	// 深度バッファのクリア
+	DirectXCommon::GetInstance()->GetCommandList()->ClearDepthStencilView(handle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
 void Bloom::CreateResource() {
@@ -68,7 +120,7 @@ void Bloom::CreateResource() {
 	auto result = device->CreateCommittedResource(
 		&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_PRESENT, &clearValue,
 		IID_PPV_ARGS(&temporaryBuffer_->buffer));
-	temporaryBuffer_->buffer->SetName(L"PostEffectBuffer");
+	temporaryBuffer_->buffer->SetName(L"Bloom");
 	assert(SUCCEEDED(result));
 	common->GetSRVCPUGPUHandle(temporaryBuffer_->srvCPUHandle, temporaryBuffer_->srvGPUHandle);
 	temporaryBuffer_->rtvHandle = common->GetRTVCPUDescriptorHandle();
@@ -121,15 +173,54 @@ void Bloom::CreateResource() {
 
 void Bloom::SetCommandList() {
 	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList();
+	// リソースバリアの変更
+	CD3DX12_RESOURCE_BARRIER barrier[2];
+	barrier[0] = CD3DX12_RESOURCE_BARRIER::Transition(
+		temporaryBuffer_->buffer.Get(),
+		D3D12_RESOURCE_STATE_PRESENT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
+	barrier[1] = CD3DX12_RESOURCE_BARRIER::Transition(
+		originalBuffer_->buffer.Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	commandList->ResourceBarrier(2, barrier);
+	commandList->OMSetRenderTargets(1, &temporaryBuffer_->rtvHandle, false, &originalDepthBuffer_->dpsCPUHandle);
+	
 	commandList->SetGraphicsRootSignature(bloomPipeline_->GetRootSignature());
 	commandList->SetPipelineState(bloomPipeline_->GetPipelineState());
 	commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList->IASetVertexBuffers(0, 1, &vbView_);
 	commandList->IASetIndexBuffer(&ibView_);
-	commandList->SetGraphicsRootDescriptorTable(PostEffectGraphicsPipeline::ROOT_PARAMETER_TYP::TEXTURE, originalBuffer_->srvGPUHandle);
+	commandList->SetGraphicsRootDescriptorTable(BloomPipeline::ROOT_PARAMETER_TYP::TEXTURE, originalBuffer_->srvGPUHandle);
+	commandList->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
+
+	// リソースバリアの変更
+	barrier[0] = CD3DX12_RESOURCE_BARRIER::Transition(
+		temporaryBuffer_->buffer.Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	barrier[1] = CD3DX12_RESOURCE_BARRIER::Transition(
+		originalBuffer_->buffer.Get(),
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
+	commandList->ResourceBarrier(2, barrier);
+
+	commandList->OMSetRenderTargets(1, &originalBuffer_->rtvHandle, false, &originalDepthBuffer_->dpsCPUHandle);
+
+	commandList->SetGraphicsRootSignature(bloomPipeline_->GetRootSignature());
+	commandList->SetPipelineState(bloomPipeline_->GetPipelineState());
+	commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	commandList->IASetVertexBuffers(0, 1, &vbView_);
+	commandList->IASetIndexBuffer(&ibView_);
+	commandList->SetGraphicsRootDescriptorTable(BloomPipeline::ROOT_PARAMETER_TYP::TEXTURE, temporaryBuffer_->srvGPUHandle);
 	commandList->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
 
 
+	CD3DX12_RESOURCE_BARRIER barrier_0=CD3DX12_RESOURCE_BARRIER::Transition(
+		temporaryBuffer_->buffer.Get(),
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		D3D12_RESOURCE_STATE_PRESENT);
+	commandList->ResourceBarrier(1, &barrier_0);
 }
 ComPtr<ID3D12Resource> Bloom::CreateBuffer(UINT size) {
 	auto device = DirectXCommon::GetInstance()->GetDevice();

@@ -175,6 +175,9 @@
     <ClCompile Include="Engine\BloomPipeline.cpp">
       <Filter>engine\graphicsPipeline</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\PreBloomPipeline.cpp">
+      <Filter>engine\graphicsPipeline</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -358,6 +361,9 @@
       <Filter>engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\BloomPipeline.h">
+      <Filter>engine\graphicsPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\PreBloomPipeline.h">
       <Filter>engine\graphicsPipeline</Filter>
     </ClInclude>
   </ItemGroup>

@@ -96,6 +96,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Bloom.cpp" />
     <ClCompile Include="Engine\GaussianBlur.cpp" />
     <ClCompile Include="Engine\HorizontalBlurPipeline.cpp" />
+    <ClCompile Include="Engine\PreBloomPipeline.cpp" />
     <ClCompile Include="Engine\VerticalBlurPipeline.cpp" />
     <ClCompile Include="Engine\PostEffect.cpp" />
     <ClCompile Include="Engine\PostEffectPipeline.cpp" />
@@ -154,6 +155,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\cMaterial.h" />
     <ClInclude Include="Engine\GaussianBlur.h" />
     <ClInclude Include="Engine\HorizontalBlurPipeline.h" />
+    <ClInclude Include="Engine\PreBloomPipeline.h" />
     <ClInclude Include="Engine\VerticalBlurPipeline.h" />
     <ClInclude Include="Engine\PostEffect.h" />
     <ClInclude Include="Engine\PostEffectPipeline.h" />

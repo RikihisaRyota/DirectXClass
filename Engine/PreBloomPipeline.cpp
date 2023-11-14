@@ -1,4 +1,4 @@
-#include "BloomPipeline.h"
+#include "PreBloomPipeline.h"
 
 #include <d3dx12.h>
 #include <cassert>
@@ -8,12 +8,12 @@
 #include "ShaderCompiler.h"
 using namespace Microsoft::WRL;
 
-void BloomPipeline::InitializeGraphicsPipeline() {
+void PreBloomPipeline::InitializeGraphicsPipeline() {
 	CreateState();
 	CreatePSO();
 }
 
-void BloomPipeline::CreateState() {
+void PreBloomPipeline::CreateState() {
 	CreateRootSignature();
 	CreateInputLayout();
 	CreateBlendState();
@@ -22,7 +22,7 @@ void BloomPipeline::CreateState() {
 	CreateShaderCompile();
 }
 
-void BloomPipeline::CreateRootSignature() {
+void PreBloomPipeline::CreateRootSignature() {
 	HRESULT hr = S_FALSE;
 	CD3DX12_DESCRIPTOR_RANGE ranges[1]{};
 	ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
@@ -62,7 +62,7 @@ void BloomPipeline::CreateRootSignature() {
 	assert(SUCCEEDED(hr));
 }
 
-void BloomPipeline::CreateInputLayout() {
+void PreBloomPipeline::CreateInputLayout() {
 	//InputLayout
 	inputLayout_[0] =
 	{// xyz座標(1行で書いたほうが見やすい)
@@ -77,26 +77,19 @@ void BloomPipeline::CreateInputLayout() {
 	};
 }
 
-void BloomPipeline::CreateBlendState() {
+void PreBloomPipeline::CreateBlendState() {
 	//全ての色要素を書き込む
-	blendDesc_.RenderTarget[0].BlendEnable = true;
-	blendDesc_.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	blendDesc_.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	blendDesc_.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
-	blendDesc_.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	blendDesc_.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	blendDesc_.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
 	blendDesc_.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 }
 
-void BloomPipeline::CreateRasterizerState() {
+void PreBloomPipeline::CreateRasterizerState() {
 	//裏面（時計回り）を表示しない
 	rasterizerDesc_.CullMode = D3D12_CULL_MODE_BACK;
 	//三角形の中を塗りつぶす
 	rasterizerDesc_.FillMode = D3D12_FILL_MODE_SOLID;
 }
 
-void BloomPipeline::CreateShaderCompile() {
+void PreBloomPipeline::CreateShaderCompile() {
 	//Shaderをコンパイルする
 	vertexShaderBlob_ = ShaderCompiler::Compile(
 		L"Resources/Shaders/Bloom.VS.hlsl",
@@ -109,7 +102,7 @@ void BloomPipeline::CreateShaderCompile() {
 	assert(pixelShaderBlob_ != nullptr);
 }
 
-void BloomPipeline::CreateDepthStencil() {
+void PreBloomPipeline::CreateDepthStencil() {
 	// Depthの機能を有効化する
 	depthStencilDesc_.DepthEnable = true;
 	// 書き込みをする
@@ -118,7 +111,7 @@ void BloomPipeline::CreateDepthStencil() {
 	depthStencilDesc_.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 }
 
-void BloomPipeline::CreatePSO() {
+void PreBloomPipeline::CreatePSO() {
 	HRESULT hr = S_FALSE;
 	//PSO生成
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicPipelineStateDesc{};

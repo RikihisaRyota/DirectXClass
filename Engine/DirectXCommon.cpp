@@ -85,6 +85,8 @@ void DirectXCommon::PreDraw() {
 void DirectXCommon::PostDraw() {
 	HRESULT hr = S_FALSE;
 	UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
+
+
 	bloom_->Update();
 	// リソースバリアの変更
 	CD3DX12_RESOURCE_BARRIER barrier[2];
@@ -96,8 +98,6 @@ void DirectXCommon::PostDraw() {
 		mainBuffer_->buffer.Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-
 	commandList_->ResourceBarrier(2, barrier);
 	commandList_->OMSetRenderTargets(1, &backBuffers_[bbIndex]->rtvHandle, false, &mainDepthBuffer_->dpsCPUHandle);
 
@@ -334,7 +334,7 @@ void DirectXCommon::CreateRenderTargets() {
 	// デスクリプタヒープの生成
 	D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapDesc{};
 	rtvDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;// レンダーターゲットビュー用
-	rtvDescriptorHeapDesc.NumDescriptors = swcDesc.BufferCount + 4;
+	rtvDescriptorHeapDesc.NumDescriptors = 32;
 	hr = device_->CreateDescriptorHeap(&rtvDescriptorHeapDesc, IID_PPV_ARGS(&rtvDescriptorHeap_));
 	assert(SUCCEEDED(hr));
 	// デスクリプタヒープを生成
