@@ -66,7 +66,7 @@ void DirectXCommon::PreDraw() {
 	// TransitionBarrierを張る
 	commandList_->ResourceBarrier(1, &barrier);
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = postEffect_->GetRTVHandle();
-	commandList_->OMSetRenderTargets(1, &rtvHandle, false, &depthBuffer_->dpsCPUHandle);
+	commandList_->OMSetRenderTargets(1, &rtvHandle, false, &mainDepthBuffer_->dpsCPUHandle);
 
 	// 全画面クリア
 	ClearRenderTarget();
@@ -101,9 +101,11 @@ void DirectXCommon::PostDraw() {
 		D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	commandList_->ResourceBarrier(2, barrier);
-	commandList_->OMSetRenderTargets(1, &backBuffers_[bbIndex]->rtvHandle, false, &depthBuffer_->dpsCPUHandle);
-	
-	postEffect_->Update();
+	commandList_->OMSetRenderTargets(1, &backBuffers_[bbIndex]->rtvHandle, false, &mainDepthBuffer_->dpsCPUHandle);
+
+	//for (size_t i = 0; i < 5; i++) {
+		postEffect_->Update();
+	//}
 
 	// リソースバリアの変更
 	barrier[0] = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -128,7 +130,7 @@ void DirectXCommon::PreUIDraw() {
 		D3D12_RESOURCE_STATE_RENDER_TARGET);
 	// TransitionBarrierを張る
 	commandList_->ResourceBarrier(1, &barrier);
-	commandList_->OMSetRenderTargets(1, &backBuffers_[bbIndex]->rtvHandle, false, &depthBuffer_->dpsCPUHandle);
+	commandList_->OMSetRenderTargets(1, &backBuffers_[bbIndex]->rtvHandle, false, &mainDepthBuffer_->dpsCPUHandle);
 
 	// ビューポートの設定
 	CD3DX12_VIEWPORT viewport =
@@ -162,7 +164,7 @@ void DirectXCommon::ClearRenderTarget() {
 
 void DirectXCommon::ClearDepthBuffer() {
 	// 深度バッファのクリア
-	commandList_->ClearDepthStencilView(depthBuffer_->dpsCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	commandList_->ClearDepthStencilView(mainDepthBuffer_->dpsCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
 void DirectXCommon::InitializeDXGIDevice() {
@@ -326,7 +328,7 @@ void DirectXCommon::CreateRenderTargets() {
 	// デスクリプタサイズを取得
 	RTVDescriptorHandleIncrementSize = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	SRVDescriptorHandleIncrementSize = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	depthBuffer_ = new Buffer();
+	mainDepthBuffer_ = new Buffer();
 
 	DXGI_SWAP_CHAIN_DESC swcDesc = {};
 	hr = swapChain_->GetDesc(&swcDesc);
@@ -371,7 +373,7 @@ void DirectXCommon::CreateRenderTargets() {
 
 void DirectXCommon::CreateDepthBuffer() {
 	// DepthStemcilTextureをウィンドウのサイズで作成
-	depthBuffer_->buffer = CreateDepthStencilTextureResource(WinApp::kWindowWidth, WinApp::kWindowHeight);
+	mainDepthBuffer_->buffer = CreateDepthStencilTextureResource(WinApp::kWindowWidth, WinApp::kWindowHeight);
 
 	// DSV用のヒープでディスクリプタの数は1。DSVはShader内で触るものではないにで、ShaderVisibleはfalse
 	dsvHeap_ = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
@@ -381,9 +383,9 @@ void DirectXCommon::CreateDepthBuffer() {
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;// Format。基本的にはResourceに合わせる
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D; // 2DTexture
 	// 深度ステンシルビュー用デスクリプタヒープのハンドルを取得
-	depthBuffer_->dpsCPUHandle = dsvHeap_->GetCPUDescriptorHandleForHeapStart();
+	mainDepthBuffer_->dpsCPUHandle = dsvHeap_->GetCPUDescriptorHandleForHeapStart();
 	// DSVHeapの先頭にDSVを作る
-	device_->CreateDepthStencilView(depthBuffer_->buffer.Get(), &dsvDesc, depthBuffer_->dpsCPUHandle);
+	device_->CreateDepthStencilView(mainDepthBuffer_->buffer.Get(), &dsvDesc, mainDepthBuffer_->dpsCPUHandle);
 }
 
 void DirectXCommon::CreateFence() {
@@ -404,7 +406,7 @@ void DirectXCommon::PostEffectInitialize() {
 
 void DirectXCommon::GaussianBlurInitialize() {
 	gaussianBlur_ = new GaussianBlur();
-	gaussianBlur_->Initialize(postEffect_->GetBuffer(), depthBuffer_,postEffect_->GetPostEffectPipeline());
+	gaussianBlur_->Initialize(postEffect_->GetBuffer(), mainDepthBuffer_, postEffect_);
 }
 
 void DirectXCommon::WaitForGPU() {
@@ -485,8 +487,8 @@ void DirectXCommon::Release() {
 	// 描画関連
 	fence_.Reset();
 	// 深度バッファ関連
-	depthBuffer_->buffer.Reset();
-	delete depthBuffer_;
+	mainDepthBuffer_->buffer.Reset();
+	delete mainDepthBuffer_;
 	dsvHeap_.Reset();
 	// レンダーターゲット関連
 	rtvDescriptorHeap_.Reset();

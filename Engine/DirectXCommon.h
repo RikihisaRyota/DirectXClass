@@ -76,7 +76,7 @@ public:
 	/// DSV
 	/// </summary>
 	/// <returns></returns>
-	D3D12_CPU_DESCRIPTOR_HANDLE GetDSVHandle() { return depthBuffer_->dpsCPUHandle; }
+	D3D12_CPU_DESCRIPTOR_HANDLE GetDSVHandle() { return mainDepthBuffer_->dpsCPUHandle; }
 	/// <summary>
 	/// リリース
 	/// </summary>
@@ -181,7 +181,7 @@ private:// メンバ変数
 	// ガウシアンブラー
 	GaussianBlur* gaussianBlur_;
 	// 深度バッファ関連
-	Buffer* depthBuffer_;
+	Buffer* mainDepthBuffer_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;
 	// 描画関連
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;

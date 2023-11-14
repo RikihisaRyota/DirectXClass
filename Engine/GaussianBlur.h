@@ -8,11 +8,13 @@
 #include "VerticalBlurPipeline.h"
 #include "HorizontalBlurPipeline.h"
 #include "PostEffectPipeline.h"
+#include "PostEffect.h"
 #include "Vector2.h"
 #include "Vector4.h"
 
 
 class GaussianBlur {
+	friend class PostEffect;
 private:
 	enum BufferType {
 		kVerticalBlur,
@@ -25,7 +27,7 @@ private:
 		Vector2 texcoord{};
 	};
 public:
-	void Initialize(Buffer* buffer, Buffer* depthBuffer, PostEffectGraphicsPipeline* originalPipeline);
+	void Initialize(Buffer* buffer, Buffer* depthBuffer, PostEffect* postEffect);
 	void Update();
 	void Shutdown();
 
@@ -57,10 +59,13 @@ private:
 	std::vector<uint16_t> indices_;
 
 	std::vector<Buffer*> buffer_;
+	
 	PostEffectGraphicsPipeline* originalPipeline_;
 	Buffer* originalBuffer_;
 	Buffer* depthBuffer_;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> constantBuffer_;
 	float weights_[kNumWeights]{};
+
+	PostEffect* postEffect_;
 }; 

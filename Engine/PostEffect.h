@@ -28,6 +28,9 @@ public:
 	ID3D12Resource* GetBufferResource(){return temporaryBuffer_->buffer.Get();}
 	Buffer* GetBuffer() { return temporaryBuffer_; }
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRTVHandle() { return temporaryBuffer_->rtvHandle; }
+
+
+	ID3D12Resource* GetTime() {return timeBuff_.Get(); }
 private:
 	void CreateResource();
 	void SetCommandList();
