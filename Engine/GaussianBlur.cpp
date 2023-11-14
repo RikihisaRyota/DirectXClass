@@ -12,7 +12,6 @@ void GaussianBlur::Initialize(Buffer* buffer, Buffer* depthBuffer, PostEffect* p
 	horizontalBlurPipeline_ = new HorizontalBlurPipeline();
 	horizontalBlurPipeline_->InitializeGraphicsPipeline();
 	postEffect_ = postEffect;
-	//originalPipeline_ = originalPipeline;
 	originalBuffer_ = buffer;
 	depthBuffer_ = depthBuffer;
 
@@ -89,6 +88,7 @@ void GaussianBlur::CreateResource() {
 			&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_PRESENT, &clearValue,
 			IID_PPV_ARGS(&buffer_.at(i)->buffer));
 		assert(SUCCEEDED(result));
+		buffer_.at(i)->buffer->SetName((L"GaussianBuffer" + std::to_wstring(i)).c_str());
 		common->GetSRVCPUGPUHandle(buffer_.at(i)->srvCPUHandle, buffer_.at(i)->srvGPUHandle);
 		buffer_.at(i)->rtvHandle = common->GetRTVCPUDescriptorHandle();
 		device->CreateShaderResourceView(buffer_.at(i)->buffer.Get(), &srvDesc, buffer_.at(i)->srvCPUHandle);
@@ -162,6 +162,7 @@ void GaussianBlur::SetCommandList() {
 	commandList->ResourceBarrier(3, barrier);
 	commandList->OMSetRenderTargets(1, &buffer_.at(kVerticalBlur)->rtvHandle, false, &depthBuffer_->dpsCPUHandle);
 	ClearRenderTarget(buffer_.at(kVerticalBlur)->rtvHandle);
+
 	// ビューポートの設定
 	CD3DX12_VIEWPORT viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, WinApp::kWindowWidth, WinApp::kWindowHeight);
 	commandList->RSSetViewports(1, &viewport);
@@ -196,6 +197,7 @@ void GaussianBlur::SetCommandList() {
 	commandList->ResourceBarrier(3, barrier);
 	commandList->OMSetRenderTargets(1, &buffer_.at(kHorizontalBlur)->rtvHandle, false, &depthBuffer_->dpsCPUHandle);
 	ClearRenderTarget(buffer_.at(kHorizontalBlur)->rtvHandle);
+
 	// ビューポートの設定
 	viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, WinApp::kWindowWidth, WinApp::kWindowHeight);
 	commandList->RSSetViewports(1, &viewport);
@@ -252,6 +254,10 @@ void GaussianBlur::ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE handle) {
 	// 全画面のクリア
 	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
 	DirectXCommon::GetInstance()->GetCommandList()->ClearRenderTargetView(handle, clearColor, 0, nullptr);
+}
+
+void GaussianBlur::ClearDepthBuffer(D3D12_CPU_DESCRIPTOR_HANDLE handle) {
+	DirectXCommon::GetInstance()->GetCommandList()->ClearDepthStencilView(handle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
 Microsoft::WRL::ComPtr<ID3D12Resource> GaussianBlur::CreateBuffer(UINT size) {

@@ -1,4 +1,4 @@
-#include "PostEffect.h"
+#include "Bloom.h"
 
 #include <cassert>
 
@@ -6,27 +6,28 @@
 
 using namespace Microsoft::WRL;
 
-void PostEffect::Initialize(Buffer* buffer) {
+void Bloom::Initialize(Buffer* original, Buffer* depth, PostEffect* postEffect) {
 	// パイプライン生成
-	postEffectPipeline_ = std::make_unique<PostEffectGraphicsPipeline>();
-	PostEffectGraphicsPipeline::SetDevice(DirectXCommon::GetInstance()->GetDevice());
-	postEffectPipeline_->InitializeGraphicsPipeline();
+	bloomPipeline_ = std::make_unique<BloomPipeline>();
+	bloomPipeline_->InitializeGraphicsPipeline();
 	// バッファー
 	temporaryBuffer_ = new Buffer();
-	originalBuffer_ = buffer;
+	originalBuffer_ = original;
+	originalDepthBuffer_ = depth;
 	CreateResource();
+	gaussianBlur_ = new GaussianBlur();
+	gaussianBlur_->Initialize(originalBuffer_, originalDepthBuffer_, postEffect);
 }
 
-void PostEffect::Update() {
-	count_ += 1.0f;
-	time_->time = count_ / countMax_;
-	/*if (count_ >= countMax_) {
-		count_ = 0.0f;
-	}*/
+void Bloom::Update() {
+	for (size_t i = 0; i < 5; i++) {
+		gaussianBlur_->Update();
+	}
 	SetCommandList();
 }
 
-void PostEffect::Shutdown() {
+void Bloom::Shutdown() {
+	gaussianBlur_->Shutdown();
 	indices_.clear();
 	idxBuff_.Reset();
 	vertices_.clear();
@@ -35,7 +36,7 @@ void PostEffect::Shutdown() {
 	delete temporaryBuffer_;
 }
 
-void PostEffect::CreateResource() {
+void Bloom::CreateResource() {
 
 	auto common = DirectXCommon::GetInstance();
 	auto device = common->GetDevice();
@@ -116,30 +117,21 @@ void PostEffect::CreateResource() {
 	ibView_.BufferLocation = idxBuff_->GetGPUVirtualAddress();
 	ibView_.Format = DXGI_FORMAT_R16_UINT;
 	ibView_.SizeInBytes = sizeIB; // 修正: インデックスバッファのバイトサイズを代入
-#pragma region ConstantBuffer
-	timeBuff_ = CreateBuffer(sizeof(Time));
-	timeBuff_->Map(0, nullptr, reinterpret_cast<void**>(&time_));
-	time_->time = 0.0f; 
-	count_ = 0.0f;
-	countMax_ = 120.0f;
-#pragma endregion
 }
 
-void PostEffect::SetCommandList() {
+void Bloom::SetCommandList() {
 	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList();
-	commandList->SetGraphicsRootSignature(postEffectPipeline_->GetRootSignature());
-	commandList->SetPipelineState(postEffectPipeline_->GetPipelineState());
+	commandList->SetGraphicsRootSignature(bloomPipeline_->GetRootSignature());
+	commandList->SetPipelineState(bloomPipeline_->GetPipelineState());
 	commandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList->IASetVertexBuffers(0, 1, &vbView_);
 	commandList->IASetIndexBuffer(&ibView_);
-	// Time
-	commandList->SetGraphicsRootConstantBufferView(PostEffectGraphicsPipeline::ROOT_PARAMETER_TYP::TIME, timeBuff_->GetGPUVirtualAddress());
 	commandList->SetGraphicsRootDescriptorTable(PostEffectGraphicsPipeline::ROOT_PARAMETER_TYP::TEXTURE, originalBuffer_->srvGPUHandle);
 	commandList->DrawIndexedInstanced(static_cast<UINT>(indices_.size()), 1, 0, 0, 0);
 
 
 }
-ComPtr<ID3D12Resource> PostEffect::CreateBuffer(UINT size) {
+ComPtr<ID3D12Resource> Bloom::CreateBuffer(UINT size) {
 	auto device = DirectXCommon::GetInstance()->GetDevice();
 	HRESULT result = S_FALSE;
 	// ヒーププロパティ

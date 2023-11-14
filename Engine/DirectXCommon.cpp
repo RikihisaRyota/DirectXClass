@@ -48,8 +48,8 @@ void DirectXCommon::Initialize(WinApp* winApp, int32_t backBufferWidth, int32_t 
 	// ポストエフェクトの初期化
 	PostEffectInitialize();
 
-	// ガウシアンブラーの初期化
-	GaussianBlurInitialize();
+	// ブルームの初期化
+	BloomInitialize();
 }
 
 void DirectXCommon::PreDraw() {
@@ -60,12 +60,12 @@ void DirectXCommon::PreDraw() {
 	UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
 	// リソースバリアを変更(表示状態->描画対象)
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		postEffect_->GetBufferResource(),
+		mainBuffer_->buffer.Get(),
 		D3D12_RESOURCE_STATE_PRESENT,
 		D3D12_RESOURCE_STATE_RENDER_TARGET);
 	// TransitionBarrierを張る
 	commandList_->ResourceBarrier(1, &barrier);
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = postEffect_->GetRTVHandle();
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = mainBuffer_->rtvHandle;
 	commandList_->OMSetRenderTargets(1, &rtvHandle, false, &mainDepthBuffer_->dpsCPUHandle);
 
 	// 全画面クリア
@@ -85,31 +85,27 @@ void DirectXCommon::PreDraw() {
 void DirectXCommon::PostDraw() {
 	HRESULT hr = S_FALSE;
 	UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
-	for (size_t i = 0; i < 10; i++) {
-		gaussianBlur_->Update();
-	}
+	bloom_->Update();
 	// リソースバリアの変更
 	CD3DX12_RESOURCE_BARRIER barrier[2];
 	barrier[0] = CD3DX12_RESOURCE_BARRIER::Transition(
-		postEffect_->GetBufferResource(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-	barrier[1] = CD3DX12_RESOURCE_BARRIER::Transition(
 		backBuffers_[bbIndex]->buffer.Get(),
 		D3D12_RESOURCE_STATE_PRESENT,
 		D3D12_RESOURCE_STATE_RENDER_TARGET);
+	barrier[1] = CD3DX12_RESOURCE_BARRIER::Transition(
+		mainBuffer_->buffer.Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
 
 	commandList_->ResourceBarrier(2, barrier);
 	commandList_->OMSetRenderTargets(1, &backBuffers_[bbIndex]->rtvHandle, false, &mainDepthBuffer_->dpsCPUHandle);
 
-
 	postEffect_->Update();
-
 
 	// リソースバリアの変更
 	barrier[0] = CD3DX12_RESOURCE_BARRIER::Transition(
-		postEffect_->GetBufferResource(),
+		mainBuffer_->buffer.Get(),
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
 		D3D12_RESOURCE_STATE_PRESENT);
 
@@ -150,7 +146,7 @@ void DirectXCommon::PostUIDraw() {
 		backBuffers_[bbIndex]->buffer.Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_PRESENT);
-
+	
 	commandList_->ResourceBarrier(1, &barrier);
 
 	WaitForGPU();
@@ -159,7 +155,7 @@ void DirectXCommon::PostUIDraw() {
 void DirectXCommon::ClearRenderTarget() {
 	// 全画面のクリア
 	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
-	commandList_->ClearRenderTargetView(postEffect_->GetRTVHandle(), clearColor, 0, nullptr);
+	commandList_->ClearRenderTargetView(mainBuffer_->rtvHandle, clearColor, 0, nullptr);
 }
 
 void DirectXCommon::ClearDepthBuffer() {
@@ -329,6 +325,7 @@ void DirectXCommon::CreateRenderTargets() {
 	RTVDescriptorHandleIncrementSize = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	SRVDescriptorHandleIncrementSize = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	mainDepthBuffer_ = new Buffer();
+	mainBuffer_ = new Buffer();
 
 	DXGI_SWAP_CHAIN_DESC swcDesc = {};
 	hr = swapChain_->GetDesc(&swcDesc);
@@ -337,7 +334,7 @@ void DirectXCommon::CreateRenderTargets() {
 	// デスクリプタヒープの生成
 	D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapDesc{};
 	rtvDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;// レンダーターゲットビュー用
-	rtvDescriptorHeapDesc.NumDescriptors = swcDesc.BufferCount + 3;
+	rtvDescriptorHeapDesc.NumDescriptors = swcDesc.BufferCount + 4;
 	hr = device_->CreateDescriptorHeap(&rtvDescriptorHeapDesc, IID_PPV_ARGS(&rtvDescriptorHeap_));
 	assert(SUCCEEDED(hr));
 	// デスクリプタヒープを生成
@@ -364,17 +361,41 @@ void DirectXCommon::CreateRenderTargets() {
 		backBuffers_[i] = new Buffer();
 		// スワップチェーンからバッファを取得
 		hr = swapChain_->GetBuffer(i, IID_PPV_ARGS(&backBuffers_[i]->buffer));
+		backBuffers_[i]->buffer->SetName((L"SwapChainBuffer" + std::to_wstring(i)).c_str());
 		assert(SUCCEEDED(hr));
 		backBuffers_[i]->rtvHandle = GetRTVCPUDescriptorHandle();
 		// レンダーターゲットビューの生成
 		device_->CreateRenderTargetView(backBuffers_[i]->buffer.Get(), &rtvDesc, backBuffers_[i]->rtvHandle);
 	}
+	// ヒーププロパティ
+	CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+	// リソース設定
+	CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		WinApp::kWindowWidth,
+		WinApp::kWindowHeight,
+		1, 0, 1, 0,
+		D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET,
+		D3D12_TEXTURE_LAYOUT_UNKNOWN, 0);
+	// レンダリング時のクリア値と同じ
+	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
+	D3D12_CLEAR_VALUE clearValue = CD3DX12_CLEAR_VALUE(
+		DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, clearColor);
+	result = device_->CreateCommittedResource(
+		&heapProps, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_PRESENT, &clearValue,
+		IID_PPV_ARGS(&mainBuffer_->buffer));
+	assert(SUCCEEDED(result));
+	mainBuffer_->buffer->SetName(L"mainBuffer");
+	GetSRVCPUGPUHandle(mainBuffer_->srvCPUHandle, mainBuffer_->srvGPUHandle);
+	mainBuffer_->rtvHandle = GetRTVCPUDescriptorHandle();
+	device_->CreateShaderResourceView(mainBuffer_->buffer.Get(), &srvDesc, mainBuffer_->srvCPUHandle);
+	device_->CreateRenderTargetView(mainBuffer_->buffer.Get(), &rtvDesc, mainBuffer_->rtvHandle);
 }
 
 void DirectXCommon::CreateDepthBuffer() {
 	// DepthStemcilTextureをウィンドウのサイズで作成
 	mainDepthBuffer_->buffer = CreateDepthStencilTextureResource(WinApp::kWindowWidth, WinApp::kWindowHeight);
-
+	mainDepthBuffer_->buffer->SetName(L"mainDepthBuffer");
 	// DSV用のヒープでディスクリプタの数は1。DSVはShader内で触るものではないにで、ShaderVisibleはfalse
 	dsvHeap_ = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 
@@ -401,12 +422,12 @@ void DirectXCommon::CreateFence() {
 
 void DirectXCommon::PostEffectInitialize() {
 	postEffect_ = new PostEffect();
-	postEffect_->Initialize();
+	postEffect_->Initialize(mainBuffer_);
 }
 
-void DirectXCommon::GaussianBlurInitialize() {
-	gaussianBlur_ = new GaussianBlur();
-	gaussianBlur_->Initialize(postEffect_->GetBuffer(), mainDepthBuffer_, postEffect_);
+void DirectXCommon::BloomInitialize() {
+	bloom_ = new Bloom();
+	bloom_->Initialize(mainBuffer_, mainDepthBuffer_, postEffect_);
 }
 
 void DirectXCommon::WaitForGPU() {
@@ -503,12 +524,14 @@ void DirectXCommon::Release() {
 	postEffect_->Shutdown();
 	delete postEffect_;
 	// ガウシアンブラー
-	gaussianBlur_->Shutdown();
+	bloom_->Shutdown();
 	delete gaussianBlur_;
 	// コマンド関連
 	commandQueue_.Reset();
 	commandAllocator_.Reset();
 	commandList_.Reset();
+	mainBuffer_->buffer.Reset();
+	delete mainBuffer_;
 	// DXGI関連
 	device_.Reset();
 	dxgiFactory_.Reset();

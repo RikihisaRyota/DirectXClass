@@ -44,6 +44,7 @@ private:
 	void CreateResource();
 	void SetCommandList();
 	void ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE handle);
+	void ClearDepthBuffer(D3D12_CPU_DESCRIPTOR_HANDLE handle);
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(UINT size);
 	VerticalBlurPipeline* verticalBlurPipelinePipeline_;
 	HorizontalBlurPipeline* horizontalBlurPipeline_;

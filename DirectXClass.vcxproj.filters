@@ -169,6 +169,12 @@
     <ClCompile Include="Engine\HorizontalBlurPipeline.cpp">
       <Filter>engine\graphicsPipeline</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Bloom.cpp">
+      <Filter>engine\base</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\BloomPipeline.cpp">
+      <Filter>engine\graphicsPipeline</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -348,6 +354,12 @@
     <ClInclude Include="Engine\cBuffer.h">
       <Filter>engine\base\constantBuffer</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Bloom.h">
+      <Filter>engine\base</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\BloomPipeline.h">
+      <Filter>engine\graphicsPipeline</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
@@ -421,6 +433,12 @@
     <FxCompile Include="Resources\Shaders\HorizontalBlur.VS.hlsl">
       <Filter>engine\shader</Filter>
     </FxCompile>
+    <FxCompile Include="Resources\Shaders\Bloom.PS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\Bloom.VS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\Sprite.hlsli">
@@ -454,6 +472,9 @@
       <Filter>engine\shader</Filter>
     </None>
     <None Include="Resources\Shaders\HorizontalBlur.hlsli">
+      <Filter>engine\shader</Filter>
+    </None>
+    <None Include="Resources\Shaders\Bloom.hlsli">
       <Filter>engine\shader</Filter>
     </None>
   </ItemGroup>

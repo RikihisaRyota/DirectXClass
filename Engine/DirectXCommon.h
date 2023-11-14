@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "cBuffer.h"
-#include "GaussianBlur.h"
+#include "Bloom.h"
 #include "PostEffect.h"
 #include "WinApp.h"
 
@@ -125,9 +125,9 @@ private:// メンバ関数
 	void PostEffectInitialize();
 	
 	/// <summary>
-	/// ガウシアンブラー初期化
+	/// ブルーム
 	/// </summary>
-	void GaussianBlurInitialize();
+	void BloomInitialize();
 private: // メンバ関数
 	DirectXCommon() = default;
 	~DirectXCommon() = default;
@@ -169,6 +169,7 @@ private:// メンバ変数
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain_;
 	// レンダーターゲット関連
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap_;
+	Buffer* mainBuffer_;
 	std::vector<Buffer*> backBuffers_;
 	uint32_t numRTVDescriptorsCount = 0u;
 	// デスクリプタサイズ
@@ -179,7 +180,7 @@ private:// メンバ変数
 	// ポストエフェクト
 	PostEffect* postEffect_;
 	// ガウシアンブラー
-	GaussianBlur* gaussianBlur_;
+	Bloom* bloom_;
 	// 深度バッファ関連
 	Buffer* mainDepthBuffer_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;
