@@ -85,9 +85,9 @@ void DirectXCommon::PreDraw() {
 void DirectXCommon::PostDraw() {
 	HRESULT hr = S_FALSE;
 	UINT bbIndex = swapChain_->GetCurrentBackBufferIndex();
-
-	gaussianBlur_->Update();
-
+	for (size_t i = 0; i < 10; i++) {
+		gaussianBlur_->Update();
+	}
 	// リソースバリアの変更
 	CD3DX12_RESOURCE_BARRIER barrier[2];
 	barrier[0] = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -103,9 +103,9 @@ void DirectXCommon::PostDraw() {
 	commandList_->ResourceBarrier(2, barrier);
 	commandList_->OMSetRenderTargets(1, &backBuffers_[bbIndex]->rtvHandle, false, &mainDepthBuffer_->dpsCPUHandle);
 
-	//for (size_t i = 0; i < 5; i++) {
-		postEffect_->Update();
-	//}
+
+	postEffect_->Update();
+
 
 	// リソースバリアの変更
 	barrier[0] = CD3DX12_RESOURCE_BARRIER::Transition(
