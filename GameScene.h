@@ -19,6 +19,7 @@
 #include "CollisionManager.h"
 #include "Enemy.h"
 #include "EnemyAttack.h"
+#include "EnemyHP.h"
 #include "Player.h"
 #include "PlayerAttack.h"
 #include "Skydome.h"
@@ -73,6 +74,7 @@ private: // メンバ変数
 	std::unique_ptr<CollisionManager> collisionManager_;
 	std::vector<Enemy*> enemy_;
 	std::vector<EnemyAttack*> enemyAttack_;
+	std::vector<EnemyHP*> enemyHP_;
 	std::unique_ptr<Player> player_;
 	std::unique_ptr<PlayerAttack> playerAttack_;
 	std::unique_ptr<Skydome> skydome_;

@@ -46,14 +46,20 @@ void GameScene::Initialize() {
 	for (size_t i = 0; i < 5; i++) {
 		EnemyAttack* enemyAttack = new EnemyAttack();
 		Enemy* enemy = new Enemy();
+		EnemyHP* enemyHP = new EnemyHP();
 		enemy->Initialize(enemyModel);
 		enemy->SetPlayer(player_.get());
+		enemy->SetPlayerAttack(playerAttack_.get());
 		enemy->SetEnemyAttack(enemyAttack);
+		enemy->SetEnemyHP(enemyHP);
 		// 敵攻撃初期化
 		enemyAttack->SetPlayerEnemy(player_.get(), enemy);
 		enemyAttack->Initialize(enemyAttackModel);
+		// 
+		enemyHP->Initialize();
 		enemy_.emplace_back(enemy);
 		enemyAttack_.emplace_back(enemyAttack);
+		enemyHP_.emplace_back(enemyHP);
 	}
 	enemy_.at(0)->SetPosition({ 30.0f,0.0f,5.0f });
 	enemy_.at(1)->SetPosition({ 30.0f,0.0f,20.0f });
@@ -74,10 +80,10 @@ void GameScene::Initialize() {
 	player_->SetViewProjection(&viewProjection_);
 	player_->SetPlayerAttack(playerAttack_.get());
 	player_->SetEnemyAttack(enemyAttack_);
-	player_->Initialize(std::move(playerModel));
+	player_->Initialize(playerModel);
 
 	playerAttack_->SetPlayer(player_.get());
-	playerAttack_->Initialize(std::move(playerAttackModel));
+	playerAttack_->Initialize(playerAttackModel);
 
 	// ブロック
 	std::vector<Model*> blockModel(1);
@@ -113,17 +119,11 @@ void GameScene::Update() {
 	player_->Update();
 	// 敵
 	for (size_t i = 0; i < 5; i++) {
-		enemy_.at(i)->Update();
 		enemyAttack_.at(i)->Update();
-	}
-	ImGui::Begin("Enemy");
-	for (int i = 0; auto & enemy : enemy_) {
-		if (ImGui::TreeNode(("enemy_" + std::to_string(i++)).c_str())) {
-
-		}
+		enemyHP_.at(i)->Update();
+		enemy_.at(i)->Update();
 	}
 	
-	ImGui::End();
 	// コリジョンマネージャー
 	collisionManager_->Update(player_.get(), playerAttack_.get(), block_.get(), enemy_, enemyAttack_);
 }

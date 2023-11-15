@@ -8,16 +8,11 @@
 #include "EnemyAttack.h"
 #include "EnemyHP.h"
 #include "Player.h"
+#include "PlayerAttack.h"
 #include "RandomNumberGenerator.h"
 
 void Enemy::Initialize(std::vector<Model*> model) {
 	BaseCharacter::Initialize(model);
-	
-	area_ = {
-		.center_{MakeTranslateMatrix(worldTransform_.at(0).matWorld_) },
-		.min_{-5.0f,-5.0f,-5.0f},
-		.max_{+5.0f,+5.0f,+5.0f},
-	};
 	// AABBのサイズ
 	AABB aabb;
 	OBB obb;
@@ -39,6 +34,8 @@ void Enemy::Initialize(std::vector<Model*> model) {
 	Isbreak_ = false;
 	break_count_ = 0;
 	isAlive_ = true;
+	isDeathAnimation_ = false;
+	deathTime_ = 60.0f;
 	// 転送
 	BaseCharacter::Update();
 #pragma region 当たり判定
@@ -50,6 +47,21 @@ void Enemy::Update() {
 	if (isAlive_ &&
 		(IsCollision(area_, *player_->GetAABB()) ||
 			behavior_ == Enemy::Behavior::kAttack)) {
+		if (!enemyHP_->GetAlive()) {
+			isDeathAnimation_ = true;
+		}
+		if (isDeathAnimation_) {
+			float t = 1.0f - deathTime_ / 60.0f;
+			for (auto& model : models_) {
+				cMaterial* material = model->GetMaterial(0)->GetMaterial();
+				material->color_.w = Lerp(1.0f, 0.0f, t);
+				model->GetMaterial(0)->SetMaterial(*material);
+			}
+			deathTime_--;
+			if (deathTime_ <= 0.0f) {
+				isAlive_ = false;
+			}
+		}
 		if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_1)) {
 			behaviorRequest_ = Behavior::kAttack;
 			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
@@ -138,7 +150,7 @@ void Enemy::EnemyRotate(const Vector3& vector1) {
 	float cos = Dot(interRotate_, rotate);
 	float sin = Cross(rotate, interRotate_).Length();
 	//  Y軸回り角度(θy)
-	worldTransform_.at(0).rotation_.y = std::sinf(sin);
+	worldTransform_.at(0).rotation_.y = std::atan2(rotate.x, rotate.z);
 	// プレイヤーの向いている方向
 	interRotate_ = rotate;
 }
@@ -147,7 +159,13 @@ void Enemy::EnemyRotate(const Vector3& vector1) {
 void Enemy::SetPosition(const Vector3& position) {
 	worldTransform_.at(0).translation_ = position;
 	worldTransform_.at(0).translation_.y = kFloor_Distance_;
-	worldTransform_.at(0).UpdateMatrix();
+	BaseCharacter::Update();
+	HitBoxUpdate();
+	area_ = {
+		.center_{worldTransform_.at(0).translation_ },
+		.min_{worldTransform_.at(0).translation_ - 5.0f},
+		.max_{worldTransform_.at(0).translation_ + 5.0f},
+	};
 	vector_ = Normalize(worldTransform_.at(0).translation_);
 }
 
@@ -394,6 +412,9 @@ void Enemy::OnCollision(const OBB& obb, const WorldTransform& worldTransform, ui
 		HitBoxUpdate();
 	}
 	if (type == static_cast<uint32_t>(Collider::Type::PlayerAttackToEnemy)) {
-		isAlive_ = false;
+		if (!playerAttack_->GetHit()) {
+			enemyHP_->SetAdd(1);
+		}
+		//isAlive_ = false;
 	}
 }

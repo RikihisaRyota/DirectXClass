@@ -66,7 +66,6 @@ public:
 	void OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) override;
 
 	void SetPlayer(Player* player) { player_ = player; }
-	//void SetEnemy(Enemy* enmey) { enemy_ =enmey; }
 	void SetBehavior(const Behavior& behavior) { behaviorRequest_ = behavior; }
 
 	int32_t GetChageAttackCount() { return kChageAttackCount; }
@@ -82,7 +81,7 @@ public:
 	}
 	bool GetChageAttackFlag() { return IsChageAttack_; }
 	bool GetTripleAttackFlag() { return IsTripleAttack_; }
-
+	bool GetHit() { return hitFlag_; }
 	void ParticleRelease();
 
 private:

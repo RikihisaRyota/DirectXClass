@@ -18,25 +18,25 @@ void Block::Initialize(std::vector<Model*> model) {
 	worldTransform_.at(0).translation_ = { 0.0f,-distance ,0.0f };
 	worldTransform_.at(0).scale_ = { scale ,scale ,scale };
 
-	worldTransform_.at(1).translation_ = { distance * 3,0.0f ,distance };
+	worldTransform_.at(1).translation_ = { distance * 3,-distance ,distance };
 	worldTransform_.at(1).scale_ = { scale ,scale ,scale };
 
-	worldTransform_.at(2).translation_ = { distance * 6,0.0f ,distance };
+	worldTransform_.at(2).translation_ = { distance * 6,-distance  ,distance };
 	worldTransform_.at(2).scale_ = { scale ,scale ,scale };
 
-	worldTransform_.at(3).translation_ = { distance * 6.0f,0.0f,distance * 4.0f };
+	worldTransform_.at(3).translation_ = { distance * 6.0f,-distance ,distance * 4.0f };
 	worldTransform_.at(3).scale_ = { scale ,scale ,scale };
 
-	worldTransform_.at(4).translation_ = { distance * 6.0f,0.0f,distance * 7.0f };
+	worldTransform_.at(4).translation_ = { distance * 6.0f,-distance ,distance * 7.0f };
 	worldTransform_.at(4).scale_ = { scale ,scale ,scale };
 
-	worldTransform_.at(5).translation_ = { distance * 9.0f,0.0f,distance * 7.0f };
+	worldTransform_.at(5).translation_ = { distance * 9.0f,-distance ,distance * 7.0f };
 	worldTransform_.at(5).scale_ = { scale ,scale ,scale };
 
-	worldTransform_.at(6).translation_ = { distance * 9.0f,0.0f,distance * 10.0f };
+	worldTransform_.at(6).translation_ = { distance * 9.0f,-distance ,distance * 10.0f };
 	worldTransform_.at(6).scale_ = { scale ,scale ,scale };
 
-	worldTransform_.at(7).translation_ = { distance * 9.0f,0.0f,distance * 13.0f };
+	worldTransform_.at(7).translation_ = { distance * 9.0f,-distance ,distance * 13.0f };
 	worldTransform_.at(7).scale_ = { scale ,scale ,scale };
 
 	BaseCharacter::Update();

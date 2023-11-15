@@ -3,6 +3,8 @@
 #include "Collider.h"
 #include "EnemyAttack.h"
 class Player;
+class PlayerAttack;
+class EnemyHP;
 class Enemy : public Collider {
 public:
 	// ふるまい
@@ -39,12 +41,15 @@ public:
 	}
 	Behavior GetBehavior() const { return behavior_; }
 	void SetEnemyAttack(EnemyAttack* enemyAttack) { enemyAttack_ = enemyAttack; }
+	void SetEnemyHP(EnemyHP* enemyHP) { enemyHP_ = enemyHP; }
 	void EnemyRotate(const Vector3& vector);
 	float GetFloorDistance() { return kFloor_Distance_; }
 	void SetPlayer(Player* player) { player_ = player; }
+	void SetPlayerAttack(PlayerAttack* player) { playerAttack_ = player; }
 	bool GetIsAlive() { return isAlive_; }
 	void SetIsAlive(bool flag) { isAlive_ = flag; }
 	void SetPosition(const Vector3& position);
+	Vector3 GetPosition() { return Vector3(worldTransform_.at(0).matWorld_.m[3][0], worldTransform_.at(0).matWorld_.m[3][1], worldTransform_.at(0).matWorld_.m[3][2]); }
 private:
 	void HitBoxInitialize(uint32_t collisionMask) override;
 	void RootInitialize();
@@ -83,6 +88,8 @@ private:
 private:
 	AABB area_;
 	Player* player_;
+	PlayerAttack* playerAttack_;
+	EnemyHP* enemyHP_;
 	// 向き
 	Vector3 interRotate_;
 	// さいしゅうてきに向きたい方向
@@ -115,4 +122,6 @@ private:
 	uint32_t break_count_Max = 30;
 
 	bool isAlive_;
+	float deathTime_;
+	bool isDeathAnimation_;
 };

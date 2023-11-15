@@ -687,9 +687,8 @@ void PlayerAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransf
 		break;
 	case PlayerAttack::Behavior::kChargeAttack:
 		if (!hitFlag_) {
-			EnemyHP::SetAdd(static_cast<uint32_t>(45 * (charge_T_ + 1.0f)));
 			hitFlag_ = true;
-			HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));
+			/*HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));*/
 			Audio::GetInstance()->SoundPlayWave(chage_SoundHandle_);
 		}
 
@@ -699,25 +698,22 @@ void PlayerAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransf
 		switch (tripleAttack_Behavior_) {
 		case PlayerAttack::TripleAttack::kFirst:
 			if (!hitFlag_) {
-				EnemyHP::SetAdd(15);
 				hitFlag_ = true;
-				HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));
+				/*HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));*/
 				Audio::GetInstance()->SoundPlayWave(first_SoundHandle_);
 			}
 			break;
 		case PlayerAttack::TripleAttack::kSecond:
 			if (!hitFlag_) {
-				EnemyHP::SetAdd(20);
 				hitFlag_ = true;
-				HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));
+				/*HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));*/
 				Audio::GetInstance()->SoundPlayWave(first_SoundHandle_);
 			}
 			break;
 		case PlayerAttack::TripleAttack::kThird:
 			if (!hitFlag_) {
-				EnemyHP::SetAdd(40);
 				hitFlag_ = true;
-				HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));
+				/*HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));*/
 				Audio::GetInstance()->SoundPlayWave(third_SoundHandle_);
 			}
 			break;
