@@ -68,7 +68,7 @@ PixelShaderOutPut main(VertexShaderInput input)
     //output.color = tex.Sample(smp, samplePoint);
     // RGBずらし
     //samplePoint = input.texcoord;
-    //samplePoint.r += 0.01;
+    //samplePoint.r += 0.001;
     //output.color.r = tex.Sample(smp, samplePoint).r;
     // 走査線
     //float sinv = sin(input.texcoord.y * 2 + gTime.time * -0.1);
