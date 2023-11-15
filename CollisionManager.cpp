@@ -5,12 +5,12 @@
 
 #include "ImGuiManager.h"
 
-void CollisionManager::Update(Player* player, PlayerAttack* PlayerAttack, Block* block, Enemy* enemy, EnemyAttack* enemyAttack) {
+void CollisionManager::Update(Player* player, PlayerAttack* PlayerAttack, Block* block, std::vector<Enemy*> enemy, std::vector<EnemyAttack*> enemyAttack) {
 	colliders_.clear();
 	CheckAllCollisions(player, PlayerAttack, block, enemy, enemyAttack);
 }
 
-void CollisionManager::CheckAllCollisions(Player* player, PlayerAttack* PlayerAttack, Block* block, Enemy* enemy, EnemyAttack* enemyAttack) {
+void CollisionManager::CheckAllCollisions(Player* player, PlayerAttack* PlayerAttack, Block* block, std::vector<Enemy*> enemy, std::vector<EnemyAttack*> enemyAttack) {
 	// プレイヤーをリストに追加
 	colliders_.emplace_back(player);
 	if (player->GetBehavior() == Player::Behavior::kAttack) {
@@ -19,10 +19,12 @@ void CollisionManager::CheckAllCollisions(Player* player, PlayerAttack* PlayerAt
 	// ブロックのリストを追加
 	colliders_.emplace_back(block);
 	// 敵
-	if (enemy->GetIsAlive()) {
-		colliders_.emplace_back(enemy);
-		if (enemy->GetBehavior() == Enemy::Behavior::kAttack) {
-			colliders_.emplace_back(enemyAttack);
+	for (size_t i = 0; i < enemy.size(); i++) {
+		if (enemy.at(i)->GetIsAlive()) {
+			colliders_.emplace_back(enemy.at(i));
+			if (enemy.at(i)->GetBehavior() == Enemy::Behavior::kAttack) {
+				colliders_.emplace_back(enemyAttack.at(i));
+			}
 		}
 	}
 	// リスト内総当たり

@@ -13,9 +13,9 @@
 #include "PlayerAttack.h"
 #include "Quaternion.h"
 
-void Player::Initialize(std::vector<std::unique_ptr<Model>> model) {
+void Player::Initialize(std::vector<Model*> model) {
 	// 基底クラス
-	BaseCharacter::Initialize(std::move(model));
+	BaseCharacter::Initialize(model);
 	//SetGlobalVariables();
 	GetGlobalVariables();
 	BaseCharacter::Update();
@@ -201,7 +201,7 @@ void Player::OnCollision(const OBB& obb, const WorldTransform& worldTransform, u
 	switch (type) {
 	case static_cast<uint32_t>(Collider::Type::PlayerToEnemyAttack):
 	{
-		if (enemyAttack_->GetAttack()) {
+		if (enemyAttack_.at(0)->GetAttack()) {
 			worldTransform_.at(0).parent_ = nullptr;
 			worldTransform_.at(0).translation_ = { 0.0f,10.0f,0.0f };
 		}

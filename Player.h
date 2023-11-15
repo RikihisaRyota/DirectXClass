@@ -45,7 +45,7 @@ public: // メンバ関数
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(std::vector<std::unique_ptr<Model>> model) override;
+	void Initialize(std::vector<Model*> model) override;
 	/// <summary>
 	/// 更新
 	/// </summary>
@@ -178,8 +178,7 @@ public: // ゲッター,セッター
 	Vector3 GetPlayerRotate() const { return interRotate_; }
 
 	void SetPlayerAttack(PlayerAttack* playerAttack) { playerAttack_ = playerAttack; }
-	void SetEnemy(Enemy* enemy) { enemy_ = enemy; }
-	void SetEnemyAttack(EnemyAttack* enemyAttack) { enemyAttack_ = enemyAttack; }
+	void SetEnemyAttack(std::vector<EnemyAttack*> enemyAttack) { enemyAttack_ = enemyAttack; }
 private: // 定数系
 	// 地面から距離
 	const float kGroundDistanse = 1.0f;
@@ -208,8 +207,7 @@ private: // 定数系
 	// 摩擦
 private: // メンバ変数
 	PlayerAttack* playerAttack_;
-	Enemy* enemy_;
-	EnemyAttack* enemyAttack_;
+	std::vector<EnemyAttack*>enemyAttack_;
 	// 最終的に向きたい方向
 	Vector3 destinationAngle_;
 	// ダッシュ用方向

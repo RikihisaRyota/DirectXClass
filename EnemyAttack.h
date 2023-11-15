@@ -32,7 +32,7 @@ public:
 	};
 
 public:
-	void Initialize(std::vector<std::unique_ptr<Model>> model) override;
+	void Initialize(std::vector<Model*> model) override;
 	void Initialize();
 	void RootInitialize();
 	void Update() override;

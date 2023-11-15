@@ -48,7 +48,7 @@ public:
 	/// <summary>
 	/// 初期化（モデル代入）
 	/// </summary>
-	void Initialize(std::vector<std::unique_ptr<Model>> model) override;
+	void Initialize(std::vector<Model*> model) override;
 	void Initialize();
 	/// <summary>
 	/// 更新
@@ -66,7 +66,7 @@ public:
 	void OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) override;
 
 	void SetPlayer(Player* player) { player_ = player; }
-	void SetEnemy(Enemy* enmey) { enemy_ =enmey; }
+	//void SetEnemy(Enemy* enmey) { enemy_ =enmey; }
 	void SetBehavior(const Behavior& behavior) { behaviorRequest_ = behavior; }
 
 	int32_t GetChageAttackCount() { return kChageAttackCount; }

@@ -8,9 +8,9 @@
 #include "Player.h"
 #include "PlayerHP.h"
 
-void EnemyAttack::Initialize(std::vector<std::unique_ptr<Model>> model) {
+void EnemyAttack::Initialize(std::vector<Model*> model) {
 	// 基底クラス
-	BaseCharacter::Initialize(std::move(model));
+	BaseCharacter::Initialize(model);
 	worldTransform_.at(0).scale_ = { 4.0f, 1.0f, 4.0f };
 	worldTransform_.at(0).UpdateMatrix();
 	HitBoxInitialize(kCollisionAttributeEnemyAttack);

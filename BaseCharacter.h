@@ -11,7 +11,7 @@ public:
 	/// 初期化
 	/// </summary>
 	/// <param name="models">モデルデータの配列</param>
-	virtual void Initialize(std::vector<std::unique_ptr<Model>> model) = 0;
+	virtual void Initialize(std::vector<Model*> model) = 0;
 
 	/// <summary>
 	/// 更新
@@ -85,7 +85,7 @@ public:
 
 protected:
 	// モデルデータ配列
-	std::vector<std::unique_ptr<Model>> models_;
+	std::vector<Model*> models_;
 	// ワールドトランスフォーム
 	std::vector<WorldTransform> worldTransform_;
 	// ワールドトランスフォーム(アニメーション用)

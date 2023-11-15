@@ -12,9 +12,9 @@
 #include "Player.h"
 #include "RandomNumberGenerator.h"
 
-void PlayerAttack::Initialize(std::vector<std::unique_ptr<Model>> model) {
+void PlayerAttack::Initialize(std::vector<Model*> model) {
 	// 基底クラス
-	BaseCharacter::Initialize(std::move(model));
+	BaseCharacter::Initialize(model);
 
 	HitBoxInitialize(kCollisionAttributePlayerAttack);
 
@@ -481,26 +481,26 @@ void PlayerAttack::HitBoxUpdate() {
 }
 
 void PlayerAttack::Homing() {
-	// 範囲内にはいていたらホーミング
-	if (IsCollision(*enemy_->GetAABB(), aabb_.at(0))) {
-		Vector3 toEnemy =
-			enemy_->GetWorldTransform().translation_ - worldTransform_.at(0).translation_;
-		// 長さが1.0f以上ならホーミング
-		const float kLength = player_->GetOBB()->size_.x + enemy_->GetOBB()->size_.x;
-		float distance = toEnemy.Length();
-		if (distance >= kLength) {
-			toEnemy.Normalize();
-			worldTransform_.at(0).translation_ += Lerp(Vector3(0.0f, 0.0f, 0.0f), toEnemy, 0.4f);
-			worldTransform_.at(0).translation_.y = 1.0f;
-			player_->SetTranslation(worldTransform_.at(0).translation_);
-			player_->PlayerRotate(toEnemy);
-		}
-		else {
-			// それ以下ならプレイヤーの回転だけセットする
-			toEnemy.Normalize();
-			player_->PlayerRotate(toEnemy);
-		}
-	}
+	//// 範囲内にはいていたらホーミング
+	//if (IsCollision(*enemy_->GetAABB(), aabb_.at(0))) {
+	//	Vector3 toEnemy =
+	//		enemy_->GetWorldTransform().translation_ - worldTransform_.at(0).translation_;
+	//	// 長さが1.0f以上ならホーミング
+	//	const float kLength = player_->GetOBB()->size_.x + enemy_->GetOBB()->size_.x;
+	//	float distance = toEnemy.Length();
+	//	if (distance >= kLength) {
+	//		toEnemy.Normalize();
+	//		worldTransform_.at(0).translation_ += Lerp(Vector3(0.0f, 0.0f, 0.0f), toEnemy, 0.4f);
+	//		worldTransform_.at(0).translation_.y = 1.0f;
+	//		player_->SetTranslation(worldTransform_.at(0).translation_);
+	//		player_->PlayerRotate(toEnemy);
+	//	}
+	//	else {
+	//		// それ以下ならプレイヤーの回転だけセットする
+	//		toEnemy.Normalize();
+	//		player_->PlayerRotate(toEnemy);
+	//	}
+	//}
 }
 
 void PlayerAttack::ChargeParticleCreate(const Vector3& emitter) {

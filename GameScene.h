@@ -71,8 +71,8 @@ private: // メンバ変数
 
 	std::unique_ptr<Block> block_;
 	std::unique_ptr<CollisionManager> collisionManager_;
-	std::unique_ptr<Enemy> enemy_;
-	std::unique_ptr<EnemyAttack> enemyAttack_;
+	std::vector<Enemy*> enemy_;
+	std::vector<EnemyAttack*> enemyAttack_;
 	std::unique_ptr<Player> player_;
 	std::unique_ptr<PlayerAttack> playerAttack_;
 	std::unique_ptr<Skydome> skydome_;

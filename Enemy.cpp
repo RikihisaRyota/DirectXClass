@@ -10,15 +10,13 @@
 #include "Player.h"
 #include "RandomNumberGenerator.h"
 
-void Enemy::Initialize(std::vector<std::unique_ptr<Model>> model) {
-	BaseCharacter::Initialize(std::move(model));
-	// worldTransform_をずらす
-	worldTransform_.at(0).translation_ = Vector3(30.0f, kFloor_Distance_, 7.5f);
-	vector_ = Normalize(worldTransform_.at(0).translation_);
+void Enemy::Initialize(std::vector<Model*> model) {
+	BaseCharacter::Initialize(model);
+	
 	area_ = {
-		.center_{30.0f,5.0f,5.0f},
-		.min_{30.0f - 5.0f,-5.0f,5.0f - 5.0f},
-		.max_{30.0f + 5.0f,5.0f,5.0f + 5.0f},
+		.center_{MakeTranslateMatrix(worldTransform_.at(0).matWorld_) },
+		.min_{-5.0f,-5.0f,-5.0f},
+		.max_{+5.0f,+5.0f,+5.0f},
 	};
 	// AABBのサイズ
 	AABB aabb;
@@ -143,6 +141,14 @@ void Enemy::EnemyRotate(const Vector3& vector1) {
 	worldTransform_.at(0).rotation_.y = std::sinf(sin);
 	// プレイヤーの向いている方向
 	interRotate_ = rotate;
+}
+
+
+void Enemy::SetPosition(const Vector3& position) {
+	worldTransform_.at(0).translation_ = position;
+	worldTransform_.at(0).translation_.y = kFloor_Distance_;
+	worldTransform_.at(0).UpdateMatrix();
+	vector_ = Normalize(worldTransform_.at(0).translation_);
 }
 
 void Enemy::HitBoxInitialize(uint32_t collisionMask) {

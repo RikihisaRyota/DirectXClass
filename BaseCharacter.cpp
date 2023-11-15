@@ -1,8 +1,8 @@
 #include "BaseCharacter.h"
 
-void BaseCharacter::Initialize(std::vector<std::unique_ptr<Model>> model) {
+void BaseCharacter::Initialize(std::vector<Model*> model) {
 	// モデル代入
-	models_ = std::move(model);
+	models_ = model;
 	WorldTransform worldtransform;
 	WorldTransform worldTransform_Motion;
 	std::vector<WorldTransform> worldTransforms_Parts;

@@ -7,7 +7,7 @@
 class Player;
 class Block : public Collider {
 public:
-	void Initialize(std::vector<std::unique_ptr<Model>> model) override;
+	void Initialize(std::vector<Model*> model) override;
 	void Update() override;
 	void Draw(const ViewProjection& viewProjection) override;
 	void HitBoxDraw(const ViewProjection& viewProjection) override;

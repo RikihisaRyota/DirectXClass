@@ -23,7 +23,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(std::vector<std::unique_ptr<Model>> model) override;
+	void Initialize(std::vector<Model*> model) override;
 	/// <summary>
 	/// 更新
 	/// </summary>
@@ -44,6 +44,7 @@ public:
 	void SetPlayer(Player* player) { player_ = player; }
 	bool GetIsAlive() { return isAlive_; }
 	void SetIsAlive(bool flag) { isAlive_ = flag; }
+	void SetPosition(const Vector3& position);
 private:
 	void HitBoxInitialize(uint32_t collisionMask) override;
 	void RootInitialize();
