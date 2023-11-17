@@ -92,12 +92,12 @@ void PreBloomPipeline::CreateRasterizerState() {
 void PreBloomPipeline::CreateShaderCompile() {
 	//Shaderをコンパイルする
 	vertexShaderBlob_ = ShaderCompiler::Compile(
-		L"Resources/Shaders/Bloom.VS.hlsl",
+		L"Resources/Shaders/PreBloom.VS.hlsl",
 		L"vs_6_0");
 	assert(vertexShaderBlob_ != nullptr);
 
 	pixelShaderBlob_ = ShaderCompiler::Compile(
-		L"Resources/Shaders/Bloom.PS.hlsl",
+		L"Resources/Shaders/PreBloom.PS.hlsl",
 		L"ps_6_0");
 	assert(pixelShaderBlob_ != nullptr);
 }

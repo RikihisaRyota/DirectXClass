@@ -445,6 +445,12 @@
     <FxCompile Include="Resources\Shaders\Bloom.VS.hlsl">
       <Filter>engine\shader</Filter>
     </FxCompile>
+    <FxCompile Include="Resources\Shaders\PreBloom.PS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\PreBloom.VS.hlsl">
+      <Filter>engine\shader</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\Sprite.hlsli">
