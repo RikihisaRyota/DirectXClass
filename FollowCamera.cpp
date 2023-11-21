@@ -1,5 +1,6 @@
 #include "FollowCamera.h"
 
+#include "Enemy.h"
 #include "GlobalVariables.h"
 #include "ImGuiManager.h"
 #include "MyMath.h"
@@ -8,10 +9,10 @@ void FollowCamera::Intialize() {
 	// ビュープロジェクション初期化
 	viewProjection_.Initialize();
 	// オフセット初期化
-	offsetInitialize_ = {0.0f, 2.0f, -15.0f};
+	offsetInitialize_ = { 0.0f, 2.0f, -15.0f };
 	// オフセット
 	offset_ = offsetInitialize_;
-	
+
 	destinationAngle_.x = viewProjection_.rotation_.x;
 	destinationAngle_.y = viewProjection_.rotation_.y;
 
@@ -36,37 +37,39 @@ void FollowCamera::Update() {
 		// ビュー行列の更新
 		viewProjection_.UpdateMatrix();
 	}
-#ifdef DEBUG
+#ifdef _DEBUG
 	ImGui::Begin("camera");
 	ImGui::Text(
-	    " viewProjection_.translation_::x:%f,y:%f,z:%f", viewProjection_.translation_.x, viewProjection_.translation_.y,
-	    viewProjection_.translation_.z);
+		" viewProjection_.translation_::x:%f,y:%f,z:%f", viewProjection_.translation_.x, viewProjection_.translation_.y,
+		viewProjection_.translation_.z);
 	ImGui::Text(
-	    "viewProjection_.rotation_::x:%f,y:%f,z:%f", viewProjection_.rotation_.x, viewProjection_.rotation_.y,
-	    viewProjection_.rotation_.z);
+		"viewProjection_.rotation_::x:%f,y:%f,z:%f", viewProjection_.rotation_.x, viewProjection_.rotation_.y,
+		viewProjection_.rotation_.z);
 	ImGui::Text(
-	    "target_->translation_::x:%f,y:%f,z:%f", target_->translation_.x, target_->translation_.y,
-	    target_->translation_.z);
+		"target_->translation_::x:%f,y:%f,z:%f", target_->translation_.x, target_->translation_.y,
+		target_->translation_.z);
 	ImGui::Text(
-	    "target_->rotation_::x:%f,y:%f,z:%f", target_->rotation_.x, target_->rotation_.y, target_->rotation_.z);
+		"target_->rotation_::x:%f,y:%f,z:%f", target_->rotation_.x, target_->rotation_.y, target_->rotation_.z);
 	ImGui::Text("IsTargetCamera  : %d", IsTargetCamera_);
 	ImGui::End();
 #endif // DEBUG
 }
 
-void FollowCamera::SetTarget(const WorldTransform* target) { 
-	target_ = target; 
+void FollowCamera::SetTarget(const WorldTransform* target) {
+	target_ = target;
 	Reset();
 }
 
-void FollowCamera::SetEnemy(const WorldTransform* target) { enemy_ = target; }
+void FollowCamera::SetEnemy(Enemy* enemy) {
+	enemy_.emplace_back(enemy);
+}
 
 Vector3 FollowCamera::OffSet() const {
 	Vector3 offset = offsetInitialize_;
 	// 回転行列生成
 	Matrix4x4 rotate =
-	    Mul(MakeRotateXMatrix(viewProjection_.rotation_.x),
-	        MakeRotateYMatrix(viewProjection_.rotation_.y));
+		Mul(MakeRotateXMatrix(viewProjection_.rotation_.x),
+			MakeRotateYMatrix(viewProjection_.rotation_.y));
 	// オフセットをカメラの回転に合わせて回転させる
 	offset = TransformNormal(offset, rotate);
 	return offset;
@@ -81,31 +84,46 @@ void FollowCamera::GamePad() {
 		// カメラの角度から回転行列を計算する
 		// X軸
 		viewProjection_.rotation_.x -=
-		    static_cast<float>(joyState.Gamepad.sThumbRY) * kRotateSpeedX;
+			static_cast<float>(joyState.Gamepad.sThumbRY) * kRotateSpeedX;
 		viewProjection_.rotation_.x = Clamp(
-		    viewProjection_.rotation_.x, DegToRad(kDeadZoneRotateMin),
-		    DegToRad(kDeadZoneRotateMax));
+			viewProjection_.rotation_.x, DegToRad(kDeadZoneRotateMin),
+			DegToRad(kDeadZoneRotateMax));
 		// Y軸
 		viewProjection_.rotation_.y +=
-		    static_cast<float>(joyState.Gamepad.sThumbRX) * kRotateSpeedY;
+			static_cast<float>(joyState.Gamepad.sThumbRX) * kRotateSpeedY;
 
 		destinationAngle_.y += static_cast<float>(joyState.Gamepad.sThumbRX) * kRotateSpeedY;
 		// ターゲットカメラのオンオフ
-		if ((joyState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) &&
-			 (Input::GetInstance()->GetJoystickStatePrevious(0, joyState) &&
-		     (!joyState.Gamepad.wButtons))) {
+		if ((joyState.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) &&
+			(Input::GetInstance()->GetJoystickStatePrevious(0, joyState) &&
+				(!joyState.Gamepad.wButtons))) {
 			IsTargetCamera_ ^= true;
 		}
 		// プレイヤーの方向を向く
-		if ((joyState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) &&
-		    (Input::GetInstance()->GetJoystickStatePrevious(0, joyState) &&
-		     (!joyState.Gamepad.wButtons))) {
+		if ((joyState.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) /*&&
+			(Input::GetInstance()->GetJoystickStatePrevious(0, joyState) &&
+				(!joyState.Gamepad.wButtons))*/) {
 			if (IsTargetCamera_) {
-				Vector3 enemyVector = enemy_->translation_ - MakeTranslateMatrix(target_->matWorld_);
-				enemyVector.Normalize();
-				destinationAngle_.x = enemyVector.x;
-				destinationAngle_.y = std::atan2(enemyVector.x, enemyVector.z);
-			} else {
+				Vector3 enemyPos{};
+				float distance = 9999999.0f;
+				for (size_t i = 0; i < 5; i++) {
+					if (enemy_.at(i)->GetIsDeathAnimation()) {
+						continue;
+					}
+					float test = (MakeTranslateMatrix(target_->matWorld_) - enemy_.at(i)->GetPosition()).Length();
+					if (distance >= test) {
+						enemyPos = enemy_.at(i)->GetPosition();
+						distance = test;
+					}
+				}
+				if (enemyPos != Vector3({ 0.0f, 0.0f, 0.0f })) {
+					Vector3 enemyVector = enemyPos - MakeTranslateMatrix(target_->matWorld_);
+					enemyVector.Normalize();
+					destinationAngle_.x = enemyVector.x;
+					destinationAngle_.y = std::atan2(enemyVector.x, enemyVector.z);
+				}
+			}
+			else {
 				destinationAngle_.x = target_->rotation_.x;
 				destinationAngle_.y = target_->rotation_.y;
 			}
@@ -129,19 +147,19 @@ void FollowCamera::Keyboard() {
 		// X軸を軸に回転
 		viewProjection_.rotation_.x += kRotateSpeedX * kKeyboardCameraSpeed_Y;
 		viewProjection_.rotation_.x = Clamp(
-		    viewProjection_.rotation_.x, DegToRad(kDeadZoneRotateMin),
-		    DegToRad(kDeadZoneRotateMax));
+			viewProjection_.rotation_.x, DegToRad(kDeadZoneRotateMin),
+			DegToRad(kDeadZoneRotateMax));
 		destinationAngle_.x += kRotateSpeedY * kKeyboardCameraSpeed_X;
 	}
 	if (Input::GetInstance()->PushKey(DIK_DOWNARROW)) {
 		// X軸を軸に回転
 		viewProjection_.rotation_.x -= kRotateSpeedX * kKeyboardCameraSpeed_Y;
 		viewProjection_.rotation_.x = Clamp(
-		    viewProjection_.rotation_.x, DegToRad(kDeadZoneRotateMin),
-		    DegToRad(kDeadZoneRotateMax));
+			viewProjection_.rotation_.x, DegToRad(kDeadZoneRotateMin),
+			DegToRad(kDeadZoneRotateMax));
 		destinationAngle_.x -= kRotateSpeedY * kKeyboardCameraSpeed_X;
 	}
-	
+
 	if (Input::GetInstance()->PushKey(DIK_TAB)) {
 		destinationAngle_.x = target_->rotation_.x;
 		destinationAngle_.y = target_->rotation_.y;
@@ -151,16 +169,16 @@ void FollowCamera::Keyboard() {
 void FollowCamera::RotateUpdate() {
 	// 最短角度補間
 	viewProjection_.rotation_.y =
-	    LenpShortAngle(viewProjection_.rotation_.y, destinationAngle_.y, interpolationLate);
+		LenpShortAngle(viewProjection_.rotation_.y, destinationAngle_.y, interpolationLate);
 	// 回転行列生成
 	Matrix4x4 rotate =
-	    Mul(MakeRotateXMatrix(viewProjection_.rotation_.x),
-	        MakeRotateYMatrix(viewProjection_.rotation_.y));
+		Mul(MakeRotateXMatrix(viewProjection_.rotation_.x),
+			MakeRotateYMatrix(viewProjection_.rotation_.y));
 	// オフセットをカメラの回転に合わせて回転させる
 	offset_ = TransformNormal(offset_, rotate);
 	// 座標をコピーしてずらす/*interTarget_, target_->translation_*/
 	viewProjection_.translation_ = interTarget_ + offset_;
-	
+
 }
 
 void FollowCamera::Reset() {

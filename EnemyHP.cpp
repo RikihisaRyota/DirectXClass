@@ -3,7 +3,6 @@
 #include "ImGuiManager.h"
 #include "MyMath.h"
 
-int32_t EnemyHP::add_HP_;
 
 void EnemyHP::Initialize(/*uint32_t now_TextureHandle, uint32_t delay_TextureHandle*/) {
 	now_HP_ = kMax_HP_;

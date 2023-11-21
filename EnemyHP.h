@@ -26,6 +26,6 @@ private:
 	std::unique_ptr<Sprite> delay_HP_Sprite_;*/
 	int32_t now_HP_;
 	int32_t delay_HP_;
-	static int32_t add_HP_;
+	int32_t add_HP_;
 	bool IsAlive_;
 };

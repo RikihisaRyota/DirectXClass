@@ -85,7 +85,7 @@ Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
 	}
 	float theta = std::acos(cos);
 	Quaternion result{};
-	result = Add(Multiply(from, std::sin((1.0f - t) * theta) / std::sin(theta)), Multiply(q1, std::sin(t*theta)/std::sin(theta)));
+	result = Add(Multiply(from, std::sin((1.0f - t) * theta) / std::sin(theta)), Multiply(q1, std::sin(t * theta) / std::sin(theta)));
 	return result;
 }
 Quaternion MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle) {
@@ -647,6 +647,25 @@ Vector3 MakeEulerAngle(const Matrix4x4& matrix) {
 	return angles;
 }
 
+float Angle(const Vector3& from, const Vector3& to) {
+	float dot = Dot(from, to);
+	Vector2 Vector2From = { from.x ,from.z };
+	Vector2 Vector2To = { to.x ,to.z };
+	if (dot >= 1.0f) {
+		return 0.0f;
+	}
+	if (dot <= -1.0f) {
+		return DegToRad(180.0f);
+	}
+
+	if (Cross(Vector2From, Vector2To) > 0) {
+		return -std::acosf(dot);
+	}
+	else {
+		return std::acosf(dot);
+	}
+}
+
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {
 	Matrix4x4 tmp = Mul(
 		MakeRotateXMatrix(rotate.x), Mul(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
@@ -970,7 +989,7 @@ Vector3 Cross(const Vector3& a, const Vector3& b) {
 }
 
 float Cross(const Vector2& v1, const Vector2& v2) {
-	return { v1.x * v2.y - v1.y - v2.x };
+	return { v1.x * v2.y - v1.y * v2.x };
 }
 
 AABB AABBAssignment(const AABB& aabb) {

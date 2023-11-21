@@ -28,16 +28,18 @@ void GameScene::Initialize() {
 #pragma endregion
 	// 敵
 	// 敵モデル
-	std::vector<Model*> enemyModel(static_cast<int>(Enemy::Parts::COUNT));
+	std::vector<std::vector<Model*>> enemyModels;
 	// 敵攻撃モデル
-	std::vector<Model*> enemyAttackModel(
-		static_cast<int>(EnemyAttack::Parts::COUNT));
+	std::vector<Model*> enemyAttackModel(static_cast<int>(EnemyAttack::Parts::COUNT));
 	// 敵モデル
-	enemyModel[static_cast<int>(Enemy::Parts::BODY)] = (Model::Create("enemy_Body", true));
-	enemyModel[static_cast<int>(Enemy::Parts::HEAD)] = (Model::Create("enemy_Head", true));
-	enemyModel[static_cast<int>(Enemy::Parts::ARML)] = (Model::Create("enemy_armL", true));
-	enemyModel[static_cast<int>(Enemy::Parts::ARMR)] = (Model::Create("enemy_armR", true));
-
+	for (size_t i = 0; i < 5; i++) {
+		std::vector<Model*> enemyModel(static_cast<int>(Enemy::Parts::COUNT));
+		enemyModel[static_cast<int>(Enemy::Parts::BODY)] = (Model::Create("enemy_Body", true));
+		enemyModel[static_cast<int>(Enemy::Parts::HEAD)] = (Model::Create("enemy_Head", true));
+		enemyModel[static_cast<int>(Enemy::Parts::ARML)] = (Model::Create("enemy_armL", true));
+		enemyModel[static_cast<int>(Enemy::Parts::ARMR)] = (Model::Create("enemy_armR", true));
+		enemyModels.emplace_back(enemyModel);
+	}
 	// 敵攻撃モデル
 	enemyAttackModel[static_cast<int>(EnemyAttack::Parts::CIRCLE)] = (Model::Create("enemy_Attack_Circle", true));
 	enemyAttackModel[static_cast<int>(EnemyAttack::Parts::PLANE)] = (Model::Create("enemy_Attack_Plane", true));
@@ -47,7 +49,7 @@ void GameScene::Initialize() {
 		EnemyAttack* enemyAttack = new EnemyAttack();
 		Enemy* enemy = new Enemy();
 		EnemyHP* enemyHP = new EnemyHP();
-		enemy->Initialize(enemyModel);
+		enemy->Initialize(enemyModels.at(i));
 		enemy->SetPlayer(player_.get());
 		enemy->SetPlayerAttack(playerAttack_.get());
 		enemy->SetEnemyAttack(enemyAttack);
@@ -57,6 +59,7 @@ void GameScene::Initialize() {
 		enemyAttack->Initialize(enemyAttackModel);
 		// 
 		enemyHP->Initialize();
+
 		enemy_.emplace_back(enemy);
 		enemyAttack_.emplace_back(enemyAttack);
 		enemyHP_.emplace_back(enemyHP);
@@ -103,12 +106,15 @@ void GameScene::Initialize() {
 	//フォローカメラ
 	followCamera_.Intialize();
 	followCamera_.SetTarget(&player_.get()->GetWorldTransform());
+	for (int i = 0; i < enemy_.size(); i++) {
+		followCamera_.SetEnemy(enemy_.at(i));
+	}
 }
 
 void GameScene::Update() {
 	GlobalVariables::GetInstance()->Update();
 	// デバックカメラ
-	debugCamera_->Update(&viewProjection_);
+	//debugCamera_->Update(&viewProjection_);
 	// フォローカメラ	
 	followCamera_.Update();
 	viewProjection_ = *followCamera_.GetViewProjection();
@@ -123,7 +129,7 @@ void GameScene::Update() {
 		enemyHP_.at(i)->Update();
 		enemy_.at(i)->Update();
 	}
-	
+
 	// コリジョンマネージャー
 	collisionManager_->Update(player_.get(), playerAttack_.get(), block_.get(), enemy_, enemyAttack_);
 }

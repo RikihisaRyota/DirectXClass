@@ -145,7 +145,7 @@ void EnemyAttack::Update() {
 }
 
 void EnemyAttack::Draw(const ViewProjection& viewProjection) {
-	if (enemy_->GetIsAlive()) {
+	if (enemy_->GetIsDeathAnimation()) {
 
 		for (size_t i = 0; i < worldTransform_.size(); i++) {
 			switch (behavior_) {

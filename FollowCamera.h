@@ -1,9 +1,12 @@
 #pragma once
 
+#include <vector>
+
 #include "Vector2.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 
+class Enemy;
 class FollowCamera {
 public: // メンバ関数
 	/// <summary>
@@ -26,7 +29,7 @@ public: // セッター,ゲッター
 	/// 敵へのターゲットカメラ
 	/// </summary>
 	/// <param name="target"></param>
-	void SetEnemy(const WorldTransform* target);
+	void SetEnemy(Enemy* enemy);
 	/// <summary>
 	/// offsetを
 	/// </summary>
@@ -81,7 +84,7 @@ private: // メンバ変数
 	// 追従対象
 	const WorldTransform* target_ = nullptr;
 	// 追従対象
-	const WorldTransform* enemy_ = nullptr;
+	std::vector<Enemy*> enemy_;
 	// 追従対象の残像
 	Vector3 interTarget_ = {};
 	// オフセット(いらない)

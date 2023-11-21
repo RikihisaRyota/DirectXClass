@@ -47,6 +47,7 @@ public:
 	void SetPlayer(Player* player) { player_ = player; }
 	void SetPlayerAttack(PlayerAttack* player) { playerAttack_ = player; }
 	bool GetIsAlive() { return isAlive_; }
+	bool GetIsDeathAnimation() { return isDeathAnimation_; }
 	void SetIsAlive(bool flag) { isAlive_ = flag; }
 	void SetPosition(const Vector3& position);
 	Vector3 GetPosition() { return Vector3(worldTransform_.at(0).matWorld_.m[3][0], worldTransform_.at(0).matWorld_.m[3][1], worldTransform_.at(0).matWorld_.m[3][2]); }

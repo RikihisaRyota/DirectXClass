@@ -192,7 +192,7 @@ void Player::GetGlobalVariables() {
 	const char* groupName = "Player";
 	globalVariables->LoadFiles();
 	worldTransform_.at(0).translation_ = globalVariables->GetValue<Vector3>(groupName, "position");
-	kDashTime= globalVariables->GetValue<int>(groupName, "dashTime");
+	kDashTime = globalVariables->GetValue<int>(groupName, "dashTime");
 	// 転送
 	BaseCharacter::Update();
 }
@@ -394,20 +394,20 @@ void Player::HitBoxDraw(const ViewProjection& viewProjection) {
 }
 
 void Player::PlayerRotate(const Vector3& vector1) {
-	Vector3 vector = vector1;
-	if (vector != Vector3(0.0f, 0.0f, 0.0f)) {
-		vector.Normalize();
-	}
-	if (interRotate_ != Vector3(0.0f, 0.0f, 0.0f)) {
-		interRotate_.Normalize();
-	}
-	Vector3 rotate = Lerp(interRotate_, vector, kTurn);
-	//  Y軸回り角度(θy)
-	Matrix4x4 rotateMatrix = DirectionToDirection(interRotate_, vector);
+	//Vector3 vector = vector1;
+	//if (vector != Vector3(0.0f, 0.0f, 0.0f)) {
+	//	vector.Normalize();
+	//}
+	//if (interRotate_ != Vector3(0.0f, 0.0f, 0.0f)) {
+	//	interRotate_.Normalize();
+	//}
+	//Vector3 rotate = Lerp(interRotate_, vector, kTurn);
+	////  Y軸回り角度(θy)
+	//Matrix4x4 rotateMatrix = DirectionToDirection(interRotate_, vector);
 
-	worldTransform_.at(0).rotation_ = MakeEulerAngle(rotateMatrix);
-	// プレイヤーの向いている方向
-	interRotate_ = rotate;
+	//worldTransform_.at(0).rotation_ = MakeEulerAngle(rotateMatrix);
+	//// プレイヤーの向いている方向
+	//interRotate_ = rotate;
 }
 
 void Player::BehaviorInitialize() {
@@ -581,42 +581,15 @@ void Player::ChackTranslation() {
 
 }
 void Player::PlayerRotate() {
-	/*Quaternion rotation = MakeRotateAxisAngleQuaternion(
-		Normalize(Vector3{ 1.0f,0.4f,-0.2f }), 0.45f);
-	Vector3 pointY = { 2.1f,-0.9f,1.3f };
-	pointY.Normalize();
-	Matrix4x4 rotateMatrix = MakeRotateMatrix(rotation);
-	Vector3 rotateByQuaternion = RotateVector(pointY,rotation);
-	Vector3 rotateByMatrix = Transform(pointY,rotateMatrix);*/
 	if (vector_ != Vector3(0.0f, 0.0f, 0.0f)) {
 		vector_.Normalize();
-	}
-	if (interRotate_ != Vector3(0.0f, 0.0f, 0.0f)) {
 		interRotate_.Normalize();
+		//  Y軸回り角度(θy)
+		worldTransform_.at(0).rotation_.y = Angle({0.0f,0.0f,1.0f}, vector_);
+		worldTransform_.at(0).UpdateMatrix();
+		interRotate_ = vector_;
 	}
-	interRotate_ = Lerp(interRotate_, vector_, kTurn);
-	// test
-	Quaternion rotation = MakeRotateAxisAngleQuaternion(
-		Normalize(Vector3{ 1.0f,0.4f,-0.2f }), 0.45f
-	);
 
-	//  Y軸回り角度(θy)
-	worldTransform_.at(0).rotation_.y = std::atan2(interRotate_.x, interRotate_.z);
-	worldTransform_.at(0).UpdateMatrix();
-	/*Vector3 axis = Cross(interRotate_, vector_);
-	if (axis.Length() > 0.0f) {
-		axis.Normalize();
-	}
-	float angle = std::acos(Dot(interRotate_, vector_));
-	worldTransform_.at(0).quaternion_ = MakeRotateAxisAngleQuaternion(axis, angle);
-	worldTransform_.at(0).UpdateQuaternion();
-
-	for (size_t i = 0; i < worldTransform_.size(); i++) {
-		worldTransform_Motion_.at(i).UpdateMatrix();
-		for (size_t model = 0; model < worldTransforms_Parts_.at(i).size(); model++) {
-			worldTransforms_Parts_.at(i).at(model).UpdateMatrix();
-		}
-	}*/
 }
 
 void Player::InitializeFloatGimmick() {

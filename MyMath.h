@@ -19,9 +19,9 @@ Quaternion Normalize(const Quaternion& quaternion);
 Quaternion Inverse(const Quaternion& quaternion);
 Quaternion Add(const Quaternion& p1, const Quaternion& p2);
 Quaternion Multiply(const Quaternion& p1, const Quaternion& p2);
-Quaternion Multiply(const Quaternion& p1,float scalar);
+Quaternion Multiply(const Quaternion& p1, float scalar);
 float Norm(const Quaternion& quaternion);
-Quaternion Slerp(const Quaternion& q0, const Quaternion& q1,float t);
+Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t);
 // 任意軸回転(Quaternion)
 Quaternion MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle);
 Quaternion MakeRotateQuaternion(const Vector3& from, const Vector3 to);
@@ -91,6 +91,8 @@ Matrix4x4 MakeRotateXYZMatrix(const Vector3& rotation);
 Matrix4x4 MakeRotateMatrix(const Matrix4x4& matrix);
 // 行列からオイラー角
 Vector3 MakeEulerAngle(const Matrix4x4& matrix);
+
+float Angle(const Vector3& from, const Vector3& to);
 // 3次元アフィン変換
 Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
 //1,透視投影行列
@@ -158,8 +160,8 @@ Matrix4x4 MakeMatWolrd(const WorldTransform& worldtransform);
 /// <param name="viewProjection">viewProjection</param>
 /// <param name="color">color</param>
 void ChackHitBox(
-    const WorldTransform& worldtransform, const ViewProjection& viewProjection,
-    const Vector4& color);
+	const WorldTransform& worldtransform, const ViewProjection& viewProjection,
+	const Vector4& color);
 
 /// <summary> 
 /// 最短角度補間
@@ -192,12 +194,12 @@ Matrix4x4 SetRotate(const Vector3(&array)[3]);
 // 曲線
 // 二次ベジエ
 Vector2 QuadraticBezier(
-    const Vector2& controlPoint0, const Vector2& controlPoint1, const Vector2& controlPoint2,
-    float t);
+	const Vector2& controlPoint0, const Vector2& controlPoint1, const Vector2& controlPoint2,
+	float t);
 // 三次ベジエ
 Vector3 CubicBezier(
-    const Vector3& controlPoint0, const Vector3& controlPoint1, const Vector3& controlPoint2,
-    float t);
+	const Vector3& controlPoint0, const Vector3& controlPoint1, const Vector3& controlPoint2,
+	float t);
 
 // Lerp
 // float Lerp(float start, float end, float t);
@@ -205,16 +207,16 @@ Vector3 CubicBezier(
 // Vector3 Lerp(const Vector3& start, const Vector3& end, float t);
 template<class T> T Lerp(const T& start, const T& end, float t);
 template<class T> inline T Lerp(const T& start, const T& end, float t) {
-    return start + (end - start) * t;
+	return start + (end - start) * t;
 }
 
 // CatmullRom
 Vector2 QuadraticCatmullRom(
-    const Vector2& Position0, const Vector2& Position1, const Vector2& Position2,
-    const Vector2& Position3, float t);
+	const Vector2& Position0, const Vector2& Position1, const Vector2& Position2,
+	const Vector2& Position3, float t);
 Vector3 CubicCatmullRom(
-    const Vector3& Position0, const Vector3& Position1, const Vector3& Position2,
-    const Vector3& Position3, float t);
+	const Vector3& Position0, const Vector3& Position1, const Vector3& Position2,
+	const Vector3& Position3, float t);
 // OBBの頂点
 void OBBIndex(const OBB& obb, std::vector<Vector3>& output_vertices);
 // 分離軸

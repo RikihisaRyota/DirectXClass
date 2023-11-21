@@ -54,7 +54,9 @@ void Enemy::Update() {
 			float t = 1.0f - deathTime_ / 60.0f;
 			for (auto& model : models_) {
 				cMaterial* material = model->GetMaterial(0)->GetMaterial();
-				material->color_.w = Lerp(1.0f, 0.0f, t);
+				material->color_.x = Lerp(1.0f, 0.0f, t);
+				material->color_.y = Lerp(1.0f, 0.0f, t);
+				material->color_.z = Lerp(1.0f, 0.0f, t);
 				model->GetMaterial(0)->SetMaterial(*material);
 			}
 			deathTime_--;
@@ -62,54 +64,56 @@ void Enemy::Update() {
 				isAlive_ = false;
 			}
 		}
-		if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_1)) {
-			behaviorRequest_ = Behavior::kAttack;
-			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
-		}
-		if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_2)) {
-			behaviorRequest_ = Behavior::kAttack;
-			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kDashAttack);
-		}
-		if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_3)) {
-			behaviorRequest_ = Behavior::kAttack;
-			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
-		}
-		if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_4)) {
-			behaviorRequest_ = Behavior::kAttack;
-			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kTornadoAttack);
-		}
-		if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_5)) {
-			behaviorRequest_ = Behavior::kAttack;
-			enemyAttack_->SetBehavior(EnemyAttack::Behavior::kMeteoAttack);
-		}
-		if (behaviorRequest_) {
-			// ふるまいを変更
-			behavior_ = behaviorRequest_.value();
-			// 各ふるまいごとの初期化を実行
+		else {
+			if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_1)) {
+				behaviorRequest_ = Behavior::kAttack;
+				enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPressAttack);
+			}
+			if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_2)) {
+				behaviorRequest_ = Behavior::kAttack;
+				enemyAttack_->SetBehavior(EnemyAttack::Behavior::kDashAttack);
+			}
+			if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_3)) {
+				behaviorRequest_ = Behavior::kAttack;
+				enemyAttack_->SetBehavior(EnemyAttack::Behavior::kPunchAttack);
+			}
+			if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_4)) {
+				behaviorRequest_ = Behavior::kAttack;
+				enemyAttack_->SetBehavior(EnemyAttack::Behavior::kTornadoAttack);
+			}
+			if (behavior_ != Enemy::Behavior::kAttack && Input::GetInstance()->PushKey(DIK_5)) {
+				behaviorRequest_ = Behavior::kAttack;
+				enemyAttack_->SetBehavior(EnemyAttack::Behavior::kMeteoAttack);
+			}
+			if (behaviorRequest_) {
+				// ふるまいを変更
+				behavior_ = behaviorRequest_.value();
+				// 各ふるまいごとの初期化を実行
+				switch (behavior_) {
+				case Enemy::Behavior::kRoot:
+				default:
+					RootInitialize();
+					break;
+				case Enemy::Behavior::kAttack:
+					enemyAttack_->Initialize();
+					break;
+				}
+				// ふるまいリクエストをリセット
+				behaviorRequest_ = std::nullopt;
+			}
 			switch (behavior_) {
 			case Enemy::Behavior::kRoot:
 			default:
-				RootInitialize();
+				RootUpdate();
 				break;
 			case Enemy::Behavior::kAttack:
-				enemyAttack_->Initialize();
+				enemyAttack_->Update();
 				break;
 			}
-			// ふるまいリクエストをリセット
-			behaviorRequest_ = std::nullopt;
+			// 転送
+			BaseCharacter::Update();
+			HitBoxUpdate();
 		}
-		switch (behavior_) {
-		case Enemy::Behavior::kRoot:
-		default:
-			RootUpdate();
-			break;
-		case Enemy::Behavior::kAttack:
-			enemyAttack_->Update();
-			break;
-		}
-		// 転送
-		BaseCharacter::Update();
-		HitBoxUpdate();
 	}
 
 
