@@ -110,6 +110,7 @@ void Input::Update() {
 					devJoysticks_[i].state_.xInput_.Gamepad.sThumbRY = 0;
 				}
 			}
+			devJoysticks_[i].statePre_.xInput_ = devJoysticks_[i].state_.xInput_;
 		}
 	}
 }
@@ -218,6 +219,17 @@ bool Input::GetJoystickStatePrevious(int32_t stickNo, XINPUT_STATE& out) const {
 	return false;
 }
 bool Input::IsControllerConnected() const {
+	for (DWORD i = 0; i < devJoysticks_.size(); ++i) {
+		if (devJoysticks_[i].type_ == PadType::XInput) {
+			XINPUT_STATE xInputState;
+			ZeroMemory(&xInputState, sizeof(XINPUT_STATE));
+			DWORD result = XInputGetState(i, &xInputState);
+			if (result == ERROR_SUCCESS) {
+				return true;
+			}
+			return false;
+		}
+	}
 	return false;
 }
 //BOOL CALLBACK Input::EnumJoystickObjectsCallback(const DIDEVICEOBJECTINSTANCE* instance, VOID* context) {

@@ -37,7 +37,7 @@ void EnemyDash::Initialize() {
 	const Vector3 kScale{2.0f, 1.0f, target_Distance_*0.5f};
 	// 角度
 	Vector3 rotate = target_.translation_ - origin_.translation_;
-	rotate.y = std::atan2(rotate.x, rotate.z);
+	rotate.y = Angle({0.0f,0.0f,1.0f}, rotate);
 	rotate.x = 0.0f;
 	rotate.z = 0.0f;
 	// 移動

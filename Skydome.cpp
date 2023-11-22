@@ -9,7 +9,7 @@ void Skydome::Initialize(std::unique_ptr<Model> model) {
 	model_ = std::move(model);
 	worldTransform_.Initialize();
 	scale_ = 51.0f;
-	worldTransform_.scale_ = {70.0f, 70.0f, 70.0f};
+	worldTransform_.scale_ = {90.0f, 90.0f, 90.0f};
 	worldTransform_.translation_ = {0.0f, 0.0f, 0.0f};
 
 	worldTransform_.UpdateMatrix();

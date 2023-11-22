@@ -86,6 +86,7 @@ void GameScene::Initialize() {
 	player_->Initialize(playerModel);
 
 	playerAttack_->SetPlayer(player_.get());
+	playerAttack_->SetEnemy(enemy_);
 	playerAttack_->Initialize(playerAttackModel);
 
 	// ブロック
@@ -115,6 +116,16 @@ void GameScene::Update() {
 	GlobalVariables::GetInstance()->Update();
 	// デバックカメラ
 	//debugCamera_->Update(&viewProjection_);
+	// 敵
+	for (size_t i = 0; i < 5; i++) {
+		enemyAttack_.at(i)->Update();
+		if (!player_->GetIsAlive()) {
+			enemy_.at(i)->SetIsAlive(true);
+			enemyHP_.at(i)->Initialize();
+		}
+		enemyHP_.at(i)->Update();
+		enemy_.at(i)->Update();
+	}
 	// フォローカメラ	
 	followCamera_.Update();
 	viewProjection_ = *followCamera_.GetViewProjection();
@@ -123,15 +134,7 @@ void GameScene::Update() {
 	// プレイヤー
 	playerAttack_->Update();
 	player_->Update();
-	// 敵
-	for (size_t i = 0; i < 5; i++) {
-		if (!player_->GetIsAlive()) {
-			enemy_.at(i)->SetIsAlive(true);
-		}
-		enemyAttack_.at(i)->Update();
-		enemyHP_.at(i)->Update();
-		enemy_.at(i)->Update();
-	}
+	
 
 	// コリジョンマネージャー
 	collisionManager_->Update(player_.get(), playerAttack_.get(), block_.get(), enemy_, enemyAttack_);
@@ -165,12 +168,16 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	//skydome_->Draw(viewProjection_);
+	skydome_->Draw(viewProjection_);
 	block_->Draw(viewProjection_);
 	for (size_t i = 0; i < 5; i++) {
 		enemy_.at(i)->Draw(viewProjection_);
-		enemyAttack_.at(i)->Draw(viewProjection_);
+		if (enemy_.at(i)->GetIsAlive()&&
+			!enemy_.at(i)->GetIsDeathAnimation()) {
+			enemyAttack_.at(i)->Draw(viewProjection_);
+		}
 	}
+	followCamera_.Draw();
 	player_->Draw(viewProjection_);
 	if (player_->GetBehavior() == Player::Behavior::kAttack) {
 		playerAttack_->Draw(viewProjection_);

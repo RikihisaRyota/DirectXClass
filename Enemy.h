@@ -48,7 +48,7 @@ public:
 	void SetPlayerAttack(PlayerAttack* player) { playerAttack_ = player; }
 	bool GetIsAlive() { return isAlive_; }
 	bool GetIsDeathAnimation() { return isDeathAnimation_; }
-	void SetIsAlive(bool flag) { isAlive_ = flag; }
+	void SetIsAlive(bool flag);
 	void SetPosition(const Vector3& position);
 	Vector3 GetPosition() { return Vector3(worldTransform_.at(0).matWorld_.m[3][0], worldTransform_.at(0).matWorld_.m[3][1], worldTransform_.at(0).matWorld_.m[3][2]); }
 private:
@@ -95,6 +95,8 @@ private:
 	Vector3 interRotate_;
 	// さいしゅうてきに向きたい方向
 	Vector3 destinationAngle_;
+
+	Vector3 initializePosition_;
 	// 移動回転用
 	float moveRatate_;
 	// 動作回転用

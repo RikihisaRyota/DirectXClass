@@ -20,7 +20,8 @@ void CollisionManager::CheckAllCollisions(Player* player, PlayerAttack* PlayerAt
 	colliders_.emplace_back(block);
 	// 敵
 	for (size_t i = 0; i < enemy.size(); i++) {
-		if (enemy.at(i)->GetIsAlive()) {
+		if (enemy.at(i)->GetIsAlive()&&
+			!enemy.at(i)->GetIsDeathAnimation()) {
 			colliders_.emplace_back(enemy.at(i));
 			if (enemy.at(i)->GetBehavior() == Enemy::Behavior::kAttack) {
 				colliders_.emplace_back(enemyAttack.at(i));
@@ -94,10 +95,10 @@ void CollisionManager::CheakCollisionPair(Collider* colliderA, Collider* collide
 					else if (
 						(collisionAttributeA & kCollisionAttributePlayerAttack) &&
 						(collisionAttributeB & kCollisionAttributeEnemy)) {
-						colliderA->OnCollision(
-							*obbB, colliderB->GetWorldTransform(b), static_cast<uint32_t>(Collider::Type::PlayerAttackToEnemy));
 						colliderB->OnCollision(
 							*obbA, colliderA->GetWorldTransform(a), static_cast<uint32_t>(Collider::Type::PlayerAttackToEnemy));
+						colliderA->OnCollision(
+							*obbB, colliderB->GetWorldTransform(b), static_cast<uint32_t>(Collider::Type::PlayerAttackToEnemy));
 					}
 					else if ((collisionAttributeA & kCollisionAttributePlayer) &&
 						(collisionAttributeB & kCollisionAttributeBlock)) {

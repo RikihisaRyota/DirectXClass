@@ -18,7 +18,7 @@ private:
 	float Conversion(int32_t num);
 
 private:
-	const uint32_t kMax_HP_ = 3;
+	const uint32_t kMax_HP_ = 4;
 	const Vector2 position_ = {100.0f, 20.0f};
 	const float kWidth_ = 1280.0f - position_.x * 2.0f;
 	const float kHeight_ = 30.0f;

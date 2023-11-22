@@ -51,6 +51,7 @@ void Enemy::Update() {
 			isDeathAnimation_ = true;
 		}
 		if (isDeathAnimation_) {
+			worldTransform_.at(0).translation_.y += 1.0f;
 			float t = 1.0f - deathTime_ / 60.0f;
 			for (auto& model : models_) {
 				cMaterial* material = model->GetMaterial(0)->GetMaterial();
@@ -149,20 +150,39 @@ void Enemy::EnemyRotate(const Vector3& vector1) {
 	if (interRotate_ != Vector3(0.0f, 0.0f, 0.0f)) {
 		interRotate_.Normalize();
 	}
-	Vector3 rotate = Lerp(interRotate_, vector, kTurn);
-
-	float cos = Dot(interRotate_, rotate);
-	float sin = Cross(rotate, interRotate_).Length();
+	interRotate_ = Lerp(interRotate_, vector, kTurn);
 	//  Y軸回り角度(θy)
-	worldTransform_.at(0).rotation_.y = std::atan2(rotate.x, rotate.z);
+	worldTransform_.at(0).rotation_.y = Angle({ 0.0f,0.0f,1.0f }, interRotate_);
 	// プレイヤーの向いている方向
-	interRotate_ = rotate;
 }
 
 
+void Enemy::SetIsAlive(bool flag) {
+	isAlive_ = flag;
+	isDeathAnimation_ = false;
+	worldTransform_.at(0).translation_ = initializePosition_;
+	BaseCharacter::Update();
+	HitBoxUpdate();
+	area_ = {
+		.center_{worldTransform_.at(0).translation_ },
+		.min_{worldTransform_.at(0).translation_ - 5.0f},
+		.max_{worldTransform_.at(0).translation_ + 5.0f},
+	};
+	vector_ = Normalize(worldTransform_.at(0).translation_);
+	for (auto& model : models_) {
+		cMaterial* material = model->GetMaterial(0)->GetMaterial();
+		material->color_.x = 1.0f;
+		material->color_.y = 1.0f;
+		material->color_.z = 1.0f;
+		model->GetMaterial(0)->SetMaterial(*material);
+	}
+	deathTime_ = 60.0f;
+}
+
 void Enemy::SetPosition(const Vector3& position) {
-	worldTransform_.at(0).translation_ = position;
-	worldTransform_.at(0).translation_.y = kFloor_Distance_;
+	initializePosition_ = position;
+	initializePosition_.y = kFloor_Distance_;
+	worldTransform_.at(0).translation_ = initializePosition_;
 	BaseCharacter::Update();
 	HitBoxUpdate();
 	area_ = {

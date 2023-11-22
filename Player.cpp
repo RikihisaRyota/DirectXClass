@@ -120,7 +120,7 @@ void Player::BehaviorAttackUpdate() {
 
 void Player::BehaviorDashInitialize() {
 	workDash_.dashParameter_ = 0;
-	worldTransform_.at(0).rotation_.y = std::atan2(destinationAngle_.x, destinationAngle_.z);
+	worldTransform_.at(0).rotation_.y = Angle({ 0.0f,0.0f,1.0f }, destinationAngle_);
 	acceleration_.y = 0.0f;
 	IsDash_ = true;
 	dash_Count_Start_Flag_ = true;
@@ -590,7 +590,7 @@ void Player::PlayerRotate() {
 		vector_.Normalize();
 		interRotate_.Normalize();
 		//  Y軸回り角度(θy)
-		worldTransform_.at(0).rotation_.y = Angle({0.0f,0.0f,1.0f}, vector_);
+		worldTransform_.at(0).rotation_.y = Angle({ 0.0f,0.0f,1.0f }, vector_);
 		worldTransform_.at(0).UpdateMatrix();
 		interRotate_ = vector_;
 	}

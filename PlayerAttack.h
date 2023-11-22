@@ -1,6 +1,7 @@
 #pragma once
 #include <optional>
 #include <list>
+#include <vector>
 
 #include "Collider.h"
 #include "PlaneRenderer.h"
@@ -66,6 +67,7 @@ public:
 	void OnCollision(const OBB& obb, const WorldTransform& worldTransform, uint32_t type) override;
 
 	void SetPlayer(Player* player) { player_ = player; }
+	void SetEnemy(std::vector<Enemy*>enemy) { enemy_ = enemy; }
 	void SetBehavior(const Behavior& behavior) { behaviorRequest_ = behavior; }
 
 	int32_t GetChageAttackCount() { return kChageAttackCount; }
@@ -111,7 +113,7 @@ private:
 	void HitParticleDraw(const ViewProjection& viewProjection);
 private:
 	Player* player_;
-	Enemy* enemy_;
+	std::vector<Enemy*> enemy_;
 
 	// ふるまい
 	Behavior behavior_ = Behavior::kRoot;

@@ -88,19 +88,6 @@ void PlayerAttack::Update() {
 	BaseCharacter::Update();
 	HitBoxUpdate();
 	ParticleUpdate();
-	/*ImGui::Begin("playerAttack");
-	ImGui::SliderFloat("distance_min_", &distance_min_, 0.0f, 10.0f);
-	ImGui::SliderFloat("distance_max_", &distance_max_, 10.0f, 30.0f);
-	ImGui::SliderFloat("over_scale_", &scale_, 0.0f, 1.0f);
-	float min = static_cast<float>(time_min_);
-	float max = static_cast<float>(time_max_);
-	ImGui::SliderFloat("time_min_", &min, 5.0f, 10.0f);
-	ImGui::SliderFloat("time_max_", &max, 15.0f, 30.0f);
-	time_min_ = static_cast<uint32_t>(min);
-	time_max_ = static_cast<uint32_t>(max);
-	ImGui::Text("size:%d", chage_Particles_.size());
-	ImGui::Text("count:%d", particle_Count_);
-	ImGui::End();*/
 }
 
 void PlayerAttack::Draw(const ViewProjection& viewProjection) {
@@ -688,10 +675,21 @@ void PlayerAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransf
 	case PlayerAttack::Behavior::kChargeAttack:
 		if (!hitFlag_) {
 			hitFlag_ = true;
-			/*HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));*/
+			Vector3 enemyPos{};
+			float distance = 9999999.0f;
+			for (size_t i = 0; i < 5; i++) {
+				if (enemy_.at(i)->GetIsDeathAnimation()) {
+					continue;
+				}
+				float test = (MakeTranslateMatrix(worldTransform.matWorld_) - enemy_.at(i)->GetPosition()).Length();
+				if (distance >= test) {
+					enemyPos = enemy_.at(i)->GetPosition();
+					distance = test;
+				}
+			}
+			HitParticleCreate(enemyPos);
 			Audio::GetInstance()->SoundPlayWave(chage_SoundHandle_);
 		}
-
 		break;
 	case PlayerAttack::Behavior::kTripleAttack:
 
@@ -699,21 +697,57 @@ void PlayerAttack::OnCollision(const OBB& obb, const WorldTransform& worldTransf
 		case PlayerAttack::TripleAttack::kFirst:
 			if (!hitFlag_) {
 				hitFlag_ = true;
-				/*HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));*/
+				Vector3 enemyPos{};
+				float distance = 9999999.0f;
+				for (size_t i = 0; i < 5; i++) {
+					if (enemy_.at(i)->GetIsDeathAnimation()) {
+						continue;
+					}
+					float test = (MakeTranslateMatrix(worldTransform.matWorld_) - enemy_.at(i)->GetPosition()).Length();
+					if (distance >= test) {
+						enemyPos = enemy_.at(i)->GetPosition();
+						distance = test;
+					}
+				}
+				HitParticleCreate(enemyPos);
 				Audio::GetInstance()->SoundPlayWave(first_SoundHandle_);
 			}
 			break;
 		case PlayerAttack::TripleAttack::kSecond:
 			if (!hitFlag_) {
 				hitFlag_ = true;
-				/*HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));*/
+				Vector3 enemyPos{};
+				float distance = 9999999.0f;
+				for (size_t i = 0; i < 5; i++) {
+					if (enemy_.at(i)->GetIsDeathAnimation()) {
+						continue;
+					}
+					float test = (MakeTranslateMatrix(worldTransform.matWorld_) - enemy_.at(i)->GetPosition()).Length();
+					if (distance >= test) {
+						enemyPos = enemy_.at(i)->GetPosition();
+						distance = test;
+					}
+				}
+				HitParticleCreate(enemyPos);
 				Audio::GetInstance()->SoundPlayWave(first_SoundHandle_);
 			}
 			break;
 		case PlayerAttack::TripleAttack::kThird:
 			if (!hitFlag_) {
 				hitFlag_ = true;
-				/*HitParticleCreate(MakeTranslateMatrix(enemy_->GetWorldTransform().matWorld_));*/
+				Vector3 enemyPos{};
+				float distance = 9999999.0f;
+				for (size_t i = 0; i < 5; i++) {
+					if (enemy_.at(i)->GetIsDeathAnimation()) {
+						continue;
+					}
+					float test = (MakeTranslateMatrix(worldTransform.matWorld_) - enemy_.at(i)->GetPosition()).Length();
+					if (distance >= test) {
+						enemyPos = enemy_.at(i)->GetPosition();
+						distance = test;
+					}
+				}
+				HitParticleCreate(enemyPos);
 				Audio::GetInstance()->SoundPlayWave(third_SoundHandle_);
 			}
 			break;

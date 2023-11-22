@@ -5,6 +5,7 @@
 #include "Vector2.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
+#include "PlaneRenderer.h"
 
 class Enemy;
 class FollowCamera {
@@ -43,6 +44,7 @@ public: // セッター,ゲッター
 
 	bool GetIsTargetCamera() const { return IsTargetCamera_; }
 
+	void Draw();
 private:
 	/// <summary>
 	/// ゲームパットのカメラ処理
@@ -97,4 +99,10 @@ private: // メンバ変数
 	bool IsTargetCamera_ = false;
 
 	float interpolationLate=0.2f;
+
+	int time_;
+
+	std::unique_ptr<PlaneRenderer> plane_;
+	uint32_t textureHandle_;
+	WorldTransform reticleWorldTarnsform_;
 };
