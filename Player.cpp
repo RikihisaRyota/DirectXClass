@@ -31,6 +31,7 @@ void Player::Initialize(std::vector<Model*> model) {
 	isJump = false;
 	// ダッシュフラグ
 	IsDash_ = false;
+	isAlive_ = true;
 	// 浮遊アニメーションの初期化
 	InitializeFloatGimmick();
 
@@ -45,6 +46,11 @@ void Player::Initialize(std::vector<Model*> model) {
 }
 
 void Player::Update() {
+	if (!isAlive_) {
+		worldTransform_.at(0).parent_ = nullptr;
+		worldTransform_.at(0).translation_ = { 0.0f,10.0f,0.0f };
+		isAlive_ = true;
+	}
 	if (behaviorRequest_) {
 		// ふるまいを変更
 		behavior_ = behaviorRequest_.value();
@@ -550,8 +556,7 @@ void Player::Gravity() {
 	velocity_ += acceleration_;
 	worldTransform_.at(0).translation_ += velocity_;
 	if (MakeTranslateMatrix(worldTransform_.at(0).matWorld_).y <= -30.0f) {
-		worldTransform_.at(0).parent_ = nullptr;
-		worldTransform_.at(0).translation_ = { 0.0f,10.0f,0.0f };
+		isAlive_ = false;
 	}
 	if (std::fabs(velocity_.x) <= 0.001 && std::fabs(velocity_.z) <= 0.001) {
 		velocity_.x = 0.0f;

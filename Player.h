@@ -64,6 +64,9 @@ public: // メンバ関数
 	void BehaviorInitialize();
 	void SetGlobalVariables();
 	void GetGlobalVariables();
+
+	void SetIsAlive(bool flag) { isAlive_ = flag; }
+	bool GetIsAlive() { return isAlive_; }
 private: // メンバ関数
 #pragma region 移動系
 	/// <summary>
@@ -227,5 +230,7 @@ private: // メンバ変数
 	// ふるまい
 	Behavior behavior_ = Behavior::kRoot;
 	std::optional<Behavior> behaviorRequest_ = std::nullopt;
+
+	bool isAlive_;
 
 };

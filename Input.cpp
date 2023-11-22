@@ -217,6 +217,9 @@ bool Input::GetJoystickStatePrevious(int32_t stickNo, XINPUT_STATE& out) const {
 	}
 	return false;
 }
+bool Input::IsControllerConnected() const {
+	return false;
+}
 //BOOL CALLBACK Input::EnumJoystickObjectsCallback(const DIDEVICEOBJECTINSTANCE* instance, VOID* context) {
 //	IDirectInputDevice8* device = static_cast<IDirectInputDevice8*>(context);
 //

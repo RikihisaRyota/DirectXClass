@@ -125,6 +125,9 @@ void GameScene::Update() {
 	player_->Update();
 	// 敵
 	for (size_t i = 0; i < 5; i++) {
+		if (!player_->GetIsAlive()) {
+			enemy_.at(i)->SetIsAlive(true);
+		}
 		enemyAttack_.at(i)->Update();
 		enemyHP_.at(i)->Update();
 		enemy_.at(i)->Update();
