@@ -16,7 +16,7 @@ void GameScene::Initialize() {
 	debugCamera_ = new DebugCamera();
 
 	// 入力
-	input_ = Input::GetInstans();
+	input_ = Input::GetInstance();
 
 	// ライト
 	directionalLight_ = new cDirectionalLight();
@@ -29,11 +29,25 @@ void GameScene::Initialize() {
 	viewProjection_.Initialize();
 	// 線
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection_);
+
+	inputHandler_ = std::make_unique<InputHandler>();
+	inputHandler_->PressKeyA();
+	inputHandler_->PressKeyD();
+
+	player_ = std::make_unique<Player>();
+	player_->Initialize();
 }
 
 void GameScene::Update() {
 	// デバックカメラ
 	debugCamera_->Update(&viewProjection_);
+
+	command_ = inputHandler_->HandleInput();
+	if (command_) {
+		command_->Exec(player_.get());
+	}
+
+	player_->Update();
 }
 
 void GameScene::Draw() {
@@ -61,14 +75,10 @@ void GameScene::Draw() {
 	Model::PreDraw(commandList);
 	PrimitiveDrawer::PreDraw(commandList);
 	PlaneRenderer::PreDraw(commandList);
-
-
-
-
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	
+	player_->Draw(viewProjection_);
 	/// 
 	PrimitiveDrawer::GetInstance()->PrimitiveDrawer::Draw();
 	// 3Dオブジェクト描画後処理
@@ -85,7 +95,6 @@ void GameScene::Draw() {
 #pragma region 前景スプライト描画
 	// 前景スプライト描画前処理
 	Sprite::PreDraw(commandList);
-	Particle::PreDraw(commandList);
 
 	/// <summary>
 	/// ここに前景スプライトの描画処理を追加できる
@@ -94,7 +103,6 @@ void GameScene::Draw() {
 	
 	// スプライト描画後処理
 	Sprite::PostDraw();
-	Particle::PostDraw();
 #pragma endregion
 
 }

@@ -9,14 +9,15 @@
 #include "PrimitiveDrawer.h"
 #include "Model.h"
 #include "OBJ.h"
-
 #include "Pera.h"
-
 #include "SafeDelete.h"
-#include "../Particle.h"
 #include "PlaneRenderer.h"
 #include "SphereRenderer.h"
 #include "Sprite.h"
+
+#include "ICommand.h"
+#include "InputHandler.h"
+#include "Player.h"
 
 class DirectXCommon;
 /// <summary>
@@ -60,11 +61,15 @@ private: // メンバ変数
 	DebugCamera* debugCamera_ = nullptr;
 	// ライト
 	cDirectionalLight* directionalLight_ = nullptr;
-
+	// 音声再生
+	Audio* audio_;
 	/// <summary>
 	/// ゲーム用
 	/// </summary>
 	ViewProjection viewProjection_;
-	// 音声再生
-	Audio* audio_;
+
+	ICommand* command_;
+	std::unique_ptr<InputHandler> inputHandler_;
+	std::unique_ptr<Player> player_;
+
 };

@@ -36,7 +36,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// 入力の初期化
 	Input* input = nullptr;
-	input = Input::GetInstans();
+	input = Input::GetInstance();
 	input->Initialize();
 
 	// テクスチャマネージャの初期化
@@ -53,9 +53,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// LineGraphicsPipelineの静的初期化
 	LineGraphicsPipline::SetDevice(dxCommon->GetDevice());
-
-	// ParticleGraphicsPipelineの静的初期化
-	ParticleGraphicsPipline::SetDevice(dxCommon->GetDevice());
 
 	// Planeの静的初期化
 	PlaneRenderer::SetDevice(dxCommon->GetDevice());
@@ -89,9 +86,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// Audio
 	Audio* audio = Audio::GetInstance();
 	audio->Initialize();
-
-	// パーティクル
-	Particle::SetDevice(dxCommon->GetDevice());
 
 	// ゲームシーンの初期化
 	GameScene* gameScene = nullptr;
@@ -148,15 +142,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// ゲームウィンドウの破棄
 	win->TerminateGameWindow();
-
-	// リリースリークチェック
-	IDXGIDebug1* debug;
-	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
-		debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
-		debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
-		debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
-		debug->Release();
-	}
 	return 0;
 }
 
