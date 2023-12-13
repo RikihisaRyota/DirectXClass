@@ -207,7 +207,7 @@ std::vector<cVertexPos> OBJ::LoadObjFile(const std::string& filename) {
 	std::vector<Vector2> texcoords; //!< テクスチャ座標
 	std::string line; //!< ファイルから読み込んだ1行を格納するもの
 
-	std::ifstream file("resources/" + filename + "/" + filename + ".obj"); //!< ファイルを開く
+	std::ifstream file("Resources/Models/" + filename + "/" + filename + ".obj"); //!< ファイルを開く
 	assert(file.is_open()); //!< とりあえず開けなかったら止める
 
 	while (std::getline(file, line)) {
@@ -277,7 +277,7 @@ std::string OBJ::LoadMaterialTemplateFile(const std::string& filepath, const std
 	std::string materialData; //!< 構築するMaterialData
 	std::string line; //!< ファイルから読み込んだ1行を格納するもの
 	// 2. ファイルを開く
-	std::ifstream file("resources/" + filepath + "/" + filename);
+	std::ifstream file("Resources/Models/" + filepath + "/" + filename);
 	assert(file.is_open());
 	// 3. 実際にファイルを読み、MaterialDataを構築していく
 	while (std::getline(file, line)) {
@@ -289,7 +289,7 @@ std::string OBJ::LoadMaterialTemplateFile(const std::string& filepath, const std
 			std::string textureFilename;
 			s >> textureFilename;
 			// 連結してファイルパスにする
-			materialData = "resources/" + filepath + "/" + textureFilename;
+			materialData = "Resources/Models/" + filepath + "/" + textureFilename;
 		}
 	}
 	// 4. MateriarDataを返す

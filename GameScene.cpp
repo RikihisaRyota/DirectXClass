@@ -13,8 +13,8 @@ void GameScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 
 	// ロード
-	textureHandle_ = TextureManager::Load("uvChecker.png");
-	auto tex = TextureManager::Load("ikamoveSheet.png");
+	textureHandle_ = TextureManager::Load("Resources/Textures/uvChecker.png");
+	auto tex = TextureManager::Load("Resources/Textures/ikamoveSheet.png");
 	animation_ = 0.0f;
 	size_ = {256.0f,256.0f};
 	// デバックカメラ

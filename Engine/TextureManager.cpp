@@ -78,7 +78,7 @@ uint32_t TextureManager::LoadInternal(const std::string& filePath) {
 DirectX::ScratchImage TextureManager::LoadTexture(const std::string& filePath) {
 	// テクスチャを読み込んでプログラムで扱えるようにする
 	DirectX::ScratchImage image{};
-	std::wstring filePathW = ConvertString("Resources/Textures/" + filePath);
+	std::wstring filePathW = ConvertString(filePath);
 	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	assert(SUCCEEDED(hr));
 
@@ -213,8 +213,8 @@ void TextureManager::Initialize(DirectXCommon* device) {
 	// 初期テクスチャ
 	const int InitialTexture = 2;
 	std::string filePath[InitialTexture]{};
-	filePath[0] = ("white1x1.png");
-	filePath[1] = ("toon.png");
+	filePath[0] = ("Resources/Textures/white1x1.png");
+	filePath[1] = ("Resources/Textures/toon.png");
 	for (uint32_t i = 0; i < InitialTexture; i++) {
 		useTable_[i] = true;
 
